@@ -3,26 +3,69 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Lucky simulated-credit slot prototype" />
-    <title>Lucky — Prototype</title>
+    <meta name="description" content="Lucky888 simulated-credit slot prototype" />
+    <title>Lucky888</title>
   </head>
   <body>
-    <main class="shell">
-      <header>
-        <p class="eyebrow">SIMULATED-CREDIT PROTOTYPE</p>
-        <h1>Lucky</h1>
-      </header>
-      <section class="game-panel" aria-label="Five reel slot prototype">
-        <div id="game" role="img" aria-label="Five reels with three visible symbol rows"></div>
-        <div class="status" aria-live="polite">
-          <span>Credits <strong id="credits">1000</strong></span>
-          <span>Bet <strong id="bet">5</strong></span>
-          <span>Latest win <strong id="win">0</strong></span>
-        </div>
-        <button id="spin" type="button" aria-label="Spin five simulated reels">Spin</button>
-        <p id="message" class="message" aria-live="polite">Ready. Press Space or Spin.</p>
+    <main class="page-shell">
+      <section class="game-column" aria-labelledby="game-title">
+        <header><h1 id="game-title">Lucky888</h1></header>
+        <section class="game-panel" aria-label="Five reel slot prototype">
+          <div id="game" role="img" aria-label="Five reels with three visible symbol rows"></div>
+          <div class="status" aria-live="polite">
+            <span>Credits <strong id="credits">1000</strong></span>
+            <span>Bet <strong id="bet">5</strong></span>
+            <span>Latest win <strong id="win">0</strong></span>
+          </div>
+          <button
+            id="spin"
+            class="spin-button"
+            type="button"
+            aria-label="Spin five simulated reels"
+          >
+            Spin
+          </button>
+          <p id="message" class="message" aria-live="polite">Loading configuration…</p>
+        </section>
       </section>
-      <footer>Entertainment and engineering prototype only. Credits have no monetary value.</footer>
+
+      <aside class="diagnostics-panel" aria-labelledby="diagnostics-title">
+        <div class="diagnostics-heading">
+          <div>
+            <p class="diagnostics-kicker">SESSION</p>
+            <h2 id="diagnostics-title">Spin Diagnostics</h2>
+          </div>
+          <a id="download-csv" class="download-button" aria-disabled="true"> Download CSV </a>
+        </div>
+
+        <dl class="session-summary">
+          <div>
+            <dt>Total spins</dt>
+            <dd id="diagnostics-spins">0</dd>
+          </div>
+          <div>
+            <dt>Total wagered</dt>
+            <dd id="diagnostics-wagered">0</dd>
+          </div>
+          <div>
+            <dt>Total won</dt>
+            <dd id="diagnostics-won">0</dd>
+          </div>
+          <div>
+            <dt>Session RTP</dt>
+            <dd id="diagnostics-rtp">0.00%</dd>
+          </div>
+        </dl>
+
+        <section class="history-section" aria-labelledby="history-title">
+          <div class="history-heading">
+            <h3 id="history-title">Recent spins</h3>
+            <span>Latest 10</span>
+          </div>
+          <p id="history-empty" class="history-empty">Completed spins will appear here.</p>
+          <ol id="spin-history" class="spin-history" aria-live="polite"></ol>
+        </section>
+      </aside>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

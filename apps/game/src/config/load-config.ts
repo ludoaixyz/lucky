@@ -1,20 +1,122 @@
-import type { RuntimeGameConfig } from '@lucky/shared-types';
 import { validateConfig } from '@lucky/math-engine';
+import type { RuntimeGameConfig } from '@lucky/shared-types';
 
-interface RuntimeArtifact {
-  readonly config: RuntimeGameConfig;
+function record(value: unknown, path: string): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error(`${path} must be an object`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function stringField(value: unknown, path: string): void {
+  if (typeof value !== 'string' || value.length === 0)
+    throw new Error(`${path} must be a non-empty string`);
+}
+
+function integerField(value: unknown, path: string): void {
+  if (!Number.isSafeInteger(value)) throw new Error(`${path} must be a safe integer`);
+}
+
+function arrayField(value: unknown, path: string): readonly unknown[] {
+  if (!Array.isArray(value)) throw new Error(`${path} must be an array`);
+  return value;
+}
+
+function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
+  const artifact = record(payload, 'Runtime math artifact');
+  const config = record(artifact.config, 'Runtime math artifact.config');
+  for (const field of ['schemaVersion', 'gameId', 'gameVersion', 'configurationId'] as const) {
+    stringField(config[field], `config.${field}`);
+  }
+  for (const field of [
+    'reelCount',
+    'visibleRows',
+    'lineBetCredits',
+    'totalBetCredits',
+    'maximumWinCredits',
+  ] as const) {
+    integerField(config[field], `config.${field}`);
+  }
+  if ((config.reelCount as number) <= 0) throw new Error('config.reelCount must be positive');
+  if ((config.visibleRows as number) <= 0) throw new Error('config.visibleRows must be positive');
+  if ((config.lineBetCredits as number) <= 0)
+    throw new Error('config.lineBetCredits must be positive');
+  if ((config.totalBetCredits as number) <= 0)
+    throw new Error('config.totalBetCredits must be positive');
+  if ((config.maximumWinCredits as number) < 0)
+    throw new Error('config.maximumWinCredits must be non-negative');
+
+  arrayField(config.symbols, 'config.symbols').forEach((value, index) => {
+    const symbol = record(value, `config.symbols[${index}]`);
+    for (const field of ['id', 'name', 'category', 'display'] as const) {
+      stringField(symbol[field], `config.symbols[${index}].${field}`);
+    }
+    if (!['regular', 'wild', 'scatter', 'bonus'].includes(symbol.category as string)) {
+      throw new Error(`config.symbols[${index}].category must be regular, wild, scatter, or bonus`);
+    }
+  });
+  arrayField(config.reelStrips, 'config.reelStrips').forEach((value, reel) => {
+    arrayField(value, `config.reelStrips[${reel}]`).forEach((symbol, stop) =>
+      stringField(symbol, `config.reelStrips[${reel}][${stop}]`),
+    );
+  });
+  arrayField(config.paylines, 'config.paylines').forEach((value, index) => {
+    const payline = record(value, `config.paylines[${index}]`);
+    stringField(payline.id, `config.paylines[${index}].id`);
+    arrayField(payline.rows, `config.paylines[${index}].rows`).forEach((row, reel) =>
+      integerField(row, `config.paylines[${index}].rows[${reel}]`),
+    );
+  });
+  arrayField(config.paytable, 'config.paytable').forEach((value, index) => {
+    const award = record(value, `config.paytable[${index}]`);
+    stringField(award.symbolId, `config.paytable[${index}].symbolId`);
+    integerField(award.count, `config.paytable[${index}].count`);
+    integerField(award.awardCredits, `config.paytable[${index}].awardCredits`);
+  });
+  const bonus = record(config.bonus, 'config.bonus');
+  stringField(bonus.triggerSymbolId, 'config.bonus.triggerSymbolId');
+  for (const field of ['minimumCount', 'freeSpins', 'multiplier'] as const) {
+    integerField(bonus[field], `config.bonus.${field}`);
+  }
+  return config as unknown as RuntimeGameConfig;
+}
+
+function message(error: unknown): string {
+  return error instanceof Error ? error.message : 'unknown error';
 }
 
 export async function loadConfig(): Promise<RuntimeGameConfig> {
-  const response = await fetch(`${import.meta.env.BASE_URL}data/runtime-config.json`);
-  if (!response.ok) throw new Error(`Could not load math configuration (${response.status})`);
-  const artifact = (await response.json()) as RuntimeArtifact;
-  const issues = validateConfig(artifact.config, 'data/runtime-config.json');
-  if (issues.length > 0) {
-    const first = issues[0];
+  const url = `${import.meta.env.BASE_URL}data/runtime-config.json`;
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch (error: unknown) {
+    throw new Error(`Could not load math configuration '${url}': ${message(error)}`, {
+      cause: error,
+    });
+  }
+  if (!response.ok) {
     throw new Error(
-      `Invalid runtime configuration at ${first?.record ?? 'unknown'}:${first?.field ?? 'unknown'}`,
+      `Could not load math configuration '${url}': HTTP ${response.status} ${response.statusText}`,
     );
   }
-  return artifact.config;
+
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch (error: unknown) {
+    throw new Error(`Math configuration '${url}' is not valid JSON: ${message(error)}`, {
+      cause: error,
+    });
+  }
+  const config = parseRuntimeConfig(payload);
+  const issues = validateConfig(config, url);
+  if (issues.length > 0) {
+    const issue = issues[0];
+    if (!issue) throw new Error(`Math configuration '${url}' failed validation`);
+    throw new Error(
+      `Invalid math configuration '${url}' at ${issue.record}.${issue.field}: received ${JSON.stringify(issue.value)}; ${issue.rule}`,
+    );
+  }
+  return config;
 }

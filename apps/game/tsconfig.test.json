@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@lucky/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@lucky/math-engine": ["../../packages/math-engine/src/index.ts"]
+    }
+  },
+  "include": ["src/diagnostics", "tests", "vitest.config.ts"]
+}

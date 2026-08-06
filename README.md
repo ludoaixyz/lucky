@@ -1,8 +1,8 @@
-# Lucky
+# Lucky888
 
-Lucky is a production-oriented workspace for an HTML5 slot-machine prototype and its supporting mathematics. It contains a responsive Phaser 3 shell, editable CSV/JSON math sheets, a deterministic TypeScript math engine, validation, simulation, tests, and documentation.
+Lucky888 is a production-oriented workspace for an HTML5 slot-machine prototype and its supporting mathematics. It contains a responsive Phaser 3 shell, editable CSV/JSON math sheets, a deterministic TypeScript math engine, validation, simulation, tests, and documentation.
 
-> **Non-monetary prototype:** Lucky uses simulated credits with no cash value. It is not a real-money gambling product and has no wagering accounts, deposits, withdrawals, purchases, cryptocurrency, payments, or cash-out path.
+> **Non-monetary prototype:** Lucky888 uses simulated credits with no cash value. It is not a real-money gambling product and has no wagering accounts, deposits, withdrawals, purchases, cryptocurrency, payments, or cash-out path.
 
 ## Status
 

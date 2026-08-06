@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lucky.local/schemas/simulation-report.schema.json",
-  "title": "Lucky simulation report",
+  "title": "Lucky888 simulation report",
   "type": "object",
   "required": [
     "schemaVersion",

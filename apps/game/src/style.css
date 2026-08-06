@@ -4,41 +4,57 @@
   background: #07111f;
   font-synthesis: none;
 }
+
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at 50% 10%, #173b52, #07111f 55%);
+  background: radial-gradient(circle at 40% 8%, #173b52, #07111f 55%);
 }
-.shell {
-  width: min(94vw, 850px);
+
+button {
+  font: inherit;
+}
+
+.page-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 850px) minmax(330px, 410px);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  width: min(96vw, 1320px);
   margin: 0 auto;
-  padding: clamp(1rem, 4vw, 3rem) 0;
+  padding: clamp(1rem, 3vw, 2.5rem) 0;
+  align-items: start;
+}
+
+.game-column {
+  min-width: 0;
   text-align: center;
 }
+
 header h1 {
-  margin: 0;
+  margin: 0 0 0.5rem;
   color: #ffd66b;
-  font-size: clamp(2.8rem, 9vw, 5.5rem);
-  letter-spacing: 0.06em;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  letter-spacing: 0.035em;
+  line-height: 1;
 }
-.eyebrow {
-  margin: 0 0 0.25rem;
-  color: #7de7d1;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-}
-.game-panel {
-  padding: clamp(0.75rem, 3vw, 1.5rem);
+
+.game-panel,
+.diagnostics-panel {
   border: 1px solid #37677a;
-  border-radius: 1.5rem;
-  background: rgba(4, 15, 28, 0.82);
+  background: rgb(4 15 28 / 88%);
   box-shadow: 0 2rem 5rem #0008;
 }
+
+.game-panel {
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  border-radius: 1.5rem;
+}
+
 #game {
   width: 100%;
   aspect-ratio: 5 / 3;
@@ -46,11 +62,13 @@ header h1 {
   border-radius: 1rem;
   background: #102738;
 }
+
 #game canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
 }
+
 .status {
   display: flex;
   justify-content: space-around;
@@ -58,50 +76,237 @@ header h1 {
   margin: 1rem 0;
   color: #b6cad2;
 }
+
 .status strong {
   display: block;
   color: #fff;
   font-size: 1.35rem;
 }
-button {
+
+.spin-button {
   min-width: 10rem;
   padding: 0.8rem 2rem;
   border: 0;
   border-radius: 999px;
   color: #10202a;
   background: #ffd66b;
-  font: inherit;
   font-size: 1.2rem;
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 0.4rem 0 #b67d26;
 }
-button:hover {
+
+.spin-button:hover,
+.download-button:hover:not(:disabled) {
   background: #ffe59d;
 }
-button:focus-visible {
+
+button:focus-visible,
+.download-button:focus-visible {
   outline: 3px solid #7de7d1;
   outline-offset: 4px;
 }
+
 button:disabled {
   opacity: 0.55;
   cursor: wait;
 }
+
 .message {
   min-height: 1.5em;
   margin-bottom: 0;
   color: #7de7d1;
 }
-footer {
-  margin-top: 1.25rem;
-  color: #8da4ad;
-  font-size: 0.85rem;
+
+.diagnostics-panel {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  padding: 1.25rem;
+  overflow: auto;
+  border-radius: 1.25rem;
+  text-align: left;
 }
+
+.diagnostics-heading,
+.history-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.diagnostics-kicker {
+  margin: 0 0 0.15rem;
+  color: #7de7d1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.diagnostics-heading h2,
+.history-heading h3 {
+  margin: 0;
+}
+
+.diagnostics-heading h2 {
+  color: #ffd66b;
+  font-size: 1.35rem;
+}
+
+.download-button {
+  display: inline-block;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #b67d26;
+  border-radius: 0.65rem;
+  color: #10202a;
+  background: #ffd66b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.download-button[aria-disabled='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.session-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.session-summary div {
+  padding: 0.75rem;
+  border: 1px solid #284b5c;
+  border-radius: 0.75rem;
+  background: #102738;
+}
+
+.session-summary dt {
+  color: #8da4ad;
+  font-size: 0.72rem;
+}
+
+.session-summary dd {
+  margin: 0.15rem 0 0;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.history-section {
+  border-top: 1px solid #284b5c;
+  padding-top: 1rem;
+}
+
+.history-heading h3 {
+  font-size: 1rem;
+}
+
+.history-heading span,
+.history-empty {
+  color: #8da4ad;
+  font-size: 0.75rem;
+}
+
+.history-empty {
+  margin: 1rem 0 0;
+  text-align: center;
+}
+
+.spin-history {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-card {
+  padding: 0.75rem;
+  border: 1px solid #284b5c;
+  border-radius: 0.8rem;
+  background: #0c2130;
+}
+
+.history-card-header,
+.history-metrics {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.history-card-header strong {
+  color: #ffd66b;
+}
+
+.history-card-header time,
+.history-detail-label {
+  color: #8da4ad;
+  font-size: 0.68rem;
+}
+
+.history-metrics {
+  margin: 0.55rem 0;
+  font-size: 0.75rem;
+}
+
+.history-metrics span {
+  color: #b6cad2;
+}
+
+.history-metrics strong {
+  color: #fff;
+}
+
+.history-outcome,
+.history-detail {
+  margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
+  color: #d9e4e8;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.positive {
+  color: #7de7d1 !important;
+}
+
+.negative {
+  color: #ff9f9f !important;
+}
+
+@media (max-width: 1050px) {
+  .page-shell {
+    grid-template-columns: minmax(0, 850px);
+    justify-content: center;
+  }
+
+  .diagnostics-panel {
+    position: static;
+    max-height: none;
+  }
+}
+
 @media (max-width: 500px) {
   .status {
     font-size: 0.8rem;
   }
+
   .status strong {
     font-size: 1rem;
+  }
+
+  .diagnostics-heading {
+    align-items: flex-start;
+  }
+
+  .download-button {
+    max-width: 7rem;
   }
 }

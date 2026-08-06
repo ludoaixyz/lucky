@@ -21,7 +21,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc -b --force packages/shared-types packages/math-engine --pretty false && tsc --noEmit -p packages/math-engine/tsconfig.test.json --pretty false && tsc --noEmit -p apps/game --pretty false && tsc --noEmit -p scripts --pretty false && tsc --noEmit -p tsconfig.json --pretty false",
+    "typecheck": "tsc -b --force packages/shared-types packages/math-engine --pretty false && tsc --noEmit -p packages/math-engine/tsconfig.test.json --pretty false && tsc --noEmit -p apps/game --pretty false && tsc --noEmit -p apps/game/tsconfig.test.json --pretty false && tsc --noEmit -p scripts --pretty false && tsc --noEmit -p tsconfig.json --pretty false",
     "math:build": "tsx scripts/build-math-data.ts",
     "math:validate": "tsx scripts/validate-math-data.ts",
     "math:simulate": "tsx scripts/simulate.ts",
