@@ -109,8 +109,7 @@ const config: RuntimeGameConfig = {
 };
 
 const settle = async (): Promise<void> => {
-  await Promise.resolve();
-  await Promise.resolve();
+  for (let turn = 0; turn < 32; turn += 1) await Promise.resolve();
 };
 
 beforeEach(() => {
@@ -135,6 +134,7 @@ describe('paid-spin controller boundary', () => {
       scene,
       new SequenceRandom([1, 1, 1, 0, 0, 0, 0, 0, 0]),
       { recordCompletedSpin },
+      () => Promise.resolve(),
     );
     document.querySelector<HTMLButtonElement>('#spin')?.click();
     await settle();
@@ -174,9 +174,15 @@ describe('paid-spin controller boundary', () => {
     const scene = {
       present: vi.fn(() => Promise.reject(new Error('presentation failed'))),
     } as unknown as SlotScene;
-    const dispose = attachController(config, scene, new SequenceRandom([0, 0, 0]), {
-      recordCompletedSpin,
-    });
+    const dispose = attachController(
+      config,
+      scene,
+      new SequenceRandom([0, 0, 0]),
+      {
+        recordCompletedSpin,
+      },
+      () => Promise.resolve(),
+    );
     document.querySelector<HTMLButtonElement>('#spin')?.click();
     await settle();
     expect(document.querySelector('#credits')?.textContent).toBe('1000');
@@ -193,6 +199,7 @@ describe('paid-spin controller boundary', () => {
       { present } as unknown as SlotScene,
       new SequenceRandom([0, 0, 0]),
       { recordCompletedSpin },
+      () => Promise.resolve(),
     );
 
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }));

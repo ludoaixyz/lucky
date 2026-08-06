@@ -141,7 +141,8 @@ export class SimulationAccumulator {
         ]),
       ),
       featureInclusiveHitFrequency: this.featureInclusiveWinningSpins / this.paidSpins,
-      averageInitiallyAwardedFreeSpins: this.initiallyAwardedFreeSpins / this.paidSpins,
+      averageInitiallyAwardedFreeSpins:
+        this.featureTriggers === 0 ? 0 : this.initiallyAwardedFreeSpins / this.featureTriggers,
       averageTotalFreeSpinsPerTrigger:
         this.featureTriggers === 0 ? 0 : this.totalFreeSpins / this.featureTriggers,
       averageRetriggersPerTrigger:

@@ -8,5 +8,5 @@
       "@lucky/math-engine": ["../../packages/math-engine/src/index.ts"]
     }
   },
-  "include": ["src/diagnostics", "src/ui", "tests", "vitest.config.ts"]
+  "include": ["src/diagnostics", "src/game", "src/ui", "tests", "vitest.config.ts"]
 }

@@ -1,0 +1,55 @@
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
+import type { ExactMathReport } from '@lucky/shared-types';
+import { formatPercentRatio } from '@lucky/shared-types';
+import { loadSourceConfig } from './lib/source-loader.js';
+import { buildDurableReport, renderSimulationMarkdown } from './lib/simulation-report.js';
+
+function option(name: string, fallback: number): number {
+  const prefix = `--${name}=`;
+  const inline = process.argv.find((argument) => argument.startsWith(prefix));
+  const index = process.argv.indexOf(`--${name}`);
+  const raw = inline?.slice(prefix.length) ?? (index >= 0 ? process.argv[index + 1] : undefined);
+  const value = raw === undefined ? fallback : Number(raw);
+  if (!Number.isSafeInteger(value) || value <= 0)
+    throw new RangeError(`--${name} must be a positive safe integer`);
+  return value;
+}
+
+async function optionalExact(path: string): Promise<ExactMathReport | null> {
+  try {
+    await access(path);
+  } catch {
+    return null;
+  }
+  return JSON.parse(await readFile(path, 'utf8')) as ExactMathReport;
+}
+
+const spins = option('spins', 1_000_000);
+const seed = option('seed', 2026);
+const { config, sourceHash } = await loadSourceConfig();
+const issues = validateConfig(config, 'math/source');
+if (issues.length > 0)
+  throw new Error(`Report generation stopped: ${issues.length} math validation issue(s)`);
+
+const simulation = runSimulation(
+  config,
+  { spins, seed, betCredits: config.totalBetCredits },
+  new SeededRandom(seed),
+);
+const reportsDirectory = resolve(process.cwd(), 'math/reports');
+const exact = await optionalExact(
+  resolve(reportsDirectory, `${config.configurationId}-exact.json`),
+);
+const report = buildDurableReport(config, sourceHash, simulation, exact);
+const basename = `${config.configurationId}-simulation`;
+await mkdir(reportsDirectory, { recursive: true });
+await Promise.all([
+  writeFile(resolve(reportsDirectory, `${basename}.json`), `${JSON.stringify(report, null, 2)}\n`),
+  writeFile(resolve(reportsDirectory, `${basename}.md`), renderSimulationMarkdown(report)),
+]);
+console.log(
+  `Simulated ${spins.toLocaleString()} paid spins with seed ${seed}: credited RTP ${formatPercentRatio(report.creditedTotalRtp, 6)}; all reconciliations PASS.`,
+);
+console.log(`Reports: ${resolve(reportsDirectory, `${basename}.{json,md}`)}`);

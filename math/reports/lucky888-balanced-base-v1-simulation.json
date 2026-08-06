@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "1.2.0",
+  "methodology": "deterministic-monte-carlo",
+  "gameVersion": "0.3.0",
+  "configurationId": "lucky888-balanced-base-v1",
+  "generatedAt": "2026-08-06T10:41:58.447Z",
+  "seed": 2026,
+  "paidSpins": 1000000,
+  "totalWageredCredits": 5000000,
+  "uncappedBaseLinePayoutCredits": 4413517,
+  "uncappedBaseScatterPayoutCredits": 0,
+  "uncappedBasePayoutCredits": 4413517,
+  "uncappedFeaturePayoutCredits": 355101,
+  "uncappedTotalPayoutCredits": 4768618,
+  "creditedTotalPayoutCredits": 4768618,
+  "capReductionCredits": 0,
+  "uncappedBaseLineRtp": 0.8827034,
+  "uncappedBaseScatterRtp": 0,
+  "uncappedFeatureRtp": 0.0710202,
+  "uncappedTotalRtp": 0.9537236,
+  "creditedTotalRtp": 0.9537236,
+  "baseHitFrequency": 0.327399,
+  "featureTriggerFrequency": 0.008649,
+  "featureTriggerFrequencyByScatterCount": {
+    "3": 0.008159,
+    "4": 0.000481,
+    "5": 0.000009
+  },
+  "featureInclusiveHitFrequency": 0.334967,
+  "averageInitiallyAwardedFreeSpins": 9.115389062319343,
+  "averageTotalFreeSpinsPerTrigger": 9.28673835125448,
+  "averageRetriggersPerTrigger": 0.08151231356226153,
+  "featureLengthPercentiles": {
+    "median": 9,
+    "p75": 9,
+    "p90": 11,
+    "p95": 11,
+    "p99": 13
+  },
+  "maximumObservedFeatureLength": 17,
+  "featureCapHitFrequency": 0,
+  "variance": 5.651501694801794,
+  "standardDeviation": 2.3772887276899697,
+  "standardError": 0.00237728872768997,
+  "confidenceInterval95": [
+    0.9490641140946684,
+    0.958383085907213
+  ],
+  "maximumObservedWinCredits": 387,
+  "capApplications": 0,
+  "capApplicationFrequency": 0,
+  "payoutDistribution": [
+    {
+      "label": "0x",
+      "minimumMultiple": 0,
+      "maximumMultiple": 0,
+      "count": 665033,
+      "probability": 0.665033
+    },
+    {
+      "label": "(0,1)x",
+      "minimumMultiple": 2.220446049250313e-16,
+      "maximumMultiple": 1,
+      "count": 56451,
+      "probability": 0.056451
+    },
+    {
+      "label": "[1,5)x",
+      "minimumMultiple": 1,
+      "maximumMultiple": 5,
+      "count": 235980,
+      "probability": 0.23598
+    },
+    {
+      "label": "[5,20)x",
+      "minimumMultiple": 5,
+      "maximumMultiple": 20,
+      "count": 41196,
+      "probability": 0.041196
+    },
+    {
+      "label": "20x+",
+      "minimumMultiple": 20,
+      "maximumMultiple": null,
+      "count": 1340,
+      "probability": 0.00134
+    }
+  ],
+  "gameId": "lucky888",
+  "gameName": "LUCKY888",
+  "sourceHash": "5c4cb470e9ca5ac3d610d80d883f92cc26e9ff1f88775da47e542bf52ab15f96",
+  "exactEnumeration": {
+    "schemaVersion": "1.2.0",
+    "methodology": "hybrid",
+    "gameVersion": "0.3.0",
+    "configurationId": "lucky888-balanced-base-v1",
+    "generatedAt": "2026-08-06T10:41:47.155Z",
+    "sourceHash": "5c4cb470e9ca5ac3d610d80d883f92cc26e9ff1f88775da47e542bf52ab15f96",
+    "totalPaidSpinCombinations": 24300000,
+    "probabilityReconciliation": 1.0000000000000024,
+    "uncappedBaseLineRtp": 0.8810187242798365,
+    "uncappedBaseScatterRtp": 0,
+    "uncappedFeatureRtp": 0.0699654155236996,
+    "uncappedTotalRtp": 0.9509841398035359,
+    "triggerFrequency": 0.008560000000000007,
+    "triggerFrequencyByScatterCount": {
+      "3": 0.008100000000000007,
+      "4": 0.00045,
+      "5": 0.000009999999999999999
+    },
+    "expectedInitiallyAwardedFreeSpins": 0.07798000000000002,
+    "expectedTotalFreeSpinsPerPaidSpin": 0.07941422082815619,
+    "expectedTotalFreeSpinsPerTrigger": 9.277362246279921,
+    "expectedRetriggerCountPerTrigger": 0.07941422082815627,
+    "baseHitFrequency": 0.32699588477366315,
+    "featureInclusiveHitFrequency": 0.33442970578536907,
+    "variance": 5.591980952118661,
+    "standardDeviation": 2.3647369731364756,
+    "payoutDistribution": [
+      {
+        "label": "0x",
+        "minimumMultiple": 0,
+        "maximumMultiple": 0,
+        "probability": 0.6655702942146315,
+        "count": 16173358.149415547
+      },
+      {
+        "label": "(0,1)x",
+        "minimumMultiple": 2.220446049250313e-16,
+        "maximumMultiple": 1,
+        "probability": 0.056422622964039104,
+        "count": 1371069.7380261503
+      },
+      {
+        "label": "[1,5)x",
+        "minimumMultiple": 1,
+        "maximumMultiple": 5,
+        "probability": 0.23558164780745672,
+        "count": 5724634.041721198
+      },
+      {
+        "label": "[5,20)x",
+        "minimumMultiple": 5,
+        "maximumMultiple": 20,
+        "probability": 0.04108155022771509,
+        "count": 998281.6705334767
+      },
+      {
+        "label": "20x+",
+        "minimumMultiple": 20,
+        "maximumMultiple": null,
+        "probability": 0.0013438847861575454,
+        "count": 32656.400303628354
+      }
+    ],
+    "maximumReachableBaseWinCredits": 543,
+    "maximumReachableUncappedWinCredits": 49051,
+    "maximumReachableCreditedWinCredits": 5000,
+    "maximumWinCapCredits": 5000,
+    "maximumWinCapReducesRtp": true,
+    "creditedTotalRtp": 0.9537236,
+    "creditedTotalRtpMethodology": "monte-carlo-estimate",
+    "estimatedCapReductionRtp": 0
+  },
+  "reconciliations": [
+    {
+      "id": "total-wager",
+      "actual": 5000000,
+      "expected": 5000000,
+      "difference": 0,
+      "tolerance": 0,
+      "passed": true
+    },
+    {
+      "id": "uncapped-components",
+      "actual": 4768618,
+      "expected": 4768618,
+      "difference": 0,
+      "tolerance": 0,
+      "passed": true
+    },
+    {
+      "id": "credited-plus-cap-reduction",
+      "actual": 4768618,
+      "expected": 4768618,
+      "difference": 0,
+      "tolerance": 0,
+      "passed": true
+    },
+    {
+      "id": "payout-bucket-probabilities",
+      "actual": 1,
+      "expected": 1,
+      "difference": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "id": "scatter-trigger-frequencies",
+      "actual": 0.008649,
+      "expected": 0.008649,
+      "difference": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    }
+  ],
+  "targetComparisons": [
+    {
+      "measure": "Credited RTP",
+      "result": 0.9537236,
+      "target": "94%–97%",
+      "status": "PASS"
+    },
+    {
+      "measure": "Feature frequency (paid spins per trigger)",
+      "result": 115.62030292519366,
+      "target": "80–150",
+      "status": "PASS"
+    },
+    {
+      "measure": "Average feature length",
+      "result": 9.28673835125448,
+      "target": "9–14",
+      "status": "PASS"
+    },
+    {
+      "measure": "p95 feature length",
+      "result": 11,
+      "target": "<30",
+      "status": "PASS"
+    },
+    {
+      "measure": "Feature-cap hit frequency",
+      "result": 0,
+      "target": "effectively zero",
+      "status": "PASS"
+    }
+  ]
+}

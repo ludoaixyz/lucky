@@ -56,21 +56,22 @@ For repeatable local presentation checks, append an integer `?seed=` query (for 
 
 ## Commands
 
-| Command                                               | Purpose                                                |
-| ----------------------------------------------------- | ------------------------------------------------------ |
-| `npm run dev`                                         | Compile math data and start the game                   |
-| `npm run build`                                       | Compile math data and create `apps/game/dist`          |
-| `npm test` / `npm run test:watch`                     | Run tests once / watch                                 |
-| `npm run lint` / `npm run lint:fix`                   | Check / fix lint issues                                |
-| `npm run format` / `npm run format:check`             | Write / check formatting                               |
-| `npm run typecheck`                                   | Strict TypeScript project build check                  |
-| `npm run math:validate`                               | Validate source math data with located errors          |
-| `npm run math:build`                                  | Compile source sheets without changing them            |
-| `npm run math:enumerate`                              | Exact stop/finite-feature enumeration and PAR report   |
-| `npm run math:balance`                                | Aggregate five deterministic million-spin balance runs |
-| `npm run math:simulate -- --spins 100000 --seed 2026` | Run a repeatable simulation                            |
-| `npm run validate`                                    | Format, lint, types, math, tests, and production build |
-| `npm run clean`                                       | Remove workspace build output                          |
+| Command                                               | Purpose                                                  |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| `npm run dev`                                         | Compile math data and start the game                     |
+| `npm run build`                                       | Compile math data and create `apps/game/dist`            |
+| `npm test` / `npm run test:watch`                     | Run tests once / watch                                   |
+| `npm run lint` / `npm run lint:fix`                   | Check / fix lint issues                                  |
+| `npm run format` / `npm run format:check`             | Write / check formatting                                 |
+| `npm run typecheck`                                   | Strict TypeScript project build check                    |
+| `npm run math:validate`                               | Validate source math data with located errors            |
+| `npm run math:build`                                  | Compile source sheets without changing them              |
+| `npm run math:enumerate`                              | Exact stop/finite-feature enumeration and PAR report     |
+| `npm run math:balance`                                | Aggregate five deterministic million-spin balance runs   |
+| `npm run math:simulate -- --spins 100000 --seed 2026` | Run a repeatable simulation                              |
+| `npm run math:report -- --spins 1000000 --seed 2026`  | Generate reconciled JSON and Markdown simulation reports |
+| `npm run validate`                                    | Format, lint, types, math, tests, and production build   |
+| `npm run clean`                                       | Remove workspace build output                            |
 
 The production output is static and uses a GitHub Pages-compatible `/lucky/` base during GitHub Actions builds. No deployment or credentials are configured.
 

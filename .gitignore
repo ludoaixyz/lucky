@@ -26,6 +26,8 @@ math/reports/*
 !math/reports/lucky888-balanced-base-v1-par.md
 !math/reports/lucky888-balance-comparison.md
 !math/reports/lucky888-balance-seeds.md
+!math/reports/lucky888-balanced-base-v1-simulation.json
+!math/reports/lucky888-balanced-base-v1-simulation.md
 math/reports/raw/
 math/generated/*.json
 apps/game/public/data/runtime-config.json
