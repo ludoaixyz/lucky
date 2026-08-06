@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lucky.local/schemas/reel-strips.schema.json",
+  "title": "Compiled reel strips",
+  "type": "array",
+  "minItems": 1,
+  "items": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+}

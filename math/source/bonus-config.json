@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "triggerSymbolId": "SCATTER",
+  "minimumCount": 3,
+  "freeSpins": 8,
+  "multiplier": 1,
+  "enabled": true,
+  "notes": "Trigger representation only; free-spin orchestration is not implemented in the shell."
+}

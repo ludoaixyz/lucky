@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "gameId": "lucky-prototype",
+  "gameVersion": "0.1.0",
+  "configurationId": "illustrative-default-v1",
+  "reelCount": 5,
+  "visibleRows": 3,
+  "payModel": "fixed-paylines-left-to-right",
+  "lineBetCredits": 1,
+  "totalBetCredits": 5,
+  "maximumWinCredits": 5000,
+  "selectedRtpProfile": "illustrative-default",
+  "simulationMetadata": { "defaultSpins": 100000, "defaultSeed": 2026 },
+  "notes": "Illustrative scaffold; performance metrics are not finalized."
+}

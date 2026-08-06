@@ -1,0 +1,16 @@
+{
+  "name": "@lucky/game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@lucky/math-engine": "0.1.0",
+    "@lucky/shared-types": "0.1.0",
+    "phaser": "^3.90.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  }
+}

@@ -1,0 +1,8 @@
+symbol_id,name,category,display
+A,Ace,regular,A
+K,King,regular,K
+Q,Queen,regular,Q
+J,Jack,regular,J
+GEM,Gem,regular,◆
+WILD,Wild,wild,★
+SCATTER,Scatter,scatter,●

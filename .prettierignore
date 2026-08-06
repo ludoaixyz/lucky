@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+math/generated
+math/reports
+package-lock.json

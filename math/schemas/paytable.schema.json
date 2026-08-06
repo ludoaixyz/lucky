@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lucky.local/schemas/paytable.schema.json",
+  "title": "Compiled paytable",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["symbolId", "count", "awardCredits"],
+    "properties": {
+      "symbolId": { "type": "string", "minLength": 1 },
+      "count": { "type": "integer", "minimum": 1 },
+      "awardCredits": { "type": "integer", "minimum": 0 }
+    },
+    "additionalProperties": false
+  }
+}

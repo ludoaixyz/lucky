@@ -1,0 +1,6 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": { "composite": true, "noEmit": true },
+  "include": ["**/*.ts"],
+  "references": [{ "path": "../packages/shared-types" }, { "path": "../packages/math-engine" }]
+}

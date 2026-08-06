@@ -1,0 +1,46 @@
+{
+  "name": "lucky",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulated-credit HTML5 slot prototype and deterministic mathematics workspace",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run math:build && npm run dev -w @lucky/game",
+    "build": "npm run math:build && npm run build -w @lucky/game",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -b --force packages/shared-types packages/math-engine --pretty false && tsc --noEmit -p packages/math-engine/tsconfig.test.json --pretty false && tsc --noEmit -p apps/game --pretty false && tsc --noEmit -p scripts --pretty false && tsc --noEmit -p tsconfig.json --pretty false",
+    "math:build": "tsx scripts/build-math-data.ts",
+    "math:validate": "tsx scripts/validate-math-data.ts",
+    "math:simulate": "tsx scripts/simulate.ts",
+    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run build",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.19.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.1",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.16"
+  }
+}

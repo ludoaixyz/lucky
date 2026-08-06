@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Lucky simulated-credit slot prototype" />
+    <title>Lucky — Prototype</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">SIMULATED-CREDIT PROTOTYPE</p>
+        <h1>Lucky</h1>
+      </header>
+      <section class="game-panel" aria-label="Five reel slot prototype">
+        <div id="game" role="img" aria-label="Five reels with three visible symbol rows"></div>
+        <div class="status" aria-live="polite">
+          <span>Credits <strong id="credits">1000</strong></span>
+          <span>Bet <strong id="bet">5</strong></span>
+          <span>Latest win <strong id="win">0</strong></span>
+        </div>
+        <button id="spin" type="button" aria-label="Spin five simulated reels">Spin</button>
+        <p id="message" class="message" aria-live="polite">Ready. Press Space or Spin.</p>
+      </section>
+      <footer>Entertainment and engineering prototype only. Credits have no monetary value.</footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

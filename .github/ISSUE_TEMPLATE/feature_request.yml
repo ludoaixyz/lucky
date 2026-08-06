@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose an in-scope prototype or math-workspace improvement
+title: 'feat: '
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What engineering or player-understanding problem should be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Responsible-design scope
+      options:
+        - label: This uses simulated credits only and adds no payment, cash-out, loss-chasing, or manipulative retention behavior.
+          required: true
