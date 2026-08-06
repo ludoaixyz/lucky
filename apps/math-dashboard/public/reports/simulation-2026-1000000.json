@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.2.0",
+  "methodology": "deterministic-monte-carlo",
+  "gameVersion": "0.3.0",
+  "configurationId": "lucky888-balanced-base-v1",
+  "generatedAt": "2026-08-06T12:49:29.857Z",
+  "seed": 2026,
+  "paidSpins": 1000000,
+  "totalWageredCredits": 5000000,
+  "uncappedBaseLinePayoutCredits": 4413517,
+  "uncappedBaseScatterPayoutCredits": 0,
+  "uncappedBasePayoutCredits": 4413517,
+  "uncappedFeaturePayoutCredits": 355101,
+  "uncappedTotalPayoutCredits": 4768618,
+  "creditedTotalPayoutCredits": 4768618,
+  "capReductionCredits": 0,
+  "uncappedBaseLineRtp": 0.8827034,
+  "uncappedBaseScatterRtp": 0,
+  "uncappedFeatureRtp": 0.0710202,
+  "uncappedTotalRtp": 0.9537236,
+  "creditedTotalRtp": 0.9537236,
+  "baseHitFrequency": 0.327399,
+  "featureTriggerFrequency": 0.008649,
+  "featureTriggerFrequencyByScatterCount": {
+    "3": 0.008159,
+    "4": 0.000481,
+    "5": 0.000009
+  },
+  "featureInclusiveHitFrequency": 0.334967,
+  "averageInitiallyAwardedFreeSpins": 9.115389062319343,
+  "averageTotalFreeSpinsPerTrigger": 9.28673835125448,
+  "averageRetriggersPerTrigger": 0.08151231356226153,
+  "featureLengthPercentiles": {
+    "median": 9,
+    "p75": 9,
+    "p90": 11,
+    "p95": 11,
+    "p99": 13
+  },
+  "maximumObservedFeatureLength": 17,
+  "featureCapHitFrequency": 0,
+  "variance": 5.651501694801794,
+  "standardDeviation": 2.3772887276899697,
+  "standardError": 0.00237728872768997,
+  "confidenceInterval95": [0.9490641140946684, 0.958383085907213],
+  "maximumObservedWinCredits": 387,
+  "capApplications": 0,
+  "capApplicationFrequency": 0,
+  "payoutDistribution": [
+    {
+      "label": "0x",
+      "minimumMultiple": 0,
+      "maximumMultiple": 0,
+      "count": 665033,
+      "probability": 0.665033
+    },
+    {
+      "label": "(0,1)x",
+      "minimumMultiple": 2.220446049250313e-16,
+      "maximumMultiple": 1,
+      "count": 56451,
+      "probability": 0.056451
+    },
+    {
+      "label": "[1,5)x",
+      "minimumMultiple": 1,
+      "maximumMultiple": 5,
+      "count": 235980,
+      "probability": 0.23598
+    },
+    {
+      "label": "[5,20)x",
+      "minimumMultiple": 5,
+      "maximumMultiple": 20,
+      "count": 41196,
+      "probability": 0.041196
+    },
+    {
+      "label": "20x+",
+      "minimumMultiple": 20,
+      "maximumMultiple": null,
+      "count": 1340,
+      "probability": 0.00134
+    }
+  ]
+}

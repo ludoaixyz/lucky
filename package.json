@@ -14,6 +14,9 @@
   ],
   "scripts": {
     "dev": "npm run math:build && npm run dev -w @lucky/game",
+    "dashboard:dev": "npm run dev -w @lucky/math-dashboard",
+    "dashboard:build": "npm run build -w @lucky/math-dashboard",
+    "dashboard:preview": "npm run preview -w @lucky/math-dashboard",
     "build": "npm run math:build && npm run build -w @lucky/game",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -21,14 +24,14 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc -b --force packages/shared-types packages/math-engine --pretty false && tsc --noEmit -p packages/math-engine/tsconfig.test.json --pretty false && tsc --noEmit -p apps/game --pretty false && tsc --noEmit -p apps/game/tsconfig.test.json --pretty false && tsc --noEmit -p scripts --pretty false && tsc --noEmit -p tsconfig.json --pretty false",
+    "typecheck": "tsc -b --force packages/shared-types packages/math-engine --pretty false && tsc --noEmit -p packages/math-engine/tsconfig.test.json --pretty false && tsc --noEmit -p apps/game --pretty false && tsc --noEmit -p apps/game/tsconfig.test.json --pretty false && tsc --noEmit -p apps/math-dashboard --pretty false && tsc --noEmit -p apps/math-dashboard/tsconfig.test.json --pretty false && tsc --noEmit -p scripts --pretty false && tsc --noEmit -p tsconfig.json --pretty false",
     "math:build": "tsx scripts/build-math-data.ts",
     "math:validate": "tsx scripts/validate-math-data.ts",
     "math:enumerate": "tsx scripts/enumerate.ts",
     "math:balance": "tsx scripts/balance.ts",
     "math:simulate": "tsx scripts/simulate.ts",
     "math:report": "tsx scripts/report.ts",
-    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run build",
+    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run dashboard:build && npm run build",
     "clean": "npm run clean --workspaces --if-present"
   },
   "dependencies": {

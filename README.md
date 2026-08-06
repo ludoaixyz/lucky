@@ -54,6 +54,8 @@ npm run dev
 
 The top-right language selector switches the complete presentation between English (`en-US`), Brazilian Portuguese (`pt-BR`), and Simplified Chinese (`zh-CN`) without resetting credits, controls, the active sequence, or spin history. The choice is saved under `lucky888.locale`; an unsupported saved or browser locale safely falls back to English. `LUCKY888`, reel symbols and their IDs, and the visible `SPIN` label intentionally remain invariant. Diagnostic CSV filenames, headers, and machine-facing fields also remain stable English for downstream tooling. See [localization architecture](docs/localization.md) for the translation contract and steps to add a locale.
 
+The independent simulation management dashboard runs at `http://127.0.0.1:5174/` with `npm run dashboard:dev`. It reads version 1.2.0 deterministic Monte Carlo JSON reports, validates and reconciles them, presents management KPIs and provisional target assessments, compares compatible runs, and provides a print/PDF view. It does not load Phaser or resolve spins. Built-in dashboard fixtures live in `apps/math-dashboard/public/reports`; additional reports can be reviewed locally through JSON upload without modifying the source file.
+
 For repeatable local presentation checks, append an integer `?seed=` query (for example, `?seed=13`). This is a development-only deterministic RNG control, not production randomness.
 
 ## Commands
@@ -61,6 +63,8 @@ For repeatable local presentation checks, append an integer `?seed=` query (for 
 | Command                                               | Purpose                                                  |
 | ----------------------------------------------------- | -------------------------------------------------------- |
 | `npm run dev`                                         | Compile math data and start the game                     |
+| `npm run dashboard:dev`                               | Start the independent report dashboard on port 5174      |
+| `npm run dashboard:build` / `dashboard:preview`       | Build / preview the static report dashboard              |
 | `npm run build`                                       | Compile math data and create `apps/game/dist`            |
 | `npm test` / `npm run test:watch`                     | Run tests once / watch                                   |
 | `npm run lint` / `npm run lint:fix`                   | Check / fix lint issues                                  |

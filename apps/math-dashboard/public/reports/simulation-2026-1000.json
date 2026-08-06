@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "1.2.0",
+  "methodology": "deterministic-monte-carlo",
+  "gameVersion": "0.3.0",
+  "configurationId": "lucky888-balanced-base-v1",
+  "generatedAt": "2026-08-06T12:49:09.092Z",
+  "seed": 2026,
+  "paidSpins": 1000,
+  "totalWageredCredits": 5000,
+  "uncappedBaseLinePayoutCredits": 4298,
+  "uncappedBaseScatterPayoutCredits": 0,
+  "uncappedBasePayoutCredits": 4298,
+  "uncappedFeaturePayoutCredits": 199,
+  "uncappedTotalPayoutCredits": 4497,
+  "creditedTotalPayoutCredits": 4497,
+  "capReductionCredits": 0,
+  "uncappedBaseLineRtp": 0.8596,
+  "uncappedBaseScatterRtp": 0,
+  "uncappedFeatureRtp": 0.0398,
+  "uncappedTotalRtp": 0.8994,
+  "creditedTotalRtp": 0.8994,
+  "baseHitFrequency": 0.319,
+  "featureTriggerFrequency": 0.009,
+  "featureTriggerFrequencyByScatterCount": {
+    "3": 0.009
+  },
+  "featureInclusiveHitFrequency": 0.327,
+  "averageInitiallyAwardedFreeSpins": 9,
+  "averageTotalFreeSpinsPerTrigger": 9.222222222222221,
+  "averageRetriggersPerTrigger": 0.1111111111111111,
+  "featureLengthPercentiles": {
+    "median": 9,
+    "p75": 9,
+    "p90": 11,
+    "p95": 11,
+    "p99": 11
+  },
+  "maximumObservedFeatureLength": 11,
+  "featureCapHitFrequency": 0,
+  "variance": 4.2720796400000065,
+  "standardDeviation": 2.0669009748897036,
+  "standardError": 0.06536114778673954,
+  "confidenceInterval95": [0.7712921503379898, 1.0275078496620087],
+  "maximumObservedWinCredits": 103,
+  "capApplications": 0,
+  "capApplicationFrequency": 0,
+  "payoutDistribution": [
+    {
+      "label": "0x",
+      "minimumMultiple": 0,
+      "maximumMultiple": 0,
+      "count": 673,
+      "probability": 0.673
+    },
+    {
+      "label": "(0,1)x",
+      "minimumMultiple": 2.220446049250313e-16,
+      "maximumMultiple": 1,
+      "count": 53,
+      "probability": 0.053
+    },
+    {
+      "label": "[1,5)x",
+      "minimumMultiple": 1,
+      "maximumMultiple": 5,
+      "count": 238,
+      "probability": 0.238
+    },
+    {
+      "label": "[5,20)x",
+      "minimumMultiple": 5,
+      "maximumMultiple": 20,
+      "count": 35,
+      "probability": 0.035
+    },
+    {
+      "label": "20x+",
+      "minimumMultiple": 20,
+      "maximumMultiple": null,
+      "count": 1,
+      "probability": 0.001
+    }
+  ]
+}

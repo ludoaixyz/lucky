@@ -36,6 +36,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ['apps/math-dashboard/tests/*.ts', 'apps/math-dashboard/vitest.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./apps/math-dashboard/tsconfig.test.json'],
+      },
+    },
+  },
+  {
     files: ['packages/math-engine/tests/*.ts', 'packages/math-engine/vitest.config.ts'],
     languageOptions: {
       parserOptions: {
