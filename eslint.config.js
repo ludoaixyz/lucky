@@ -26,5 +26,23 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
     },
   },
+  {
+    files: ['apps/game/tests/*.ts', 'apps/game/vitest.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./apps/game/tsconfig.test.json'],
+      },
+    },
+  },
+  {
+    files: ['packages/math-engine/tests/*.ts', 'packages/math-engine/vitest.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./packages/math-engine/tsconfig.test.json'],
+      },
+    },
+  },
   { files: ['*.js'], extends: [tseslint.configs.disableTypeChecked] },
 );

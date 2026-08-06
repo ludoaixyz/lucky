@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { matchedPaylineCenters, paylineColor } from '../src/game/payline-presentation.js';
 import {
   MINIMUM_VISIBLE_DURATION_MS,
+  PRESENTATION_SPEED_OPTIONS,
   PRESENTATION_SPEED_MULTIPLIER,
   scaledDelay,
   scaledDuration,
@@ -9,8 +10,12 @@ import {
 
 describe('prototype presentation timing', () => {
   it('uses one five-times multiplier while preserving a visible frame', () => {
+    expect(PRESENTATION_SPEED_OPTIONS).toEqual([0.5, 1, 2, 3]);
     expect(PRESENTATION_SPEED_MULTIPLIER).toBe(5);
     expect(scaledDuration(1000)).toBe(200);
+    expect(scaledDuration(1000, 0.5)).toBe(400);
+    expect(scaledDuration(1000, 2)).toBe(100);
+    expect(scaledDuration(1000, 3)).toBe(67);
     expect(scaledDelay(10)).toBe(MINIMUM_VISIBLE_DURATION_MS);
     expect(scaledDuration(0)).toBe(0);
   });

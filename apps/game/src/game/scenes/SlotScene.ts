@@ -6,8 +6,9 @@ import type {
   RuntimeGameConfig,
   SymbolId,
 } from '@lucky/shared-types';
-import { PRESENTATION_TIMING } from '../presentation-timing.js';
+import { presentationTiming } from '../presentation-timing.js';
 import { matchedPaylineCenters, paylineColor } from '../payline-presentation.js';
+import { formatNumber, type Localization } from '../../i18n/index.js';
 
 interface SceneLifecycle {
   readonly ready: () => void;
@@ -24,6 +25,10 @@ interface PresentationToken {
   cancelled: boolean;
 }
 
+type WinLabelState =
+  | { readonly kind: 'single'; readonly win: LineWin }
+  | { readonly kind: 'all'; readonly count: number };
+
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 480;
 export class SlotScene extends Phaser.Scene {
@@ -34,10 +39,14 @@ export class SlotScene extends Phaser.Scene {
   private presentationToken: PresentationToken | undefined;
   private lineOverlay: Phaser.GameObjects.Graphics | undefined;
   private winLabel: Phaser.GameObjects.Text | undefined;
+  private presentationSpeed = 1;
+  private winLabelState: WinLabelState | undefined;
+  private disposeLocalization: (() => void) | undefined;
   private created = false;
 
   constructor(
     private readonly gameConfig: RuntimeGameConfig,
+    private readonly localization: Localization,
     private readonly lifecycle: SceneLifecycle,
   ) {
     super('slot');
@@ -62,6 +71,7 @@ export class SlotScene extends Phaser.Scene {
         .setOrigin(0.5, 1)
         .setDepth(21)
         .setVisible(false);
+      this.disposeLocalization = this.localization.subscribe(() => this.renderWinLabel());
       this.created = true;
       this.lifecycle.ready();
     } catch (error: unknown) {
@@ -74,6 +84,11 @@ export class SlotScene extends Phaser.Scene {
     this.shutdownCallbacks.add(callback);
   }
 
+  setPresentationSpeed(multiplier: number): void {
+    presentationTiming(multiplier);
+    this.presentationSpeed = multiplier;
+  }
+
   present(result: ReelOutcome, reelSet: 'base' | 'free-spin' = 'base'): Promise<void> {
     if (!this.created)
       return Promise.reject(new Error('Cannot present a spin before scene creation'));
@@ -83,6 +98,7 @@ export class SlotScene extends Phaser.Scene {
       reelSet === 'free-spin' ? this.gameConfig.freeSpinReelStrips : this.gameConfig.reelStrips;
     this.validateResult(result, strips);
     this.clearWinPresentation();
+    const timing = presentationTiming(this.presentationSpeed);
 
     return new Promise((resolve) => {
       let completedReels = 0;
@@ -110,7 +126,7 @@ export class SlotScene extends Phaser.Scene {
         const currentStop = storedStop % stripLength;
         const distance = (currentStop - finalStop + stripLength) % stripLength;
         const totalSteps = stripLength + distance;
-        this.time.delayedCall(PRESENTATION_TIMING.reelStopStagger * reel, () => {
+        this.time.delayedCall(timing.reelStopStagger * reel, () => {
           if (token.cancelled) return;
           this.animateReel(
             reel,
@@ -119,6 +135,7 @@ export class SlotScene extends Phaser.Scene {
             totalSteps,
             strips,
             token,
+            timing,
             () => {
               completedReels += 1;
               if (completedReels === this.reelViews.length) void reelsFinished();
@@ -175,6 +192,7 @@ export class SlotScene extends Phaser.Scene {
     totalSteps: number,
     strips: readonly (readonly SymbolId[])[],
     token: PresentationToken,
+    timing: ReturnType<typeof presentationTiming>,
     done: () => void,
   ): void {
     const view = this.reelViews[reel];
@@ -189,13 +207,13 @@ export class SlotScene extends Phaser.Scene {
     const advance = (): void => {
       if (token.cancelled) return;
       const remaining = totalSteps - completedSteps;
-      const decelerationIndex = PRESENTATION_TIMING.reelDeceleration.length - remaining;
+      const decelerationIndex = timing.reelDeceleration.length - remaining;
       const duration =
         decelerationIndex >= 0
-          ? (PRESENTATION_TIMING.reelDeceleration[decelerationIndex] ??
-            PRESENTATION_TIMING.reelDeceleration.at(-1) ??
-            PRESENTATION_TIMING.reelStep)
-          : PRESENTATION_TIMING.reelStep;
+          ? (timing.reelDeceleration[decelerationIndex] ??
+            timing.reelDeceleration.at(-1) ??
+            timing.reelStep)
+          : timing.reelStep;
       this.tweens.add({
         targets: view.container,
         y: height,
@@ -217,7 +235,7 @@ export class SlotScene extends Phaser.Scene {
             scaleX: 1.08,
             scaleY: 1.08,
             yoyo: true,
-            duration: PRESENTATION_TIMING.symbolLanding,
+            duration: timing.symbolLanding,
             onComplete: done,
           });
         },
@@ -231,19 +249,18 @@ export class SlotScene extends Phaser.Scene {
     token: PresentationToken,
   ): Promise<void> {
     if (lineWins.length === 0 || token.cancelled) return;
+    const timing = presentationTiming(this.presentationSpeed);
     for (const win of lineWins) {
       if (token.cancelled) return;
       this.drawLineWin(win, true);
-      await this.wait(PRESENTATION_TIMING.paylineDisplay, token);
+      await this.wait(timing.paylineDisplay, token);
     }
     if (token.cancelled) return;
     this.clearWinPresentation();
     for (const win of lineWins) this.drawLineWin(win, false);
-    this.winLabel
-      ?.setText(`${lineWins.length} winning payline${lineWins.length === 1 ? '' : 's'}`)
-      .setVisible(true);
-    await this.wait(PRESENTATION_TIMING.allPaylinesDisplay, token);
-    this.clearWinPresentation();
+    this.winLabelState = { kind: 'all', count: lineWins.length };
+    this.renderWinLabel();
+    await this.wait(timing.allPaylinesDisplay, token);
   }
 
   private drawLineWin(win: LineWin, clear: boolean): void {
@@ -274,18 +291,30 @@ export class SlotScene extends Phaser.Scene {
         alpha: 0.72,
         yoyo: true,
         repeat: 1,
-        duration: Math.max(24, Math.floor(PRESENTATION_TIMING.paylineDisplay / 4)),
+        duration: Math.max(
+          24,
+          Math.floor(presentationTiming(this.presentationSpeed).paylineDisplay / 4),
+        ),
       });
     });
     if (clear) {
-      this.winLabel
-        ?.setText(`${win.paylineId} · ${win.symbolId} ×${win.count} · +${win.awardCredits}`)
-        .setVisible(true);
+      this.winLabelState = { kind: 'single', win };
+      this.renderWinLabel();
     }
+  }
+
+  private renderWinLabel(): void {
+    if (!this.winLabelState) return;
+    const text =
+      this.winLabelState.kind === 'all'
+        ? this.localization.dictionary.presentation.winningPaylines(this.winLabelState.count)
+        : `${this.winLabelState.win.paylineId} · ${this.winLabelState.win.symbolId} ×${this.winLabelState.win.count} · +${formatNumber(this.localization.locale, this.winLabelState.win.awardCredits)}`;
+    this.winLabel?.setText(text).setVisible(true);
   }
 
   private clearWinPresentation(): void {
     this.lineOverlay?.clear();
+    this.winLabelState = undefined;
     this.winLabel?.setVisible(false).setText('');
     for (const view of this.reelViews) {
       for (const symbol of view.symbols) {
@@ -385,6 +414,8 @@ export class SlotScene extends Phaser.Scene {
     for (const callback of this.shutdownCallbacks) callback();
     this.shutdownCallbacks.clear();
     if (this.presentationToken) this.presentationToken.cancelled = true;
+    this.disposeLocalization?.();
+    this.disposeLocalization = undefined;
     this.clearWinPresentation();
     this.tweens.killTweensOf(this.reelViews.map((view) => view.container));
     if (this.finishPresentation) this.finishPresentation();

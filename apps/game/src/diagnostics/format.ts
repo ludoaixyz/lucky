@@ -4,9 +4,12 @@ export function formatVisibleWindow(window: readonly (readonly SymbolId[])[]): s
   return window.map((reel) => reel.join('|')).join(' / ');
 }
 
-export function formatLineWins(lineWins: readonly LineWin[]): string {
+export function formatLineWins(
+  lineWins: readonly LineWin[],
+  formatAward: (value: number) => string = String,
+): string {
   if (lineWins.length === 0) return '—';
   return lineWins
-    .map((win) => `${win.paylineId}:${win.symbolId}×${win.count}=${win.awardCredits}`)
+    .map((win) => `${win.paylineId}:${win.symbolId}×${win.count}=${formatAward(win.awardCredits)}`)
     .join(' | ');
 }

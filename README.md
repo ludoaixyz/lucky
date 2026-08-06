@@ -50,7 +50,9 @@ npm install
 npm run dev
 ```
 
-`dev` compiles current math sheets, then starts Vite. Open the printed local URL. Use the Spin button or Space. The fixed illustrative bet is five credits and starting credits are simulated.
+`dev` compiles current math sheets, then starts Vite. Open the printed local URL. Use the Spin button or Space. Starting credits are simulated. The prototype control panel selects animation speed, a 5/10/20/50/100-credit bet, and a sequential 1/5/10/15/20-spin batch. Controls lock for the complete batch; each paid spin and any attached feature finishes before the next begins.
+
+The top-right language selector switches the complete presentation between English (`en-US`), Brazilian Portuguese (`pt-BR`), and Simplified Chinese (`zh-CN`) without resetting credits, controls, the active sequence, or spin history. The choice is saved under `lucky888.locale`; an unsupported saved or browser locale safely falls back to English. `LUCKY888`, reel symbols and their IDs, and the visible `SPIN` label intentionally remain invariant. Diagnostic CSV filenames, headers, and machine-facing fields also remain stable English for downstream tooling. See [localization architecture](docs/localization.md) for the translation contract and steps to add a locale.
 
 For repeatable local presentation checks, append an integer `?seed=` query (for example, `?seed=13`). This is a development-only deterministic RNG control, not production randomness.
 

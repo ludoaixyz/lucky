@@ -1,13 +1,15 @@
 import Phaser from 'phaser';
 import type { RuntimeGameConfig } from '@lucky/shared-types';
 import { SlotScene } from './scenes/SlotScene.js';
+import type { Localization } from '../i18n/index.js';
 
 export function createGame(
   config: RuntimeGameConfig,
+  localization: Localization,
 ): Promise<{ game: Phaser.Game; scene: SlotScene }> {
   return new Promise((resolve, reject) => {
     const state: { game?: Phaser.Game } = {};
-    const scene = new SlotScene(config, {
+    const scene = new SlotScene(config, localization, {
       ready: () => {
         if (!state.game) {
           reject(new Error('Phaser game was unavailable when the slot scene became ready'));
