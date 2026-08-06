@@ -1,12 +1,12 @@
-# Lucky888
+# LUCKY888
 
-Lucky888 is a production-oriented workspace for an HTML5 slot-machine prototype and its supporting mathematics. It contains a responsive Phaser 3 shell, editable CSV/JSON math sheets, a deterministic TypeScript math engine, validation, simulation, tests, and documentation.
+LUCKY888 is a production-oriented workspace for an HTML5 slot-machine prototype and its supporting mathematics. Its original emblem depicts three intertwined Chinese dragons. It contains a responsive Phaser 3 shell, editable CSV/JSON math sheets, deterministic TypeScript mathematics, validation, simulation, tests, and documentation.
 
-> **Non-monetary prototype:** Lucky888 uses simulated credits with no cash value. It is not a real-money gambling product and has no wagering accounts, deposits, withdrawals, purchases, cryptocurrency, payments, or cash-out path.
+> **Non-monetary prototype:** LUCKY888 uses simulated credits with no cash value. It is not a real-money gambling product and has no wagering accounts, deposits, withdrawals, purchases, cryptocurrency, payments, or cash-out path.
 
 ## Status
 
-The game runs a complete Scatter-anywhere free-spin flow with bounded retriggers. Its theme, numerical inputs, RTP, volatility, bonus frequency, and maximum win remain illustrative and are **not finalized**.
+The game runs a complete Scatter-anywhere free-spin flow with bounded retriggers. The active balanced engineering profile is deliberately reviewed against provisional bands, but it is **not mathematically finalized or certified**; independent verification and target approval remain outstanding.
 
 ## Architecture
 
@@ -28,7 +28,7 @@ packages/shared-types/   Cross-workspace data contracts
 math/source/             Editable CSV/JSON source sheets
 math/schemas/            JSON Schemas for contracts
 math/generated/          Compiled runtime data (ignored except .gitkeep)
-math/reports/            Simulation reports (ignored except .gitkeep)
+math/reports/            Named tracked evidence plus ignored bulk reports
 math/templates/          PAR-sheet template
 scripts/                 Compiler, validator, and simulator entry points
 docs/                    Architecture, math, contracts, workflow, and policy
@@ -67,6 +67,7 @@ For repeatable local presentation checks, append an integer `?seed=` query (for 
 | `npm run math:validate`                               | Validate source math data with located errors          |
 | `npm run math:build`                                  | Compile source sheets without changing them            |
 | `npm run math:enumerate`                              | Exact stop/finite-feature enumeration and PAR report   |
+| `npm run math:balance`                                | Aggregate five deterministic million-spin balance runs |
 | `npm run math:simulate -- --spins 100000 --seed 2026` | Run a repeatable simulation                            |
 | `npm run validate`                                    | Format, lint, types, math, tests, and production build |
 | `npm run clean`                                       | Remove workspace build output                          |

@@ -1,7 +1,9 @@
-# Game design overview
+# LUCKY888 game design overview
 
-Each paid interaction costs five simulated credits once. The math engine resolves the base spin and complete bounded free-spin feature before presentation. Phaser presents the base reels, then every free spin sequentially while the Spin control remains locked. The UI shows feature progress and retrigger additions, then credits the aggregate result exactly once and records one diagnostic history entry.
+The active lockup is an original emblem of exactly three intertwined Chinese-style dragons beside the uppercase title LUCKY888. Golden serpentine linework, jade details, subtle red accents, and cloud ornament sit on deep navy. Local SVG assets support the header and favicon without external image requests; art remains provisional.
 
-Three or more Scatters anywhere trigger free spins even though Scatter has no direct credit award. Free spins cost zero, share the base strips/paytable, and may retrigger subject to explicit 100-spin and 20-retrigger limits. Mouse and Space remain available; failed presentation refunds the paid bet and does not record a completed spin.
+One paid interaction costs five simulated credits. The engine resolves the base spin and complete bounded feature before presentation. The UI debits once, locks input, presents base and free spins sequentially using their correct strip set, then credits and records once. Presentation failure refunds the paid bet.
 
-Theme, strips, paytable, pacing, starting balance, and resulting performance are provisional engineering fixtures. There is no autoplay, rapid spin, purchase, cash value, account, or loss-recovery messaging.
+Three/four/five Scatters award 9/11/13 initial spins. Free-spin retriggers add 2/4/6. Separate free-spin strips reduce Wild exposure. Both strip sets allow a practical maximum of one visible Scatter per reel, or five total. The feature is bounded at 100 spins and 20 retriggers.
+
+The balanced configuration remains a provisional engineering candidate. There is no autoplay, rapid spin, purchasing, cash value, account, or loss-recovery messaging.

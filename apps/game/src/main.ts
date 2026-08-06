@@ -28,7 +28,7 @@ try {
     throw error;
   }
 } catch (error: unknown) {
-  console.error('Lucky888 startup failed', error);
+  console.error('LUCKY888 startup failed', error);
   const message = error instanceof Error ? error.message : 'Unknown startup error';
   const target = document.querySelector('#message');
   if (target) target.textContent = `Unable to start: ${message}`;

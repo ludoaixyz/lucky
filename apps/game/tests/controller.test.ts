@@ -24,19 +24,29 @@ class SequenceRandom implements RandomSource {
 
 const config: RuntimeGameConfig = {
   schemaVersion: '1.0.0',
-  gameId: 'controller-test',
+  gameId: 'lucky888',
+  gameName: 'LUCKY888',
   gameVersion: '1.0.0',
   configurationId: 'controller-test-v1',
+  selectedRtpProfile: 'controller-test-v1',
+  payModel: 'fixed-paylines-left-to-right',
   reelCount: 3,
   visibleRows: 1,
   lineBetCredits: 1,
   totalBetCredits: 5,
   maximumWinCredits: 100,
+  maximumWinScope: 'paid-spin-including-feature',
   symbols: [
     { id: 'A', name: 'A', category: 'regular', display: 'A' },
     { id: 'S', name: 'Scatter', category: 'scatter', display: 'S' },
+    { id: 'W', name: 'Wild', category: 'wild', display: 'W' },
   ],
   reelStrips: [
+    ['A', 'S'],
+    ['A', 'S'],
+    ['A', 'S'],
+  ],
+  freeSpinReelStrips: [
     ['A', 'S'],
     ['A', 'S'],
     ['A', 'S'],
@@ -58,6 +68,43 @@ const config: RuntimeGameConfig = {
     scatterPaysCredits: false,
     useAlternateReelStrips: false,
     useAlternatePaytable: false,
+  },
+  rules: {
+    schemaVersion: '1.0.0',
+    wild: {
+      symbolId: 'W',
+      enabled: true,
+      substitutesFor: ['A'],
+      substitutesForWild: true,
+      substitutesForScatter: false,
+      hasOwnLinePay: false,
+      multiplier: 1,
+      allWildCombinationRule: 'no-pay',
+    },
+    lineAwardRules: {
+      direction: 'left-to-right',
+      activePaylines: 1,
+      lineBetCredits: 1,
+      totalBetCredits: 5,
+      awardScaling: 'award-credits-per-line-bet',
+      matchRule: 'consecutive-from-leftmost-reel',
+      winSelection: 'highest-award-per-payline',
+      multiplePaylinesAccumulate: true,
+      nestedAwardsAccumulate: false,
+      scatterBreaksLineMatch: true,
+    },
+    scatter: {
+      symbolId: 'S',
+      enabled: true,
+      evaluation: 'anywhere',
+      countMode: 'visible-symbols',
+      maximumCountMode: 'one-visible-scatter-per-reel',
+      substitutesOnLines: false,
+      wildSubstitutesForScatter: false,
+      scatterSubstitutesForRegular: false,
+      directCreditPaysEnabled: false,
+      triggersFeature: true,
+    },
   },
 };
 
@@ -111,9 +158,10 @@ describe('paid-spin controller boundary', () => {
     expect(recordCompletedSpin).toHaveBeenCalledWith(
       expect.objectContaining({
         betCredits: 5,
-        baseWinCredits: 0,
-        featureWinCredits: 20,
-        totalWinCredits: 20,
+        uncappedBaseWinCredits: 0,
+        uncappedFeatureWinCredits: 20,
+        uncappedTotalWinCredits: 20,
+        creditedTotalWinCredits: 20,
         totalFreeSpinsPlayed: 2,
       }),
     );
@@ -135,5 +183,26 @@ describe('paid-spin controller boundary', () => {
     expect(document.querySelector('#message')?.textContent).toContain('presentation failed');
     expect(recordCompletedSpin).not.toHaveBeenCalled();
     dispose();
+  });
+
+  it('starts from Space outside controls and removes the keyboard listener on disposal', async () => {
+    const present = vi.fn(() => Promise.resolve());
+    const recordCompletedSpin = vi.fn<SpinDiagnosticsRecorder['recordCompletedSpin']>();
+    const dispose = attachController(
+      config,
+      { present } as unknown as SlotScene,
+      new SequenceRandom([0, 0, 0]),
+      { recordCompletedSpin },
+    );
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }));
+    await settle();
+    expect(present).toHaveBeenCalledOnce();
+    expect(recordCompletedSpin).toHaveBeenCalledOnce();
+
+    dispose();
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }));
+    await settle();
+    expect(present).toHaveBeenCalledOnce();
   });
 });

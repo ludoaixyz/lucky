@@ -54,12 +54,14 @@ export class SlotScene extends Phaser.Scene {
     this.shutdownCallbacks.add(callback);
   }
 
-  present(result: ReelOutcome): Promise<void> {
+  present(result: ReelOutcome, reelSet: 'base' | 'free-spin' = 'base'): Promise<void> {
     if (!this.created)
       return Promise.reject(new Error('Cannot present a spin before scene creation'));
     if (this.finishPresentation)
       return Promise.reject(new Error('Cannot present a second spin while presentation is active'));
-    this.validateResult(result);
+    const strips =
+      reelSet === 'free-spin' ? this.gameConfig.freeSpinReelStrips : this.gameConfig.reelStrips;
+    this.validateResult(result, strips);
 
     return new Promise((resolve) => {
       let completedReels = 0;
@@ -76,16 +78,25 @@ export class SlotScene extends Phaser.Scene {
       this.presentationToken = token;
 
       this.reelViews.forEach((_, reel) => {
-        const finalStop = this.reelStop(result, reel);
-        const stripLength = this.gameConfig.reelStrips[reel]?.length ?? 0;
-        const currentStop = this.currentStops[reel];
-        if (currentStop === undefined) throw new Error(`Reel ${reel + 1} has no current stop`);
+        const finalStop = this.reelStop(result, reel, strips);
+        const stripLength = strips[reel]?.length ?? 0;
+        const storedStop = this.currentStops[reel];
+        if (storedStop === undefined) throw new Error(`Reel ${reel + 1} has no current stop`);
+        const currentStop = storedStop % stripLength;
         const distance = (currentStop - finalStop + stripLength) % stripLength;
         const totalSteps = (reel + 1) * stripLength + distance;
-        this.animateReel(reel, finalStop, result.window[reel] ?? [], totalSteps, token, () => {
-          completedReels += 1;
-          if (completedReels === this.reelViews.length) finish();
-        });
+        this.animateReel(
+          reel,
+          finalStop,
+          result.window[reel] ?? [],
+          totalSteps,
+          strips,
+          token,
+          () => {
+            completedReels += 1;
+            if (completedReels === this.reelViews.length) finish();
+          },
+        );
       });
     });
   }
@@ -134,11 +145,12 @@ export class SlotScene extends Phaser.Scene {
     finalStop: ReelStop,
     finalWindow: readonly SymbolId[],
     totalSteps: number,
+    strips: readonly (readonly SymbolId[])[],
     token: PresentationToken,
     done: () => void,
   ): void {
     const view = this.reelViews[reel];
-    const strip = this.gameConfig.reelStrips[reel];
+    const strip = strips[reel];
     if (!view || !strip || strip.length === 0) {
       throw new Error(`Cannot animate missing or empty reel ${reel + 1}`);
     }
@@ -162,12 +174,12 @@ export class SlotScene extends Phaser.Scene {
           completedSteps += 1;
           visualStop = (visualStop - 1 + strip.length) % strip.length;
           view.container.y = 0;
-          this.setReelAtStop(reel, visualStop);
+          this.setReelAtStop(reel, visualStop, strips);
           if (completedSteps < totalSteps) {
             advance();
             return;
           }
-          this.snapToResolvedWindow(reel, finalStop, finalWindow);
+          this.snapToResolvedWindow(reel, finalStop, finalWindow, strips);
           done();
         },
       });
@@ -175,8 +187,12 @@ export class SlotScene extends Phaser.Scene {
     advance();
   }
 
-  private setReelAtStop(reel: number, stop: ReelStop): void {
-    const strip = this.gameConfig.reelStrips[reel];
+  private setReelAtStop(
+    reel: number,
+    stop: ReelStop,
+    strips: readonly (readonly SymbolId[])[] = this.gameConfig.reelStrips,
+  ): void {
+    const strip = strips[reel];
     const view = this.reelViews[reel];
     if (!strip || strip.length === 0 || !view) throw new Error(`Cannot display reel ${reel + 1}`);
     view.symbols.forEach((text, index) => {
@@ -191,9 +207,10 @@ export class SlotScene extends Phaser.Scene {
     reel: number,
     finalStop: ReelStop,
     finalWindow: readonly SymbolId[],
+    strips: readonly (readonly SymbolId[])[],
   ): void {
     const view = this.reelViews[reel];
-    const strip = this.gameConfig.reelStrips[reel];
+    const strip = strips[reel];
     if (!view || !strip || strip.length === 0) throw new Error(`Cannot stop reel ${reel + 1}`);
     view.container.y = 0;
     const preceding = strip[(finalStop - 1 + strip.length) % strip.length];
@@ -207,7 +224,7 @@ export class SlotScene extends Phaser.Scene {
     this.currentStops[reel] = finalStop;
   }
 
-  private validateResult(result: ReelOutcome): void {
+  private validateResult(result: ReelOutcome, strips: readonly (readonly SymbolId[])[]): void {
     if (result.window.length !== this.gameConfig.reelCount) {
       throw new Error(
         `Spin window has ${result.window.length} reels; expected ${this.gameConfig.reelCount}`,
@@ -225,13 +242,17 @@ export class SlotScene extends Phaser.Scene {
         );
       }
       reel.forEach((symbol) => this.displaySymbol(symbol));
-      this.reelStop(result, index);
+      this.reelStop(result, index, strips);
     });
   }
 
-  private reelStop(result: ReelOutcome, reel: number): ReelStop {
+  private reelStop(
+    result: ReelOutcome,
+    reel: number,
+    strips: readonly (readonly SymbolId[])[],
+  ): ReelStop {
     const stop = result.stops[reel];
-    const stripLength = this.gameConfig.reelStrips[reel]?.length ?? 0;
+    const stripLength = strips[reel]?.length ?? 0;
     if (stop === undefined || stop < 0 || stop >= stripLength) {
       throw new Error(`Spin result contains invalid stop '${String(stop)}' for reel ${reel + 1}`);
     }

@@ -1,10 +1,14 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { enumerateExact, runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
-import type { ExactMathReport, RuntimeGameConfig, SimulationReport } from '@lucky/shared-types';
+import {
+  formatPercentRatio,
+  type ExactMathReport,
+  type RuntimeGameConfig,
+  type SimulationReport,
+} from '@lucky/shared-types';
 import { loadSourceConfig } from './lib/source-loader.js';
 
-const percent = (value: number): string => `${(value * 100).toFixed(6)}%`;
 const number = (value: number): string => value.toFixed(6);
 
 function parReport(
@@ -13,137 +17,160 @@ function parReport(
   simulation: SimulationReport,
 ): string {
   const symbolIds = config.symbols.map((symbol) => symbol.id);
-  const counts = config.reelStrips.map((reel) =>
-    Object.fromEntries(symbolIds.map((id) => [id, reel.filter((symbol) => symbol === id).length])),
-  );
-  const symbolHeader = `| Reel | Length | ${symbolIds.join(' | ')} |`;
-  const symbolRule = `| --- | ---: | ${symbolIds.map(() => '---:').join(' | ')} |`;
-  const symbolRows = counts.map(
-    (reel, index) =>
-      `| ${index + 1} | ${config.reelStrips[index]?.length ?? 0} | ${symbolIds.map((id) => reel[id] ?? 0).join(' | ')} |`,
-  );
-  const awards = config.bonus.awards
-    .map((award) => `| ${award.count} | ${award.freeSpins} |`)
-    .join('\n');
-  const retriggers = config.bonus.retriggerAwards
-    .map((award) => `| ${award.count} | ${award.freeSpins} |`)
-    .join('\n');
-  const paytable = config.paytable
-    .map((award) => `| ${award.symbolId} | ${award.count} | ${award.awardCredits} |`)
-    .join('\n');
-  const paylines = config.paylines
-    .map((line) => `| ${line.id} | ${line.rows.join(', ')} |`)
-    .join('\n');
-  const distribution = exact.payoutDistribution
-    .map((bucket, index) => {
-      const simulated = simulation.payoutDistribution[index];
-      return `| ${bucket.label} | ${percent(bucket.probability)} | ${percent(simulated?.probability ?? 0)} |`;
+  const reelTable = config.reelStrips
+    .map((reel, index) => {
+      const counts = symbolIds.map((id) => reel.filter((symbol) => symbol === id).length);
+      return `| ${index + 1} | ${reel.length} | ${counts.join(' | ')} |`;
     })
     .join('\n');
-  return `# Lucky888 base v1 PAR report
+  const freeReelTable = config.freeSpinReelStrips
+    .map((reel, index) => {
+      const counts = symbolIds.map((id) => reel.filter((symbol) => symbol === id).length);
+      return `| ${index + 1} | ${reel.length} | ${counts.join(' | ')} |`;
+    })
+    .join('\n');
+  const awardRows = config.bonus.awards
+    .map((award) => `| ${award.count} | ${award.freeSpins} |`)
+    .join('\n');
+  const retriggerRows = config.bonus.retriggerAwards
+    .map((award) => `| ${award.count} | ${award.freeSpins} |`)
+    .join('\n');
+  const triggerRows = Object.entries(exact.triggerFrequencyByScatterCount)
+    .map(([count, frequency]) => `| ${count} | ${formatPercentRatio(frequency, 6)} |`)
+    .join('\n');
+  const distribution = exact.payoutDistribution
+    .map(
+      (bucket, index) =>
+        `| ${bucket.label} | ${formatPercentRatio(bucket.probability, 6)} | ${formatPercentRatio(simulation.payoutDistribution[index]?.probability ?? 0, 6)} |`,
+    )
+    .join('\n');
+  return `# LUCKY888 balanced base v1 PAR report
 
-## Document identity
+> Provisional engineering mathematics. This is not a regulatory certification.
 
+## Identity
+
+- Game: ${config.gameName} (\`${config.gameId}\`)
 - Game version: ${config.gameVersion}
 - Configuration: ${config.configurationId}
-- Runtime schema: ${config.schemaVersion}
-- Bonus schema: ${config.bonus.schemaVersion}
-- Exact method: finite-state exact enumeration (Method A), uncapped return moments
-- Paid-spin combinations: ${exact.totalPaidSpinCombinations.toLocaleString('en-US')}
 - Source SHA-256: \`${exact.sourceHash}\`
+- Exact methodology: ${exact.methodology}
+- Credited methodology: deterministic Monte Carlo estimate
+- Exact paid-stop combinations: ${exact.totalPaidSpinCombinations.toLocaleString('en-US')}
 
-This is an engineering mathematics report, not a regulatory certification.
+## Reel symbol counts
 
-## Reel strips
+| Base reel | Length | ${symbolIds.join(' | ')} |
+| --- | ---: | ${symbolIds.map(() => '---:').join(' | ')} |
+${reelTable}
 
-${symbolHeader}
-${symbolRule}
-${symbolRows.join('\n')}
+| Free-spin reel | Length | ${symbolIds.join(' | ')} |
+| --- | ---: | ${symbolIds.map(() => '---:').join(' | ')} |
+${freeReelTable}
 
-## Paytable
+Free spins use alternate configuration \`${config.bonus.alternateReelStripConfigurationId}\`.
 
-| Symbol | Match count | Award credits |
-| --- | ---: | ---: |
-${paytable}
+## Payout contracts
 
-## Paylines
+- Lines: ${config.rules.lineAwardRules.direction}, consecutive from reel 1, highest award per payline, no nested award accumulation; all ${config.paylines.length} paylines accumulate.
+- Wild: \`${config.rules.wild.symbolId}\` substitutes only for ${config.rules.wild.substitutesFor.join(', ')}; never Scatter; all-Wild rule is \`${config.rules.wild.allWildCombinationRule}\`; multiplier ${config.rules.wild.multiplier}x.
+- Scatter: \`${config.rules.scatter.symbolId}\` is counted anywhere from visible symbols, never substitutes, has no direct credit award, and triggers the feature.
+- Maximum win: ${config.maximumWinCredits} credits, scope \`${config.maximumWinScope}\`, applied once to base plus the complete feature.
 
-Rows are zero-based from the top.
-
-| Payline | Reel rows |
-| --- | --- |
-${paylines}
-
-## Scatter and free-spin rules
-
-${config.bonus.triggerSymbolId} is counted anywhere in the full ${config.reelCount}x${config.visibleRows} window. It does not substitute and has no direct credit pay. Free spins use the base strips and paytable at ${config.bonus.freeSpinMultiplier}x. The maximum is ${config.bonus.maximumFeatureSpins} played free spins and ${config.bonus.maximumRetriggers} successful retriggers per paid spin.
-
-| Trigger Scatters | Initial free spins |
+| Base Scatters | Initial free spins |
 | ---: | ---: |
-${awards}
+${awardRows}
 
-| Free-spin Scatters | Retriggered free spins |
+| Free-spin Scatters | Added spins |
 | ---: | ---: |
-${retriggers}
+${retriggerRows}
 
-## Exact return and frequency
+## RTP and frequency
 
-| Measure | Exact result |
+Internal RTP values are decimal ratios: 1.0 is 100%. Formatting multiplies by 100 exactly once.
+
+| Measure | Result |
 | --- | ---: |
-| Base line RTP | ${percent(exact.baseLineRtp)} |
-| Base Scatter RTP | ${percent(exact.baseScatterRtp)} |
-| Free-spin RTP | ${percent(exact.featureRtp)} |
-| Total uncapped RTP | ${percent(exact.totalRtp)} |
-| Uncapped total RTP | ${percent(exact.uncappedTotalRtp)} |
-| Feature trigger frequency | ${percent(exact.triggerFrequency)} |
-| Base hit frequency | ${percent(exact.baseHitFrequency)} |
-| Feature-inclusive hit frequency | ${percent(exact.featureInclusiveHitFrequency)} |
-| Initial free spins / paid spin | ${number(exact.expectedInitiallyAwardedFreeSpins)} |
-| Total free spins / paid spin | ${number(exact.expectedTotalFreeSpinsPerPaidSpin)} |
-| Total free spins / trigger | ${number(exact.expectedTotalFreeSpinsPerTrigger)} |
-| Retriggers / trigger | ${number(exact.expectedRetriggerCountPerTrigger)} |
+| Exact uncapped base line RTP | ${formatPercentRatio(exact.uncappedBaseLineRtp, 6)} |
+| Exact uncapped base Scatter RTP | ${formatPercentRatio(exact.uncappedBaseScatterRtp, 6)} |
+| Exact uncapped feature RTP | ${formatPercentRatio(exact.uncappedFeatureRtp, 6)} |
+| Exact uncapped total RTP | ${formatPercentRatio(exact.uncappedTotalRtp, 6)} |
+| Simulated credited total RTP | ${formatPercentRatio(simulation.creditedTotalRtp, 6)} |
+| Simulated cap reduction RTP | ${formatPercentRatio(simulation.uncappedTotalRtp - simulation.creditedTotalRtp, 6)} |
+| Exact trigger frequency | ${formatPercentRatio(exact.triggerFrequency, 6)} |
+| Exact base hit frequency | ${formatPercentRatio(exact.baseHitFrequency, 6)} |
+| Exact feature-inclusive hit frequency | ${formatPercentRatio(exact.featureInclusiveHitFrequency, 6)} |
+| Exact free spins / trigger | ${number(exact.expectedTotalFreeSpinsPerTrigger)} |
+| Exact retriggers / trigger | ${number(exact.expectedRetriggerCountPerTrigger)} |
 
-| Scatter count | Exact paid-spin frequency |
+| Scatter count | Exact frequency |
 | ---: | ---: |
-${Object.entries(exact.triggerFrequencyByScatterCount)
-  .map(([count, frequency]) => `| ${count} | ${percent(frequency)} |`)
-  .join('\n')}
+${triggerRows}
 
-The exact feature expectation memoizes the bounded state (remaining spins, played spins, retrigger count). All feature return is divided by the original paid wager; free spins add no wager. Return moments are explicitly uncapped: the aggregate-cap tail is enforced in runtime and Monte Carlo, but is not mislabeled as an exact capped expectation.
+## Feature length and volatility
 
-## Volatility and payout distribution
+| Measure | Simulation |
+| --- | ---: |
+| Median | ${simulation.featureLengthPercentiles.median} |
+| p75 | ${simulation.featureLengthPercentiles.p75} |
+| p90 | ${simulation.featureLengthPercentiles.p90} |
+| p95 | ${simulation.featureLengthPercentiles.p95} |
+| p99 | ${simulation.featureLengthPercentiles.p99} |
+| Maximum observed | ${simulation.maximumObservedFeatureLength} |
+| Feature-cap hit frequency | ${formatPercentRatio(simulation.featureCapHitFrequency, 6)} |
+| Credited-return standard deviation | ${number(simulation.standardDeviation)} bet multiples |
 
-The return random variable is the total capped payout resulting from one paid spin, including its entire feature, divided by the ${config.totalBetCredits}-credit bet. Exact variance is ${number(exact.variance)} bet-multiple squared and standard deviation is ${number(exact.standardDeviation)} bet multiples.
+The volatility random variable is credited payout from one paid spin and its complete feature divided by the five-credit paid wager. Free spins add no wager.
 
-| Paid-spin payout | Exact | Simulation |
+| Payout multiple | Exact uncapped | Simulated credited |
 | --- | ---: | ---: |
 ${distribution}
 
-## Maximum win
+## Maximum and cap
 
-The ${config.maximumWinCredits}-credit maximum applies once to the aggregate base plus feature payout from one paid spin. The maximum reachable base result is ${exact.maximumReachableBaseWinCredits} credits; the feature-inclusive uncapped maximum under configured limits is ${exact.maximumReachableUncappedWinCredits} credits; the credited maximum is ${exact.maximumReachableCreditedWinCredits} credits. Cap changes exact RTP: ${exact.maximumWinCapReducesRtp ? 'yes' : 'no'}.
+- Maximum reachable base payout: ${exact.maximumReachableBaseWinCredits} credits.
+- Maximum reachable uncapped paid-spin payout under feature limits: ${exact.maximumReachableUncappedWinCredits} credits.
+- Maximum credited payout: ${exact.maximumReachableCreditedWinCredits} credits.
+- Cap is reachable: ${exact.maximumWinCapReducesRtp ? 'yes' : 'no'}.
+- Observed cap applications: ${simulation.capApplications} of ${simulation.paidSpins.toLocaleString('en-US')} paid spins.
 
-## Deterministic simulation comparison
+Exact state equations calculate uncapped feature expectation. The aggregate maximum-win tail is estimated through deterministic Monte Carlo and is not labeled exact.
 
-Simulation uses ${simulation.paidSpins.toLocaleString('en-US')} paid spins, seed ${simulation.seed}. Each trial includes the complete feature but only one wager.
+## Simulation comparison
 
-| Measure | Exact | Simulation |
-| --- | ---: | ---: |
-| Base RTP | ${percent(exact.baseLineRtp + exact.baseScatterRtp)} | ${percent(simulation.baseRtp)} |
-| Feature RTP | ${percent(exact.featureRtp)} | ${percent(simulation.featureRtp)} |
-| Total RTP (exact uncapped / simulated capped) | ${percent(exact.totalRtp)} | ${percent(simulation.totalRtp)} |
-| Trigger frequency | ${percent(exact.triggerFrequency)} | ${percent(simulation.featureTriggerFrequency)} |
-| Total free spins / trigger | ${number(exact.expectedTotalFreeSpinsPerTrigger)} | ${number(simulation.averageTotalFreeSpinsPerTrigger)} |
+Seed ${simulation.seed}; ${simulation.paidSpins.toLocaleString('en-US')} paid spins; credited RTP 95% interval ${formatPercentRatio(simulation.confidenceInterval95[0], 6)} to ${formatPercentRatio(simulation.confidenceInterval95[1], 6)}. The deterministic RNG supports reproducible engineering tests and is not production-approved.
 
-Simulation total-RTP 95% confidence interval: ${percent(simulation.confidenceInterval95[0])} to ${percent(simulation.confidenceInterval95[1])}. Deterministic seeded RNG is for reproducibility and is not a certified production RNG.
+## Remaining decisions
 
-## Assumptions and open decisions
+- Independent math review and target-profile approval remain outstanding.
+- Exact sparse cap-tail calculation may be added if the payout-state cost becomes practical.
+- Art direction for the original three-dragon emblem remains provisional.
+`;
+}
 
-- Scatter has no direct credit payout, so base Scatter RTP is zero.
-- Base and free spins share strips and paytable because alternate assets are disabled.
-- The fixed-payline, left-to-right base model is unchanged.
-- Exact cap-tail expectation remains unresolved; use the capped simulation estimate rather than calling the exact uncapped moment a credited theoretical RTP.
-- Product approval, target RTP selection, and regulatory validation remain outside this prototype report.
+function balanceComparison(exact: ExactMathReport, simulation: SimulationReport): string {
+  return `# LUCKY888 balance comparison
+
+> Engineering comparison only; no certification claim.
+
+| Measure | Old illustrative profile | Balanced candidate | Provisional target |
+| --- | ---: | ---: | ---: |
+| Exact uncapped total RTP | 264.522224% | ${formatPercentRatio(exact.uncappedTotalRtp, 6)} | 94%–97% credited |
+| Simulated credited RTP | 262.818600% (100k, seed 2026) | ${formatPercentRatio(simulation.creditedTotalRtp, 6)} | 94%–97% |
+| Trigger frequency | 10.351563% | ${formatPercentRatio(exact.triggerFrequency, 6)} | 0.667%–1.25% |
+| Average feature length | 19.003980 | ${number(simulation.averageTotalFreeSpinsPerTrigger)} | 9–14 preferred |
+| Feature p95 | Not recorded by legacy report | ${simulation.featureLengthPercentiles.p95} | Below 30 preferred |
+| Base hit frequency | 31.875322% | ${formatPercentRatio(simulation.baseHitFrequency, 6)} | 20%–35% |
+| Feature-cap hit frequency | Not recorded | ${formatPercentRatio(simulation.featureCapHitFrequency, 6)} | Effectively zero |
+
+## Rule changes
+
+- Base reels: one Scatter in 12 stops became one in 30 stops per reel.
+- Free spins: dedicated 30-stop strips with reduced Wild exposure.
+- Retriggers: 3/4/5 Scatters changed from 5/8/10 spins to 2/4/6.
+- Paytable: deliberately retuned after reel changes; the maximum-win cap was not used as the primary balancing mechanism.
+
+The candidate was selected because it corrects the extreme trigger rate and feature contribution while awarding 9/11/13 initial spins and keeping the shorter 2/4/6 retrigger schedule. Results outside provisional bands are reported, not hidden.
 `;
 }
 
@@ -155,16 +182,33 @@ if (Math.abs(exact.probabilityReconciliation - 1) > 1e-12)
   throw new Error(`Exact probability reconciled to ${exact.probabilityReconciliation}, expected 1`);
 const simulation = runSimulation(
   config,
-  { spins: 100_000, seed: 2026, betCredits: config.totalBetCredits },
+  { spins: 1_000_000, seed: 2026, betCredits: config.totalBetCredits },
   new SeededRandom(2026),
 );
+const hybrid: ExactMathReport = {
+  ...exact,
+  methodology: 'hybrid',
+  creditedTotalRtp: simulation.creditedTotalRtp,
+  creditedTotalRtpMethodology: 'monte-carlo-estimate',
+  estimatedCapReductionRtp: simulation.uncappedTotalRtp - simulation.creditedTotalRtp,
+};
 const reports = resolve(process.cwd(), 'math/reports');
 await mkdir(reports, { recursive: true });
 await Promise.all([
-  writeFile(resolve(reports, 'lucky888-base-v1-exact.json'), `${JSON.stringify(exact, null, 2)}\n`),
-  writeFile(resolve(reports, 'lucky888-base-v1-par.md'), parReport(config, exact, simulation)),
+  writeFile(
+    resolve(reports, 'lucky888-balanced-base-v1-exact.json'),
+    `${JSON.stringify(hybrid, null, 2)}\n`,
+  ),
+  writeFile(
+    resolve(reports, 'lucky888-balanced-base-v1-par.md'),
+    parReport(config, hybrid, simulation),
+  ),
+  writeFile(
+    resolve(reports, 'lucky888-balance-comparison.md'),
+    balanceComparison(hybrid, simulation),
+  ),
 ]);
 console.log(
-  `Exact ${exact.totalPaidSpinCombinations.toLocaleString()} combinations: uncapped total RTP ${percent(exact.totalRtp)}, trigger ${percent(exact.triggerFrequency)}.`,
+  `Exact ${exact.totalPaidSpinCombinations.toLocaleString()} combinations: uncapped RTP ${formatPercentRatio(exact.uncappedTotalRtp, 6)}, trigger ${formatPercentRatio(exact.triggerFrequency, 6)}.`,
 );
-console.log(`PAR report: ${resolve(reports, 'lucky888-base-v1-par.md')}`);
+console.log(`PAR report: ${resolve(reports, 'lucky888-balanced-base-v1-par.md')}`);

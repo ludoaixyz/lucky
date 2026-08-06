@@ -47,13 +47,13 @@ Describe trigger combinations, probability, re-trigger treatment, and contributi
 
 Document awarded spins, multipliers, alternate reels/paytable, re-triggers, and expected contribution.
 
-## RTP decomposition
+## Uncapped RTP decomposition
 
-Break out base line wins, scatters, bonuses, free spins, jackpots (if any), and caps.
+Break out uncapped base line wins, direct scatter wins, feature wins, jackpots (if any), and total uncapped RTP. State ratios as decimal values in machine-readable data and percentages only in presentation.
 
-## Total theoretical RTP
+## Credited RTP and cap reduction
 
-Record exact methodology, result, precision, and independent verification. Do not populate until verified.
+Record credited total RTP separately from uncapped RTP, the aggregate cap-reduction ratio, methodology, precision, and independent verification. Never infer component credited RTP by applying the cap to components independently.
 
 ## Volatility methodology
 
@@ -65,7 +65,7 @@ Provide mutually exclusive payout-multiple buckets, counts/probabilities, and re
 
 ## Maximum exposure and maximum win
 
-Describe uncapped maximum exposure, configured cap, maximum credited win, reachability proof, and feature interaction.
+Describe uncapped maximum exposure, configured cap, maximum credited win, reachability proof, and feature interaction. State whether the cap applies to each outcome or once to the complete paid-spin transaction, including its feature.
 
 ## Simulation settings and results
 

@@ -1,4 +1,4 @@
-import type { Credits, LineWin, PayAward, Payline, SymbolId } from '@lucky/shared-types';
+import type { Credits, LineWin, RuntimeGameConfig, SymbolId } from '@lucky/shared-types';
 
 export function countScatters(
   window: readonly (readonly SymbolId[])[],
@@ -12,31 +12,44 @@ export function countScatters(
 
 export function evaluatePaylines(
   window: readonly (readonly SymbolId[])[],
-  paylines: readonly Payline[],
-  paytable: readonly PayAward[],
-  wildId?: SymbolId,
+  config: RuntimeGameConfig,
 ): LineWin[] {
   const wins: LineWin[] = [];
-  for (const payline of paylines) {
+  const wild = config.rules.wild;
+  for (const payline of config.paylines) {
     const line = payline.rows.map((row, reel) => window[reel]?.[row]);
-    const firstRegular = line.find((symbol) => symbol !== undefined && symbol !== wildId);
-    if (firstRegular === undefined) continue;
-    let count = 0;
-    for (const symbol of line) {
-      if (symbol === firstRegular || symbol === wildId) count += 1;
-      else break;
+    if (line.every((symbol) => symbol === wild.symbolId)) {
+      if (wild.allWildCombinationRule === 'no-pay') continue;
     }
-    const award = paytable.find(
-      (entry) => entry.symbolId === firstRegular && entry.count === count,
-    );
-    if (award && award.awardCredits > 0) {
-      wins.push({
+    let best: LineWin | undefined;
+    for (const candidate of wild.substitutesFor) {
+      let matchCount = 0;
+      let usedWild = false;
+      for (const symbol of line) {
+        const isWild = wild.enabled && symbol === wild.symbolId;
+        if (symbol === candidate || isWild) {
+          matchCount += 1;
+          usedWild ||= isWild;
+        } else {
+          break;
+        }
+      }
+      const award = config.paytable
+        .filter((entry) => entry.symbolId === candidate && entry.count <= matchCount)
+        .sort((left, right) => right.awardCredits - left.awardCredits)[0];
+      if (!award || award.awardCredits <= 0) continue;
+      const wildMultiplier = usedWild ? wild.multiplier : 1;
+      const awardCredits =
+        award.awardCredits * config.rules.lineAwardRules.lineBetCredits * wildMultiplier;
+      const resolved: LineWin = {
         paylineId: payline.id,
-        symbolId: firstRegular,
-        count,
-        awardCredits: award.awardCredits,
-      });
+        symbolId: candidate,
+        count: award.count,
+        awardCredits,
+      };
+      if (!best || resolved.awardCredits > best.awardCredits) best = resolved;
     }
+    if (best) wins.push(best);
   }
   return wins;
 }
@@ -48,7 +61,7 @@ export function aggregateWins(lineWins: readonly LineWin[], scatterAward: Credit
 export function enforceMaximumWin(
   rawWin: Credits,
   maximumWin: Credits,
-): { winCredits: Credits; capped: boolean } {
+): { winCredits: Credits; capReductionCredits: Credits; capped: boolean } {
   if (
     !Number.isSafeInteger(rawWin) ||
     rawWin < 0 ||
@@ -57,5 +70,10 @@ export function enforceMaximumWin(
   ) {
     throw new RangeError('Wins and caps must be non-negative safe integers');
   }
-  return { winCredits: Math.min(rawWin, maximumWin), capped: rawWin > maximumWin };
+  const winCredits = Math.min(rawWin, maximumWin);
+  return {
+    winCredits,
+    capReductionCredits: rawWin - winCredits,
+    capped: rawWin > maximumWin,
+  };
 }

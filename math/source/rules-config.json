@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0.0",
+  "wild": {
+    "symbolId": "WILD",
+    "enabled": true,
+    "substitutesFor": ["A", "K", "Q", "J", "GEM"],
+    "substitutesForWild": true,
+    "substitutesForScatter": false,
+    "hasOwnLinePay": false,
+    "multiplier": 1,
+    "allWildCombinationRule": "no-pay"
+  },
+  "lineAwardRules": {
+    "direction": "left-to-right",
+    "activePaylines": 5,
+    "lineBetCredits": 1,
+    "totalBetCredits": 5,
+    "awardScaling": "award-credits-per-line-bet",
+    "matchRule": "consecutive-from-leftmost-reel",
+    "winSelection": "highest-award-per-payline",
+    "multiplePaylinesAccumulate": true,
+    "nestedAwardsAccumulate": false,
+    "scatterBreaksLineMatch": true
+  },
+  "scatter": {
+    "symbolId": "SCATTER",
+    "enabled": true,
+    "evaluation": "anywhere",
+    "countMode": "visible-symbols",
+    "maximumCountMode": "one-visible-scatter-per-reel",
+    "substitutesOnLines": false,
+    "wildSubstitutesForScatter": false,
+    "scatterSubstitutesForRegular": false,
+    "directCreditPaysEnabled": false,
+    "triggersFeature": true
+  }
+}

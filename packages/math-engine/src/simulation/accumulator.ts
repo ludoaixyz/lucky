@@ -1,5 +1,6 @@
 import type {
   DistributionBucket,
+  FeatureLengthPercentiles,
   RuntimeGameConfig,
   SimulationConfig,
   SimulationReport,
@@ -16,11 +17,20 @@ const BUCKETS = [
   { label: '20x+', minimumMultiple: 20, maximumMultiple: null },
 ] as const;
 
+function percentile(sorted: readonly number[], probability: number): number {
+  if (sorted.length === 0) return 0;
+  const index = Math.max(0, Math.ceil(probability * sorted.length) - 1);
+  return sorted[index] ?? 0;
+}
+
 export class SimulationAccumulator {
-  private basePayout = 0;
-  private baseScatterPayout = 0;
-  private featurePayout = 0;
-  private totalPayout = 0;
+  private paidSpins = 0;
+  private uncappedBaseLinePayout = 0;
+  private uncappedBaseScatterPayout = 0;
+  private uncappedFeaturePayout = 0;
+  private uncappedTotalPayout = 0;
+  private creditedTotalPayout = 0;
+  private capReduction = 0;
   private baseWinningSpins = 0;
   private featureTriggers = 0;
   private featureInclusiveWinningSpins = 0;
@@ -28,34 +38,48 @@ export class SimulationAccumulator {
   private totalFreeSpins = 0;
   private totalRetriggers = 0;
   private maximumObservedWin = 0;
+  private maximumObservedFeatureLength = 0;
+  private featureCapHits = 0;
   private capApplications = 0;
-  private readonly returns: number[] = [];
+  private returnSum = 0;
+  private returnSquaredSum = 0;
+  private readonly triggerCounts = new Map<number, number>();
+  private readonly featureLengths: number[] = [];
   private readonly bucketCounts = Array<number>(BUCKETS.length).fill(0);
 
   constructor(private readonly config: SimulationConfig) {}
 
   record(result: SpinResult): void {
-    // The paid-spin cap is applied once to the aggregate result. For component reporting,
-    // credited base wins are allocated first and the feature receives the remainder.
-    const creditedBase = Math.min(result.baseWinCredits, result.totalWinCredits);
-    const creditedBaseScatter = Math.min(result.baseScatterWinCredits, creditedBase);
-    const creditedFeature = result.totalWinCredits - creditedBase;
-    this.basePayout += creditedBase;
-    this.baseScatterPayout += creditedBaseScatter;
-    this.featurePayout += creditedFeature;
-    this.totalPayout += result.totalWinCredits;
-    if (result.baseWinCredits > 0) this.baseWinningSpins += 1;
+    this.paidSpins += 1;
+    this.uncappedBaseLinePayout += result.uncappedBaseLineWinCredits;
+    this.uncappedBaseScatterPayout += result.uncappedBaseScatterWinCredits;
+    this.uncappedFeaturePayout += result.uncappedFeatureWinCredits;
+    this.uncappedTotalPayout += result.uncappedTotalWinCredits;
+    this.creditedTotalPayout += result.totalWinCredits;
+    this.capReduction += result.capReductionCredits;
+    if (result.uncappedBaseWinCredits > 0) this.baseWinningSpins += 1;
     if (result.totalWinCredits > 0) this.featureInclusiveWinningSpins += 1;
     if (result.feature) {
       this.featureTriggers += 1;
+      this.triggerCounts.set(
+        result.scatterCount,
+        (this.triggerCounts.get(result.scatterCount) ?? 0) + 1,
+      );
       this.initiallyAwardedFreeSpins += result.feature.initialAwardedSpins;
       this.totalFreeSpins += result.feature.totalPlayedSpins;
       this.totalRetriggers += result.feature.retriggerCount;
+      this.featureLengths.push(result.feature.totalPlayedSpins);
+      this.maximumObservedFeatureLength = Math.max(
+        this.maximumObservedFeatureLength,
+        result.feature.totalPlayedSpins,
+      );
+      if (result.feature.limitReached) this.featureCapHits += 1;
     }
     if (result.maximumWinApplied) this.capApplications += 1;
     this.maximumObservedWin = Math.max(this.maximumObservedWin, result.totalWinCredits);
     const multiple = result.totalWinCredits / this.config.betCredits;
-    this.returns.push(multiple);
+    this.returnSum += multiple;
+    this.returnSquaredSum += multiple ** 2;
     const index = BUCKETS.findIndex((bucket) => {
       if (bucket.label === '0x') return multiple === 0;
       return (
@@ -67,49 +91,72 @@ export class SimulationAccumulator {
   }
 
   report(game: RuntimeGameConfig): SimulationReport {
-    const paidSpins = this.returns.length;
-    if (paidSpins === 0) throw new RangeError('At least one result is required');
-    const totalWageredCredits = paidSpins * this.config.betCredits;
-    const mean = this.totalPayout / totalWageredCredits;
-    const variance = this.returns.reduce((sum, value) => sum + (value - mean) ** 2, 0) / paidSpins;
+    if (this.paidSpins === 0) throw new RangeError('At least one result is required');
+    const totalWageredCredits = this.paidSpins * this.config.betCredits;
+    const mean = this.returnSum / this.paidSpins;
+    const variance = Math.max(0, this.returnSquaredSum / this.paidSpins - mean ** 2);
     const standardDeviation = Math.sqrt(variance);
-    const standardError = standardDeviation / Math.sqrt(paidSpins);
+    const standardError = standardDeviation / Math.sqrt(this.paidSpins);
     const margin = 1.96 * standardError;
+    const sortedFeatureLengths = [...this.featureLengths].sort((left, right) => left - right);
+    const featureLengthPercentiles: FeatureLengthPercentiles = {
+      median: percentile(sortedFeatureLengths, 0.5),
+      p75: percentile(sortedFeatureLengths, 0.75),
+      p90: percentile(sortedFeatureLengths, 0.9),
+      p95: percentile(sortedFeatureLengths, 0.95),
+      p99: percentile(sortedFeatureLengths, 0.99),
+    };
     const payoutDistribution: DistributionBucket[] = BUCKETS.map((bucket, index) => ({
       ...bucket,
       count: this.bucketCounts[index] ?? 0,
-      probability: (this.bucketCounts[index] ?? 0) / paidSpins,
+      probability: (this.bucketCounts[index] ?? 0) / this.paidSpins,
     }));
     const report: SimulationReport = {
-      schemaVersion: '1.1.0',
+      schemaVersion: '1.2.0',
+      methodology: 'deterministic-monte-carlo',
       gameVersion: game.gameVersion,
       configurationId: game.configurationId,
       generatedAt: new Date().toISOString(),
       seed: this.config.seed,
-      paidSpins,
+      paidSpins: this.paidSpins,
       totalWageredCredits,
-      basePayoutCredits: this.basePayout,
-      baseScatterPayoutCredits: this.baseScatterPayout,
-      featurePayoutCredits: this.featurePayout,
-      totalPayoutCredits: this.totalPayout,
-      baseRtp: this.basePayout / totalWageredCredits,
-      baseScatterRtp: this.baseScatterPayout / totalWageredCredits,
-      featureRtp: this.featurePayout / totalWageredCredits,
-      totalRtp: mean,
-      baseHitFrequency: this.baseWinningSpins / paidSpins,
-      featureTriggerFrequency: this.featureTriggers / paidSpins,
-      featureInclusiveHitFrequency: this.featureInclusiveWinningSpins / paidSpins,
-      averageInitiallyAwardedFreeSpins: this.initiallyAwardedFreeSpins / paidSpins,
+      uncappedBaseLinePayoutCredits: this.uncappedBaseLinePayout,
+      uncappedBaseScatterPayoutCredits: this.uncappedBaseScatterPayout,
+      uncappedBasePayoutCredits: this.uncappedBaseLinePayout + this.uncappedBaseScatterPayout,
+      uncappedFeaturePayoutCredits: this.uncappedFeaturePayout,
+      uncappedTotalPayoutCredits: this.uncappedTotalPayout,
+      creditedTotalPayoutCredits: this.creditedTotalPayout,
+      capReductionCredits: this.capReduction,
+      uncappedBaseLineRtp: this.uncappedBaseLinePayout / totalWageredCredits,
+      uncappedBaseScatterRtp: this.uncappedBaseScatterPayout / totalWageredCredits,
+      uncappedFeatureRtp: this.uncappedFeaturePayout / totalWageredCredits,
+      uncappedTotalRtp: this.uncappedTotalPayout / totalWageredCredits,
+      creditedTotalRtp: this.creditedTotalPayout / totalWageredCredits,
+      baseHitFrequency: this.baseWinningSpins / this.paidSpins,
+      featureTriggerFrequency: this.featureTriggers / this.paidSpins,
+      featureTriggerFrequencyByScatterCount: Object.fromEntries(
+        [...this.triggerCounts].map(([count, occurrences]) => [
+          String(count),
+          occurrences / this.paidSpins,
+        ]),
+      ),
+      featureInclusiveHitFrequency: this.featureInclusiveWinningSpins / this.paidSpins,
+      averageInitiallyAwardedFreeSpins: this.initiallyAwardedFreeSpins / this.paidSpins,
       averageTotalFreeSpinsPerTrigger:
         this.featureTriggers === 0 ? 0 : this.totalFreeSpins / this.featureTriggers,
       averageRetriggersPerTrigger:
         this.featureTriggers === 0 ? 0 : this.totalRetriggers / this.featureTriggers,
+      featureLengthPercentiles,
+      maximumObservedFeatureLength: this.maximumObservedFeatureLength,
+      featureCapHitFrequency:
+        this.featureTriggers === 0 ? 0 : this.featureCapHits / this.featureTriggers,
       variance,
       standardDeviation,
       standardError,
       confidenceInterval95: [Math.max(0, mean - margin), mean + margin],
       maximumObservedWinCredits: this.maximumObservedWin,
       capApplications: this.capApplications,
+      capApplicationFrequency: this.capApplications / this.paidSpins,
       payoutDistribution,
     };
     assertFiniteReport(report);
@@ -133,16 +180,19 @@ export function runSimulation(
 
 export function assertFiniteReport(report: SimulationReport): void {
   const rates = [
-    report.baseRtp,
-    report.baseScatterRtp,
-    report.featureRtp,
-    report.totalRtp,
+    report.uncappedBaseLineRtp,
+    report.uncappedBaseScatterRtp,
+    report.uncappedFeatureRtp,
+    report.uncappedTotalRtp,
+    report.creditedTotalRtp,
     report.baseHitFrequency,
     report.featureTriggerFrequency,
     report.featureInclusiveHitFrequency,
     report.averageInitiallyAwardedFreeSpins,
     report.averageTotalFreeSpinsPerTrigger,
     report.averageRetriggersPerTrigger,
+    report.featureCapHitFrequency,
+    report.capApplicationFrequency,
     report.variance,
     report.standardDeviation,
     report.standardError,

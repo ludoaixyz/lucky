@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lucky.local/schemas/rules-config.schema.json",
+  "title": "LUCKY888 symbol and line rules",
+  "type": "object",
+  "required": ["schemaVersion", "wild", "lineAwardRules", "scatter"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "wild": {
+      "type": "object",
+      "required": [
+        "symbolId",
+        "enabled",
+        "substitutesFor",
+        "substitutesForWild",
+        "substitutesForScatter",
+        "hasOwnLinePay",
+        "multiplier",
+        "allWildCombinationRule"
+      ],
+      "properties": {
+        "symbolId": { "const": "WILD" },
+        "enabled": { "const": true },
+        "substitutesFor": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "substitutesForWild": { "const": true },
+        "substitutesForScatter": { "const": false },
+        "hasOwnLinePay": { "const": false },
+        "multiplier": { "type": "integer", "minimum": 1 },
+        "allWildCombinationRule": { "const": "no-pay" }
+      },
+      "additionalProperties": true
+    },
+    "lineAwardRules": {
+      "type": "object",
+      "required": [
+        "direction",
+        "activePaylines",
+        "lineBetCredits",
+        "totalBetCredits",
+        "awardScaling",
+        "matchRule",
+        "winSelection",
+        "multiplePaylinesAccumulate",
+        "nestedAwardsAccumulate",
+        "scatterBreaksLineMatch"
+      ],
+      "properties": {
+        "direction": { "const": "left-to-right" },
+        "activePaylines": { "type": "integer", "minimum": 1 },
+        "lineBetCredits": { "type": "integer", "minimum": 1 },
+        "totalBetCredits": { "type": "integer", "minimum": 1 },
+        "awardScaling": { "const": "award-credits-per-line-bet" },
+        "matchRule": { "const": "consecutive-from-leftmost-reel" },
+        "winSelection": { "const": "highest-award-per-payline" },
+        "multiplePaylinesAccumulate": { "const": true },
+        "nestedAwardsAccumulate": { "const": false },
+        "scatterBreaksLineMatch": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "scatter": {
+      "type": "object",
+      "required": [
+        "symbolId",
+        "enabled",
+        "evaluation",
+        "countMode",
+        "maximumCountMode",
+        "substitutesOnLines",
+        "wildSubstitutesForScatter",
+        "scatterSubstitutesForRegular",
+        "directCreditPaysEnabled",
+        "triggersFeature"
+      ],
+      "properties": {
+        "symbolId": { "const": "SCATTER" },
+        "enabled": { "const": true },
+        "evaluation": { "const": "anywhere" },
+        "countMode": { "const": "visible-symbols" },
+        "maximumCountMode": { "const": "one-visible-scatter-per-reel" },
+        "substitutesOnLines": { "const": false },
+        "wildSubstitutesForScatter": { "const": false },
+        "scatterSubstitutesForRegular": { "const": false },
+        "directCreditPaysEnabled": { "const": false },
+        "triggersFeature": { "const": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

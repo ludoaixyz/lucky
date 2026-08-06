@@ -29,7 +29,16 @@ function arrayField(value: unknown, path: string): readonly unknown[] {
 function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
   const artifact = record(payload, 'Runtime math artifact');
   const config = record(artifact.config, 'Runtime math artifact.config');
-  for (const field of ['schemaVersion', 'gameId', 'gameVersion', 'configurationId'] as const) {
+  for (const field of [
+    'schemaVersion',
+    'gameId',
+    'gameName',
+    'gameVersion',
+    'configurationId',
+    'selectedRtpProfile',
+    'payModel',
+    'maximumWinScope',
+  ] as const) {
     stringField(config[field], `config.${field}`);
   }
   for (const field of [
@@ -62,6 +71,11 @@ function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
   arrayField(config.reelStrips, 'config.reelStrips').forEach((value, reel) => {
     arrayField(value, `config.reelStrips[${reel}]`).forEach((symbol, stop) =>
       stringField(symbol, `config.reelStrips[${reel}][${stop}]`),
+    );
+  });
+  arrayField(config.freeSpinReelStrips, 'config.freeSpinReelStrips').forEach((value, reel) => {
+    arrayField(value, `config.freeSpinReelStrips[${reel}]`).forEach((symbol, stop) =>
+      stringField(symbol, `config.freeSpinReelStrips[${reel}][${stop}]`),
     );
   });
   arrayField(config.paylines, 'config.paylines').forEach((value, index) => {
@@ -105,6 +119,51 @@ function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
       integerField(award.freeSpins, `config.bonus.${field}[${index}].freeSpins`);
     });
   }
+  if (bonus.useAlternateReelStrips)
+    stringField(
+      bonus.alternateReelStripConfigurationId,
+      'config.bonus.alternateReelStripConfigurationId',
+    );
+  const rules = record(config.rules, 'config.rules');
+  stringField(rules.schemaVersion, 'config.rules.schemaVersion');
+  const wild = record(rules.wild, 'config.rules.wild');
+  stringField(wild.symbolId, 'config.rules.wild.symbolId');
+  for (const field of [
+    'enabled',
+    'substitutesForWild',
+    'substitutesForScatter',
+    'hasOwnLinePay',
+  ] as const)
+    booleanField(wild[field], `config.rules.wild.${field}`);
+  stringField(wild.allWildCombinationRule, 'config.rules.wild.allWildCombinationRule');
+  arrayField(wild.substitutesFor, 'config.rules.wild.substitutesFor').forEach((value, index) =>
+    stringField(value, `config.rules.wild.substitutesFor[${index}]`),
+  );
+  integerField(wild.multiplier, 'config.rules.wild.multiplier');
+  const lineRules = record(rules.lineAwardRules, 'config.rules.lineAwardRules');
+  for (const field of ['direction', 'awardScaling', 'matchRule', 'winSelection'] as const)
+    stringField(lineRules[field], `config.rules.lineAwardRules.${field}`);
+  for (const field of [
+    'multiplePaylinesAccumulate',
+    'nestedAwardsAccumulate',
+    'scatterBreaksLineMatch',
+  ] as const)
+    booleanField(lineRules[field], `config.rules.lineAwardRules.${field}`);
+  for (const field of ['activePaylines', 'lineBetCredits', 'totalBetCredits'] as const)
+    integerField(lineRules[field], `config.rules.lineAwardRules.${field}`);
+  const scatter = record(rules.scatter, 'config.rules.scatter');
+  stringField(scatter.symbolId, 'config.rules.scatter.symbolId');
+  for (const field of ['evaluation', 'countMode', 'maximumCountMode'] as const)
+    stringField(scatter[field], `config.rules.scatter.${field}`);
+  for (const field of [
+    'enabled',
+    'substitutesOnLines',
+    'wildSubstitutesForScatter',
+    'scatterSubstitutesForRegular',
+    'directCreditPaysEnabled',
+    'triggersFeature',
+  ] as const)
+    booleanField(scatter[field], `config.rules.scatter.${field}`);
   return config as unknown as RuntimeGameConfig;
 }
 

@@ -28,22 +28,22 @@ const EMPTY_FEATURE: FeatureMoments = {
   maximum: 0,
 };
 
-function enumerateOutcomeClasses(config: RuntimeGameConfig): {
+function enumerateOutcomeClasses(
+  config: RuntimeGameConfig,
+  strips: readonly (readonly string[])[],
+): {
   outcomes: readonly OutcomeClass[];
   combinations: number;
   probability: number;
 } {
-  const combinations = config.reelStrips.reduce((product, reel) => product * reel.length, 1);
+  const combinations = strips.reduce((product, reel) => product * reel.length, 1);
   if (!Number.isSafeInteger(combinations) || combinations <= 0)
     throw new RangeError('Exact enumeration requires a positive safe-integer combination count');
   const classes = new Map<string, { count: number; lineWin: number; scatterCount: number }>();
   const stops = Array<number>(config.reelCount).fill(0);
-  const wildId = config.symbols.find((symbol) => symbol.category === 'wild')?.id;
   for (let combination = 0; combination < combinations; combination += 1) {
-    const window = buildVisibleWindow(config.reelStrips, stops, config.visibleRows);
-    const lineWin = aggregateWins(
-      evaluatePaylines(window, config.paylines, config.paytable, wildId),
-    );
+    const window = buildVisibleWindow(strips, stops, config.visibleRows);
+    const lineWin = aggregateWins(evaluatePaylines(window, config));
     const scatterCount = countScatters(window, config.bonus.triggerSymbolId);
     const key = `${lineWin}|${scatterCount}`;
     const existing = classes.get(key);
@@ -51,7 +51,7 @@ function enumerateOutcomeClasses(config: RuntimeGameConfig): {
     else classes.set(key, { count: 1, lineWin, scatterCount });
     for (let reel = stops.length - 1; reel >= 0; reel -= 1) {
       const next = (stops[reel] ?? 0) + 1;
-      if (next < (config.reelStrips[reel]?.length ?? 0)) {
+      if (next < (strips[reel]?.length ?? 0)) {
         stops[reel] = next;
         break;
       }
@@ -175,12 +175,15 @@ function featureCalculator(config: RuntimeGameConfig, outcomes: readonly Outcome
 }
 
 export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): ExactMathReport {
-  const { outcomes, combinations, probability } = enumerateOutcomeClasses(config);
-  const feature = featureCalculator(config, outcomes);
+  const { outcomes, combinations, probability } = enumerateOutcomeClasses(
+    config,
+    config.reelStrips,
+  );
+  const { outcomes: freeSpinOutcomes } = enumerateOutcomeClasses(config, config.freeSpinReelStrips);
+  const feature = featureCalculator(config, freeSpinOutcomes);
   const bet = config.totalBetCredits;
   let baseMean = 0;
   let featureMean = 0;
-  let totalMean = 0;
   let uncappedTotalMean = 0;
   let totalSecondMoment = 0;
   let triggerFrequency = 0;
@@ -200,14 +203,14 @@ export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): E
     const initialAward = resolveBonusAward(config.bonus, outcome.scatterCount);
     const initialSpins = Math.min(initialAward, config.bonus.maximumFeatureSpins);
     const uncappedFeature = initialSpins > 0 ? feature.uncapped(initialSpins, 0, 0) : EMPTY_FEATURE;
-    const creditedBase = Math.min(outcome.lineWin, config.maximumWinCredits);
-    baseMean += outcome.probability * creditedBase;
+    baseMean += outcome.probability * outcome.lineWin;
     featureMean += outcome.probability * uncappedFeature.mean;
-    totalMean += outcome.probability * (creditedBase + uncappedFeature.mean);
     uncappedTotalMean += outcome.probability * (outcome.lineWin + uncappedFeature.mean);
     totalSecondMoment +=
       outcome.probability *
-      (creditedBase ** 2 + 2 * creditedBase * uncappedFeature.mean + uncappedFeature.secondMoment);
+      (outcome.lineWin ** 2 +
+        2 * outcome.lineWin * uncappedFeature.mean +
+        uncappedFeature.secondMoment);
     if (outcome.lineWin > 0) baseHitFrequency += outcome.probability;
     inclusiveHitFrequency +=
       outcome.probability * (outcome.lineWin > 0 ? 1 : uncappedFeature.positiveProbability);
@@ -215,7 +218,7 @@ export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): E
     maximumUncapped = Math.max(maximumUncapped, outcome.lineWin + uncappedFeature.maximum);
     maximumCredited = Math.max(
       maximumCredited,
-      Math.min(config.maximumWinCredits, creditedBase + uncappedFeature.maximum),
+      Math.min(config.maximumWinCredits, outcome.lineWin + uncappedFeature.maximum),
     );
     if (initialSpins > 0) {
       triggerFrequency += outcome.probability;
@@ -229,8 +232,8 @@ export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): E
     cdfThresholds.forEach((threshold, index) => {
       const conditional =
         initialSpins > 0
-          ? feature.cdf(initialSpins, 0, 0, threshold - creditedBase)
-          : creditedBase <= threshold
+          ? feature.cdf(initialSpins, 0, 0, threshold - outcome.lineWin)
+          : outcome.lineWin <= threshold
             ? 1
             : 0;
       cdfs[index] = (cdfs[index] ?? 0) + outcome.probability * conditional;
@@ -256,10 +259,10 @@ export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): E
     probability: bucketProbabilities[index] ?? 0,
     count: (bucketProbabilities[index] ?? 0) * combinations,
   }));
-  const totalRtp = totalMean / bet;
-  const variance = totalSecondMoment / bet ** 2 - totalRtp ** 2;
+  const uncappedTotalRtp = uncappedTotalMean / bet;
+  const variance = totalSecondMoment / bet ** 2 - uncappedTotalRtp ** 2;
   return {
-    schemaVersion: '1.1.0',
+    schemaVersion: '1.2.0',
     methodology: 'exact-uncapped',
     gameVersion: config.gameVersion,
     configurationId: config.configurationId,
@@ -267,11 +270,10 @@ export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): E
     sourceHash,
     totalPaidSpinCombinations: combinations,
     probabilityReconciliation: probability,
-    baseLineRtp: baseMean / bet,
-    baseScatterRtp: 0,
-    featureRtp: featureMean / bet,
-    totalRtp,
-    uncappedTotalRtp: uncappedTotalMean / bet,
+    uncappedBaseLineRtp: baseMean / bet,
+    uncappedBaseScatterRtp: 0,
+    uncappedFeatureRtp: featureMean / bet,
+    uncappedTotalRtp,
     triggerFrequency,
     triggerFrequencyByScatterCount,
     expectedInitiallyAwardedFreeSpins: expectedInitialSpins,

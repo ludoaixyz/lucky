@@ -1,4 +1,4 @@
-import type { RuntimeGameConfig } from '@lucky/shared-types';
+import type { BonusAward, RuntimeGameConfig, SymbolId } from '@lucky/shared-types';
 
 export interface ValidationIssue {
   readonly file: string;
@@ -8,33 +8,82 @@ export interface ValidationIssue {
   readonly rule: string;
 }
 
+export function maximumReachableScatterCount(
+  strips: readonly (readonly SymbolId[])[],
+  visibleRows: number,
+  scatterId: SymbolId,
+): number {
+  return strips.reduce((total, strip) => {
+    let reelMaximum = 0;
+    for (let stop = 0; stop < strip.length; stop += 1) {
+      let count = 0;
+      for (let row = 0; row < visibleRows; row += 1)
+        if (strip[(stop + row) % strip.length] === scatterId) count += 1;
+      reelMaximum = Math.max(reelMaximum, count);
+    }
+    return total + reelMaximum;
+  }, 0);
+}
+
 export function validateConfig(
   config: RuntimeGameConfig,
   file = 'runtime-config',
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
-  const symbolIds = new Set(config.symbols.map((symbol) => symbol.id));
-  const totalVisibleCells = config.reelCount * config.visibleRows;
   const issue = (record: string, field: string, value: unknown, rule: string): void => {
     issues.push({ file, record, field, value, rule });
   };
-  if (config.reelStrips.length !== config.reelCount)
-    issue('game', 'reelStrips', config.reelStrips.length, `must contain ${config.reelCount} reels`);
-  config.reelStrips.forEach((reel, index) => {
-    if (reel.length === 0) issue(`reel ${index + 1}`, 'symbols', reel, 'must not be empty');
-    reel.forEach((symbol, stop) => {
-      if (!symbolIds.has(symbol))
-        issue(
-          `reel ${index + 1}, stop ${stop}`,
-          'symbolId',
-          symbol,
-          'must reference a defined symbol',
-        );
+  const symbolIds = new Set(config.symbols.map((symbol) => symbol.id));
+  const validateStrips = (
+    name: 'reelStrips' | 'freeSpinReelStrips',
+    strips: readonly (readonly SymbolId[])[],
+  ): void => {
+    if (strips.length !== config.reelCount)
+      issue('game', name, strips.length, `must contain ${config.reelCount} reels`);
+    strips.forEach((reel, index) => {
+      if (reel.length === 0)
+        issue(`${name} reel ${index + 1}`, 'symbols', reel, 'must not be empty');
+      reel.forEach((symbol, stop) => {
+        if (!symbolIds.has(symbol))
+          issue(
+            `${name} reel ${index + 1}, stop ${stop}`,
+            'symbolId',
+            symbol,
+            'must reference a defined symbol',
+          );
+      });
     });
-  });
+  };
+  validateStrips('reelStrips', config.reelStrips);
+  validateStrips('freeSpinReelStrips', config.freeSpinReelStrips);
+
+  if (config.gameId !== 'lucky888') issue('game', 'gameId', config.gameId, "must be 'lucky888'");
+  if (config.gameName !== 'LUCKY888')
+    issue('game', 'gameName', config.gameName, "must be 'LUCKY888'");
+  if (config.selectedRtpProfile !== config.configurationId)
+    issue('game', 'selectedRtpProfile', config.selectedRtpProfile, 'must equal configurationId');
+  if (config.payModel !== 'fixed-paylines-left-to-right')
+    issue('game', 'payModel', config.payModel, "must be 'fixed-paylines-left-to-right'");
+  if (config.maximumWinScope !== 'paid-spin-including-feature')
+    issue(
+      'game',
+      'maximumWinScope',
+      config.maximumWinScope,
+      "must be 'paid-spin-including-feature'",
+    );
+  if (!Number.isSafeInteger(config.maximumWinCredits) || config.maximumWinCredits <= 0)
+    issue('game', 'maximumWinCredits', config.maximumWinCredits, 'must be a positive safe integer');
+
   config.paytable.forEach((award, index) => {
     if (!symbolIds.has(award.symbolId))
       issue(`award ${index + 1}`, 'symbolId', award.symbolId, 'must reference a defined symbol');
+    if (!Number.isSafeInteger(award.count) || award.count <= 0 || award.count > config.reelCount)
+      issue(
+        `award ${index + 1}`,
+        'count',
+        award.count,
+        `must be a positive safe integer no greater than ${config.reelCount}`,
+      );
     if (!Number.isSafeInteger(award.awardCredits) || award.awardCredits < 0)
       issue(
         `award ${index + 1}`,
@@ -43,12 +92,111 @@ export function validateConfig(
         'must be a non-negative safe integer',
       );
   });
-  config.paylines.forEach((line) =>
+  config.paylines.forEach((line) => {
+    if (line.rows.length !== config.reelCount)
+      issue(`payline ${line.id}`, 'rows', line.rows, `must contain ${config.reelCount} rows`);
     line.rows.forEach((row, reel) => {
       if (!Number.isSafeInteger(row) || row < 0 || row >= config.visibleRows)
         issue(`payline ${line.id}`, `row[${reel}]`, row, `must be 0..${config.visibleRows - 1}`);
-    }),
+    });
+  });
+
+  const lineRules = config.rules.lineAwardRules;
+  for (const [field, value, expected] of [
+    ['direction', lineRules.direction, 'left-to-right'],
+    ['awardScaling', lineRules.awardScaling, 'award-credits-per-line-bet'],
+    ['matchRule', lineRules.matchRule, 'consecutive-from-leftmost-reel'],
+    ['winSelection', lineRules.winSelection, 'highest-award-per-payline'],
+  ] as const) {
+    if (value !== expected) issue('lineAwardRules', field, value, `must be '${expected}'`);
+  }
+  if (lineRules.activePaylines !== config.paylines.length)
+    issue(
+      'lineAwardRules',
+      'activePaylines',
+      lineRules.activePaylines,
+      `must equal the ${config.paylines.length} configured paylines`,
+    );
+  if (lineRules.lineBetCredits !== config.lineBetCredits)
+    issue(
+      'lineAwardRules',
+      'lineBetCredits',
+      lineRules.lineBetCredits,
+      `must equal game lineBetCredits ${config.lineBetCredits}`,
+    );
+  if (lineRules.totalBetCredits !== config.totalBetCredits)
+    issue(
+      'lineAwardRules',
+      'totalBetCredits',
+      lineRules.totalBetCredits,
+      `must equal game totalBetCredits ${config.totalBetCredits}`,
+    );
+  if (config.totalBetCredits !== lineRules.activePaylines * config.lineBetCredits)
+    issue(
+      'lineAwardRules',
+      'totalBetCredits',
+      config.totalBetCredits,
+      'must equal activePaylines multiplied by lineBetCredits',
+    );
+  if (lineRules.nestedAwardsAccumulate)
+    issue('lineAwardRules', 'nestedAwardsAccumulate', true, 'must be false');
+  if (!lineRules.multiplePaylinesAccumulate)
+    issue('lineAwardRules', 'multiplePaylinesAccumulate', false, 'must be true');
+  if (!lineRules.scatterBreaksLineMatch)
+    issue('lineAwardRules', 'scatterBreaksLineMatch', false, 'must be true');
+
+  const wild = config.rules.wild;
+  const wildSymbol = config.symbols.find((symbol) => symbol.id === wild.symbolId);
+  if (!wildSymbol || wildSymbol.category !== 'wild')
+    issue('wild', 'symbolId', wild.symbolId, 'must reference a defined wild symbol');
+  const duplicateWildTargets = wild.substitutesFor.filter(
+    (symbol, index) => wild.substitutesFor.indexOf(symbol) !== index,
   );
+  if (duplicateWildTargets.length > 0)
+    issue('wild', 'substitutesFor', wild.substitutesFor, 'must contain unique symbol IDs');
+  for (const target of wild.substitutesFor) {
+    const symbol = config.symbols.find((candidate) => candidate.id === target);
+    if (!symbol || symbol.category !== 'regular')
+      issue('wild', 'substitutesFor', target, 'must reference a defined regular symbol');
+  }
+  if (wild.substitutesForScatter) issue('wild', 'substitutesForScatter', true, 'must be false');
+  if (!wild.enabled) issue('wild', 'enabled', wild.enabled, 'must be true');
+  if (!wild.substitutesForWild)
+    issue('wild', 'substitutesForWild', wild.substitutesForWild, 'must be true');
+  if (wild.hasOwnLinePay)
+    issue('wild', 'hasOwnLinePay', wild.hasOwnLinePay, 'must be false for this paytable');
+  if (wild.allWildCombinationRule !== 'no-pay')
+    issue('wild', 'allWildCombinationRule', wild.allWildCombinationRule, "must be 'no-pay'");
+  if (!Number.isSafeInteger(wild.multiplier) || wild.multiplier <= 0)
+    issue('wild', 'multiplier', wild.multiplier, 'must be a positive safe integer');
+  const scatter = config.rules.scatter;
+  const scatterSymbol = config.symbols.find((symbol) => symbol.id === scatter.symbolId);
+  if (!scatterSymbol || scatterSymbol.category !== 'scatter')
+    issue('scatter', 'symbolId', scatter.symbolId, 'must reference a defined scatter symbol');
+  if (scatter.symbolId !== config.bonus.triggerSymbolId)
+    issue(
+      'scatter',
+      'symbolId',
+      scatter.symbolId,
+      `must equal bonus triggerSymbolId ${config.bonus.triggerSymbolId}`,
+    );
+  for (const [field, value, expected] of [
+    ['evaluation', scatter.evaluation, 'anywhere'],
+    ['countMode', scatter.countMode, 'visible-symbols'],
+    ['maximumCountMode', scatter.maximumCountMode, 'one-visible-scatter-per-reel'],
+  ] as const) {
+    if (value !== expected) issue('scatter', field, value, `must be '${expected}'`);
+  }
+  if (!scatter.enabled) issue('scatter', 'enabled', scatter.enabled, 'must be true');
+  if (!scatter.triggersFeature)
+    issue('scatter', 'triggersFeature', scatter.triggersFeature, 'must be true');
+  if (config.bonus.triggerEvaluation !== scatter.evaluation)
+    issue(
+      'bonus',
+      'triggerEvaluation',
+      config.bonus.triggerEvaluation,
+      "must equal scatter evaluation 'anywhere'",
+    );
   if (!symbolIds.has(config.bonus.triggerSymbolId))
     issue(
       'bonus',
@@ -56,56 +204,45 @@ export function validateConfig(
       config.bonus.triggerSymbolId,
       'must reference a defined symbol',
     );
-  const triggerSymbol = config.symbols.find((symbol) => symbol.id === config.bonus.triggerSymbolId);
-  if (triggerSymbol && triggerSymbol.category !== 'scatter')
-    issue(
-      'bonus',
-      'triggerSymbolId',
-      config.bonus.triggerSymbolId,
-      'must reference a scatter symbol',
-    );
-  if (config.bonus.triggerEvaluation !== 'anywhere')
-    issue('bonus', 'triggerEvaluation', config.bonus.triggerEvaluation, "must be 'anywhere'");
-  for (const field of [
-    'enabled',
-    'retriggerEnabled',
-    'scatterPaysCredits',
-    'useAlternateReelStrips',
-    'useAlternatePaytable',
+  for (const [field, value] of [
+    ['substitutesOnLines', scatter.substitutesOnLines],
+    ['wildSubstitutesForScatter', scatter.wildSubstitutesForScatter],
+    ['scatterSubstitutesForRegular', scatter.scatterSubstitutesForRegular],
+    ['directCreditPaysEnabled', scatter.directCreditPaysEnabled],
   ] as const) {
-    if (typeof config.bonus[field] !== 'boolean')
-      issue('bonus', field, config.bonus[field], 'must be a boolean');
+    if (value) issue('scatter', field, value, 'must be false for this configuration');
   }
-  if (
-    !Number.isSafeInteger(config.bonus.minimumCount) ||
-    config.bonus.minimumCount <= 0 ||
-    config.bonus.minimumCount > totalVisibleCells
-  )
-    issue(
-      'bonus',
-      'minimumCount',
-      config.bonus.minimumCount,
-      `must be a positive safe integer no greater than ${totalVisibleCells}`,
-    );
+
+  const baseMaximum = maximumReachableScatterCount(
+    config.reelStrips,
+    config.visibleRows,
+    scatter.symbolId,
+  );
+  const freeSpinMaximum = maximumReachableScatterCount(
+    config.freeSpinReelStrips,
+    config.visibleRows,
+    scatter.symbolId,
+  );
   const validateAwards = (
     name: 'awards' | 'retriggerAwards',
-    awards: RuntimeGameConfig['bonus']['awards'],
+    awards: readonly BonusAward[],
+    maximum: number,
   ): void => {
     if (awards.length === 0) issue('bonus', name, awards, 'must contain at least one award');
-    let previousCount = 0;
+    let previous = 0;
     awards.forEach((award, index) => {
       if (
         !Number.isSafeInteger(award.count) ||
         award.count < config.bonus.minimumCount ||
-        award.count > totalVisibleCells
+        award.count > maximum
       )
         issue(
           `bonus ${name}[${index}]`,
           'count',
           award.count,
-          `must be a safe integer from ${config.bonus.minimumCount} to ${totalVisibleCells}`,
+          `must be reachable from ${config.bonus.minimumCount} through ${maximum}`,
         );
-      if (award.count <= previousCount)
+      if (award.count <= previous)
         issue(
           `bonus ${name}[${index}]`,
           'count',
@@ -119,36 +256,21 @@ export function validateConfig(
           award.freeSpins,
           'must be a positive safe integer',
         );
-      if (award.freeSpins > config.bonus.maximumFeatureSpins)
-        issue(
-          `bonus ${name}[${index}]`,
-          'freeSpins',
-          award.freeSpins,
-          'must not exceed maximumFeatureSpins',
-        );
-      previousCount = award.count;
+      previous = award.count;
     });
+    if (awards[0]?.count !== config.bonus.minimumCount)
+      issue('bonus', name, awards, 'must begin at minimumCount');
   };
-  validateAwards('awards', config.bonus.awards);
-  if (config.bonus.awards[0]?.count !== config.bonus.minimumCount)
-    issue('bonus', 'awards', config.bonus.awards, 'must include an award for minimumCount');
-  if (config.bonus.retriggerEnabled) {
-    validateAwards('retriggerAwards', config.bonus.retriggerAwards);
-    if (config.bonus.retriggerAwards[0]?.count !== config.bonus.minimumCount)
-      issue(
-        'bonus',
-        'retriggerAwards',
-        config.bonus.retriggerAwards,
-        'must include an award for minimumCount when retriggers are enabled',
-      );
-  } else if (config.bonus.retriggerAwards.length !== 0) {
+  validateAwards('awards', config.bonus.awards, baseMaximum);
+  if (config.bonus.retriggerEnabled)
+    validateAwards('retriggerAwards', config.bonus.retriggerAwards, freeSpinMaximum);
+  if (config.bonus.useAlternateReelStrips && !config.bonus.alternateReelStripConfigurationId)
     issue(
       'bonus',
-      'retriggerAwards',
-      config.bonus.retriggerAwards,
-      'must be empty when retriggerEnabled is false',
+      'alternateReelStripConfigurationId',
+      config.bonus.alternateReelStripConfigurationId,
+      'is required when alternate reel strips are enabled',
     );
-  }
   if (
     !Number.isSafeInteger(config.bonus.freeSpinMultiplier) ||
     config.bonus.freeSpinMultiplier <= 0
@@ -176,26 +298,19 @@ export function validateConfig(
       config.bonus.maximumRetriggers,
       'must be a non-negative safe integer',
     );
-  if (config.bonus.scatterPaysCredits)
+  if (config.bonus.scatterPaysCredits !== scatter.directCreditPaysEnabled)
     issue(
       'bonus',
       'scatterPaysCredits',
       config.bonus.scatterPaysCredits,
-      'must be false until a direct scatter-pay table is configured',
-    );
-  if (config.bonus.useAlternateReelStrips)
-    issue(
-      'bonus',
-      'useAlternateReelStrips',
-      config.bonus.useAlternateReelStrips,
-      'must be false because no alternate free-spin reel strips are configured',
+      'must match scatter.directCreditPaysEnabled',
     );
   if (config.bonus.useAlternatePaytable)
     issue(
       'bonus',
       'useAlternatePaytable',
-      config.bonus.useAlternatePaytable,
-      'must be false because no alternate free-spin paytable is configured',
+      true,
+      'must be false because no alternate paytable is configured',
     );
   return issues;
 }

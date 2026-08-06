@@ -5,21 +5,22 @@
   "triggerEvaluation": "anywhere",
   "minimumCount": 3,
   "awards": [
-    { "count": 3, "freeSpins": 8 },
-    { "count": 4, "freeSpins": 10 },
-    { "count": 5, "freeSpins": 12 }
+    { "count": 3, "freeSpins": 9 },
+    { "count": 4, "freeSpins": 11 },
+    { "count": 5, "freeSpins": 13 }
   ],
   "freeSpinMultiplier": 1,
   "retriggerEnabled": true,
   "retriggerAwards": [
-    { "count": 3, "freeSpins": 5 },
-    { "count": 4, "freeSpins": 8 },
-    { "count": 5, "freeSpins": 10 }
+    { "count": 3, "freeSpins": 2 },
+    { "count": 4, "freeSpins": 4 },
+    { "count": 5, "freeSpins": 6 }
   ],
   "maximumFeatureSpins": 100,
   "maximumRetriggers": 20,
   "scatterPaysCredits": false,
-  "useAlternateReelStrips": false,
+  "useAlternateReelStrips": true,
+  "alternateReelStripConfigurationId": "lucky888-free-spins-v1",
   "useAlternatePaytable": false,
-  "notes": "Initial Lucky888 free-spin feature configuration."
+  "notes": "Balanced engineering free-spin profile with alternate retrigger strips and 9/11/13 initial awards."
 }

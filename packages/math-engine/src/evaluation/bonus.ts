@@ -33,10 +33,10 @@ export function resolveFreeSpin(
   rng: RandomSource,
   spinIndex: number,
 ): FreeSpinResult {
-  const stops = selectReelStops(config.reelStrips, rng);
-  const window = buildVisibleWindow(config.reelStrips, stops, config.visibleRows);
-  const wildId = config.symbols.find((symbol) => symbol.category === 'wild')?.id;
-  const lineWins = evaluatePaylines(window, config.paylines, config.paytable, wildId);
+  const strips = config.freeSpinReelStrips;
+  const stops = selectReelStops(strips, rng);
+  const window = buildVisibleWindow(strips, stops, config.visibleRows);
+  const lineWins = evaluatePaylines(window, config);
   const scatterCount = countScatters(window, config.bonus.triggerSymbolId);
   const rawWinCredits = aggregateWins(lineWins);
   const winCredits = rawWinCredits * config.bonus.freeSpinMultiplier;

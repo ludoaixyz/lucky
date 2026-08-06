@@ -1,11 +1,9 @@
-# Data contracts
+# LUCKY888 data contracts
 
-All source files use UTF-8, case-sensitive stable IDs, semantic string versions, and integer credits/counts/stops/caps.
+`game-config.json` schema 1.2.0 fixes the active identity (`lucky888`, `LUCKY888`, version 0.3.0, configuration `lucky888-balanced-base-v1`) and defines the aggregate paid-spin maximum. `rules-config.json` explicitly defines Wild substitution, line evaluation, and Scatter behavior. `bonus-config.json` defines initial/retrigger awards, finite limits, and alternate free-spin strip identity.
 
-- `game-config.json` defines identity, dimensions, fixed bet, pay model, and the aggregate paid-spin maximum.
-- `bonus-config.json` is schema `1.1.0`: enabled flag, Scatter-anywhere trigger, increasing initial/retrigger award tables, multiplier, direct Scatter-pay flag, alternate-asset flags, and finite spin/retrigger limits.
-- `symbols.csv`, `paytable.csv`, `reel-strips.csv`, and `paylines.csv` define symbols, left-to-right line awards, cyclic stops, and zero-based fixed row paths.
+`reel-strips.csv` and `free-spin-reel-strips.csv` are separate human-edited authorities. Compilation reads them but never rewrites them. Runtime data embeds both validated strip sets, complete rules, source SHA-256, versions, identity, and generation time.
 
-`SpinResult` retains base line/Scatter payout, feature payout, uncapped total, credited total, cap status, base stops/window/wins, and an optional full `FeatureResult`. Every `FreeSpinResult` retains its index, stops, window, line wins, Scatter count, allowed retrigger addition, raw award, multiplier, and win. Diagnostics store one entry per paid spin and serialize feature-spin summaries in CSV.
+`SpinResult` preserves uncapped base line/Scatter/base/feature/total credits, credited total, cap reduction, cap status, and full feature detail. Simulation reports use explicit uncapped component names and aggregate credited names. Exact reports declare `exact-uncapped`, `exact-capped`, or `hybrid`; an estimated credited field declares `monte-carlo-estimate`.
 
-Compiled runtime artifacts contain the complete validated config plus schema/game/configuration versions, SHA-256 source fingerprint, and generation timestamp. Builds read source sheets and write only ignored generated locations. Probabilities are decimal ratios (`0.01` means one percent).
+Diagnostics retain full history while rendering the latest ten. CSV exports uncapped base, feature and total payouts, credited total, cap reduction, feature counters, base stops/window, and serialized feature spins with correct escaping.

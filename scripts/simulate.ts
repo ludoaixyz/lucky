@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
+import { formatPercentRatio } from '@lucky/shared-types';
 import { loadSourceConfig } from './lib/source-loader.js';
 
 function option(name: string, fallback: number): number {
@@ -25,6 +26,6 @@ await mkdir(resolve(process.cwd(), 'math/reports'), { recursive: true });
 const output = resolve(process.cwd(), `math/reports/simulation-${seed}-${spins}.json`);
 await writeFile(output, `${JSON.stringify(report, null, 2)}\n`);
 console.log(
-  `Simulated ${spins.toLocaleString()} paid spins: total RTP ${(report.totalRtp * 100).toFixed(4)}%, feature RTP ${(report.featureRtp * 100).toFixed(4)}%, hit ${(report.featureInclusiveHitFrequency * 100).toFixed(4)}%.`,
+  `Simulated ${spins.toLocaleString()} paid spins: credited RTP ${formatPercentRatio(report.creditedTotalRtp, 4)}, uncapped feature RTP ${formatPercentRatio(report.uncappedFeatureRtp, 4)}, hit ${formatPercentRatio(report.featureInclusiveHitFrequency, 4)}.`,
 );
 console.log(`Report: ${output}`);

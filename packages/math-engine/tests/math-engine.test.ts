@@ -8,6 +8,7 @@ import {
   enforceMaximumWin,
   enumerateExact,
   evaluatePaylines,
+  maximumReachableScatterCount,
   resolveBonusAward,
   resolveFreeSpin,
   resolveFreeSpinFeature,
@@ -59,7 +60,7 @@ describe('deterministic random source', () => {
 describe('scatter and line evaluation', () => {
   it('evaluates a manually verifiable payout', () => {
     const config = fixtureConfig();
-    expect(evaluatePaylines([['A'], ['A'], ['A']], config.paylines, config.paytable, 'W')).toEqual([
+    expect(evaluatePaylines([['A'], ['A'], ['A']], config)).toEqual([
       { paylineId: 'L1', symbolId: 'A', count: 3, awardCredits: 10 },
     ]);
   });
@@ -77,9 +78,7 @@ describe('scatter and line evaluation', () => {
   });
   it('does not let Scatter substitute on paylines', () => {
     const config = fixtureConfig();
-    expect(evaluatePaylines([['A'], ['S'], ['A']], config.paylines, config.paytable, 'W')).toEqual(
-      [],
-    );
+    expect(evaluatePaylines([['A'], ['S'], ['A']], config)).toEqual([]);
   });
   it('maps zero through five Scatters to the configured awards', () => {
     const bonus = {
@@ -104,11 +103,46 @@ describe('scatter and line evaluation', () => {
   });
 });
 
+describe('explicit Wild and line-award contracts', () => {
+  const fiveReelConfig = (): RuntimeGameConfig => ({
+    ...fixtureConfig(),
+    reelCount: 5,
+    reelStrips: [['A'], ['A'], ['A'], ['A'], ['A']],
+    freeSpinReelStrips: [['A'], ['A'], ['A'], ['A'], ['A']],
+    paylines: [{ id: 'L1', rows: [0, 0, 0, 0, 0] }],
+    paytable: [
+      { symbolId: 'A', count: 3, awardCredits: 3 },
+      { symbolId: 'A', count: 4, awardCredits: 7 },
+      { symbolId: 'A', count: 5, awardCredits: 12 },
+      { symbolId: 'B', count: 3, awardCredits: 2 },
+    ],
+  });
+  const award = (symbols: readonly string[]): number =>
+    evaluatePaylines(
+      symbols.map((symbol) => [symbol]),
+      fiveReelConfig(),
+    ).reduce((total, win) => total + win.awardCredits, 0);
+
+  it('substitutes only for configured regular symbols and selects one highest award', () => {
+    expect(award(['W', 'W', 'A', 'A', 'A'])).toBe(12);
+    expect(award(['W', 'A', 'A', 'A', 'B'])).toBe(7);
+    expect(award(['A', 'W', 'A', 'A', 'A'])).toBe(12);
+  });
+  it('never substitutes for Scatter and Scatter breaks a line', () => {
+    expect(award(['W', 'S', 'A', 'A', 'A'])).toBe(0);
+    expect(award(['S', 'A', 'A', 'A', 'A'])).toBe(0);
+  });
+  it('applies the configured all-Wild no-pay rule', () => {
+    expect(award(['W', 'W', 'W', 'W', 'W'])).toBe(0);
+  });
+});
+
 describe('free-spin execution', () => {
   it('applies the multiplier exactly once and records every free spin', () => {
     const config: RuntimeGameConfig = {
       ...fixtureConfig(),
       reelStrips: [['A'], ['A'], ['A']],
+      freeSpinReelStrips: [['A'], ['A'], ['A']],
       bonus: {
         ...fixtureConfig().bonus,
         freeSpinMultiplier: 2,
@@ -127,6 +161,7 @@ describe('free-spin execution', () => {
     const config: RuntimeGameConfig = {
       ...fixtureConfig(),
       reelStrips: [['S'], ['S'], ['S']],
+      freeSpinReelStrips: [['S'], ['S'], ['S']],
       bonus: {
         ...fixtureConfig().bonus,
         maximumFeatureSpins: 4,
@@ -147,16 +182,61 @@ describe('free-spin execution', () => {
     const result = resolveSpin(config, new SequenceRandom([2, 2, 2, 0, 0, 0, 0, 0, 0]));
     expect(result.feature?.totalPlayedSpins).toBe(2);
     expect(result).toMatchObject({
-      baseWinCredits: 0,
-      featureWinCredits: 20,
+      uncappedBaseWinCredits: 0,
+      uncappedFeatureWinCredits: 20,
       uncappedTotalWinCredits: 20,
       totalWinCredits: 15,
+      maximumWinApplied: true,
+      capReductionCredits: 5,
+    });
+  });
+  it('reconciles no-cap, base-only, and combined cap cases', () => {
+    const baseOnly: RuntimeGameConfig = {
+      ...fixtureConfig(),
+      maximumWinCredits: 5,
+      reelStrips: [['A'], ['A'], ['A']],
+      freeSpinReelStrips: [['A'], ['A'], ['A']],
+      bonus: { ...fixtureConfig().bonus, enabled: false },
+    };
+    expect(resolveSpin(baseOnly, new SequenceRandom([]))).toMatchObject({
+      uncappedBaseWinCredits: 10,
+      uncappedFeatureWinCredits: 0,
+      uncappedTotalWinCredits: 10,
+      totalWinCredits: 5,
+      capReductionCredits: 5,
+    });
+
+    const combined: RuntimeGameConfig = {
+      ...fixtureConfig(),
+      visibleRows: 2,
+      maximumWinCredits: 15,
+      reelStrips: [
+        ['A', 'S'],
+        ['A', 'S'],
+        ['A', 'S'],
+      ],
+      freeSpinReelStrips: [['A'], ['A'], ['A']],
+    };
+    expect(resolveSpin(combined, new SequenceRandom([]))).toMatchObject({
+      uncappedBaseWinCredits: 10,
+      uncappedFeatureWinCredits: 20,
+      uncappedTotalWinCredits: 30,
+      totalWinCredits: 15,
+      capReductionCredits: 15,
       maximumWinApplied: true,
     });
   });
   it('enforces standalone maxima deterministically', () => {
-    expect(enforceMaximumWin(75, 50)).toEqual({ winCredits: 50, capped: true });
-    expect(enforceMaximumWin(50, 50)).toEqual({ winCredits: 50, capped: false });
+    expect(enforceMaximumWin(75, 50)).toEqual({
+      winCredits: 50,
+      capReductionCredits: 25,
+      capped: true,
+    });
+    expect(enforceMaximumWin(50, 50)).toEqual({
+      winCredits: 50,
+      capReductionCredits: 0,
+      capped: false,
+    });
   });
 });
 
@@ -198,6 +278,39 @@ describe('validation', () => {
       ]),
     );
   });
+  it('derives the practical Scatter maximum from cyclic visible windows', () => {
+    const config = fixtureConfig();
+    expect(
+      maximumReachableScatterCount(
+        config.reelStrips,
+        config.visibleRows,
+        config.rules.scatter.symbolId,
+      ),
+    ).toBe(3);
+    expect(
+      validateConfig({
+        ...config,
+        bonus: { ...config.bonus, awards: [{ count: 4, freeSpins: 2 }] },
+      }),
+    ).toContainEqual(expect.objectContaining({ field: 'count', value: 4 }));
+  });
+  it('rejects a total bet that does not reconcile to active lines and line bet', () => {
+    const config = changed((value) => ({
+      ...value,
+      totalBetCredits: 2,
+      rules: {
+        ...value.rules,
+        lineAwardRules: { ...value.rules.lineAwardRules, totalBetCredits: 2 },
+      },
+    }));
+    expect(validateConfig(config)).toContainEqual(
+      expect.objectContaining({
+        record: 'lineAwardRules',
+        field: 'totalBetCredits',
+        rule: 'must equal activePaylines multiplied by lineBetCredits',
+      }),
+    );
+  });
 });
 
 function result(totalWinCredits: number, featureTriggered = false): SpinResult {
@@ -206,12 +319,13 @@ function result(totalWinCredits: number, featureTriggered = false): SpinResult {
     window: [['A'], ['A'], ['A']],
     lineWins: [],
     scatterCount: featureTriggered ? 3 : 0,
-    baseLineWinCredits: featureTriggered ? 0 : totalWinCredits,
-    baseScatterWinCredits: 0,
-    baseWinCredits: featureTriggered ? 0 : totalWinCredits,
-    featureWinCredits: featureTriggered ? totalWinCredits : 0,
+    uncappedBaseLineWinCredits: featureTriggered ? 0 : totalWinCredits,
+    uncappedBaseScatterWinCredits: 0,
+    uncappedBaseWinCredits: featureTriggered ? 0 : totalWinCredits,
+    uncappedFeatureWinCredits: featureTriggered ? totalWinCredits : 0,
     uncappedTotalWinCredits: totalWinCredits,
     totalWinCredits,
+    capReductionCredits: 0,
     featureTriggered,
     feature: featureTriggered
       ? {
@@ -237,9 +351,12 @@ describe('feature-inclusive RTP and simulation accounting', () => {
     };
     const report = enumerateExact(config, 'fixture');
     expect(report.probabilityReconciliation).toBeCloseTo(1, 12);
-    expect(report.baseLineRtp).toBeCloseTo(5 / 9, 12);
-    expect(report.featureRtp).toBe(0);
-    expect(report.totalRtp).toBeCloseTo(report.baseLineRtp + report.featureRtp, 12);
+    expect(report.uncappedBaseLineRtp).toBeCloseTo(5 / 9, 12);
+    expect(report.uncappedFeatureRtp).toBe(0);
+    expect(report.uncappedTotalRtp).toBeCloseTo(
+      report.uncappedBaseLineRtp + report.uncappedFeatureRtp,
+      12,
+    );
     expect(report.triggerFrequency).toBe(0);
   });
   it('counts one paid wager per full feature and reconciles payout components', () => {
@@ -251,11 +368,22 @@ describe('feature-inclusive RTP and simulation accounting', () => {
     expect(report).toMatchObject({
       paidSpins: 3,
       totalWageredCredits: 6,
-      basePayoutCredits: 2,
-      featurePayoutCredits: 4,
-      totalPayoutCredits: 6,
+      uncappedBasePayoutCredits: 2,
+      uncappedFeaturePayoutCredits: 4,
+      uncappedTotalPayoutCredits: 6,
+      creditedTotalPayoutCredits: 6,
     });
-    expect(report.basePayoutCredits + report.featurePayoutCredits).toBe(report.totalPayoutCredits);
+    expect(report.uncappedBasePayoutCredits + report.uncappedFeaturePayoutCredits).toBe(
+      report.uncappedTotalPayoutCredits,
+    );
+    expect(report.creditedTotalPayoutCredits).toBeLessThanOrEqual(
+      report.uncappedTotalPayoutCredits,
+    );
+    expect(report.capReductionCredits).toBe(
+      report.uncappedTotalPayoutCredits - report.creditedTotalPayoutCredits,
+    );
+    expect(report.methodology).toBe('deterministic-monte-carlo');
+    expect(report.featureLengthPercentiles.p95).toBeGreaterThanOrEqual(0);
     expect(report.payoutDistribution.reduce((sum, bucket) => sum + bucket.count, 0)).toBe(3);
   });
   it('rejects non-finite or negative report rates and orders confidence bounds', () => {
@@ -263,7 +391,7 @@ describe('feature-inclusive RTP and simulation accounting', () => {
     accumulator.record(result(0));
     const report = accumulator.report(fixtureConfig());
     expect(report.confidenceInterval95[0]).toBeLessThanOrEqual(report.confidenceInterval95[1]);
-    expect(() => assertFiniteReport({ ...report, totalRtp: Number.NaN })).toThrow();
+    expect(() => assertFiniteReport({ ...report, creditedTotalRtp: Number.NaN })).toThrow();
     expect(() => assertFiniteReport({ ...report, variance: Number.POSITIVE_INFINITY })).toThrow();
     expect(() => assertFiniteReport({ ...report, baseHitFrequency: -0.1 })).toThrow();
   });

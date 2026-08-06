@@ -7,6 +7,7 @@ import type {
 import { SessionDiagnosticsStore } from './session-diagnostics.js';
 import { buildSpinHistoryCsv, spinHistoryFilename } from './csv.js';
 import { formatLineWins, formatVisibleWindow } from './format.js';
+import { formatPercentRatio } from '@lucky/shared-types';
 
 function element<T extends HTMLElement>(id: string): T {
   const found = document.querySelector<T>(`#${id}`);
@@ -52,9 +53,9 @@ function renderEntry(entry: SpinHistoryEntry): HTMLLIElement {
   const netClass = entry.netCredits >= 0 ? 'positive' : 'negative';
   metrics.append(
     textElement('Bet', String(entry.betCredits)),
-    textElement('Base', String(entry.baseWinCredits)),
-    textElement('Feature', String(entry.featureWinCredits)),
-    textElement('Total', String(entry.totalWinCredits)),
+    textElement('Base', String(entry.uncappedBaseWinCredits)),
+    textElement('Feature', String(entry.uncappedFeatureWinCredits)),
+    textElement('Credited', String(entry.creditedTotalWinCredits)),
     textElement('Net', `${entry.netCredits >= 0 ? '+' : ''}${entry.netCredits}`, netClass),
   );
 
@@ -91,6 +92,10 @@ export function attachDiagnostics(): DiagnosticsController {
   const wagered = element<HTMLElement>('diagnostics-wagered');
   const won = element<HTMLElement>('diagnostics-won');
   const rtp = element<HTMLElement>('diagnostics-rtp');
+  const uncapped = element<HTMLElement>('diagnostics-uncapped');
+  const capReduction = element<HTMLElement>('diagnostics-cap-reduction');
+  const triggerRate = element<HTMLElement>('diagnostics-trigger-rate');
+  const featureLength = element<HTMLElement>('diagnostics-feature-length');
   const history = element<HTMLOListElement>('spin-history');
   const empty = element<HTMLElement>('history-empty');
   const download = element<HTMLAnchorElement>('download-csv');
@@ -117,7 +122,11 @@ export function attachDiagnostics(): DiagnosticsController {
     spins.textContent = String(snapshot.totalSpins);
     wagered.textContent = String(snapshot.totalWagered);
     won.textContent = String(snapshot.totalWon);
-    rtp.textContent = `${(snapshot.rtp * 100).toFixed(2)}%`;
+    rtp.textContent = formatPercentRatio(snapshot.creditedRtp);
+    uncapped.textContent = formatPercentRatio(snapshot.uncappedReturn);
+    capReduction.textContent = String(snapshot.totalCapReduction);
+    triggerRate.textContent = formatPercentRatio(snapshot.featureTriggerRate);
+    featureLength.textContent = snapshot.averageFeatureLength.toFixed(2);
     empty.hidden = snapshot.recentSpins.length > 0;
     history.replaceChildren(...snapshot.recentSpins.map(renderEntry));
     updateDownload(snapshot);

@@ -5,6 +5,14 @@ export type SymbolId = string;
 export type ConfigVersion = string;
 export type ReelStop = number;
 
+export function formatPercentRatio(value: number, decimals = 2): string {
+  if (!Number.isFinite(value) || value < 0)
+    throw new RangeError('Percentage ratio must be finite and non-negative');
+  if (!Number.isSafeInteger(decimals) || decimals < 0 || decimals > 20)
+    throw new RangeError('Percentage decimals must be a safe integer from 0 to 20');
+  return `${(value * 100).toFixed(decimals)}%`;
+}
+
 export interface SymbolDefinition {
   readonly id: SymbolId;
   readonly name: string;
@@ -21,6 +29,50 @@ export interface PayAward {
 export interface Payline {
   readonly id: string;
   readonly rows: readonly number[];
+}
+
+export interface WildRules {
+  readonly symbolId: SymbolId;
+  readonly enabled: boolean;
+  readonly substitutesFor: readonly SymbolId[];
+  readonly substitutesForWild: boolean;
+  readonly substitutesForScatter: boolean;
+  readonly hasOwnLinePay: boolean;
+  readonly multiplier: number;
+  readonly allWildCombinationRule: 'no-pay';
+}
+
+export interface LineAwardRules {
+  readonly direction: 'left-to-right';
+  readonly activePaylines: number;
+  readonly lineBetCredits: BetCredits;
+  readonly totalBetCredits: BetCredits;
+  readonly awardScaling: 'award-credits-per-line-bet';
+  readonly matchRule: 'consecutive-from-leftmost-reel';
+  readonly winSelection: 'highest-award-per-payline';
+  readonly multiplePaylinesAccumulate: boolean;
+  readonly nestedAwardsAccumulate: boolean;
+  readonly scatterBreaksLineMatch: boolean;
+}
+
+export interface ScatterRules {
+  readonly symbolId: SymbolId;
+  readonly enabled: boolean;
+  readonly evaluation: 'anywhere';
+  readonly countMode: 'visible-symbols';
+  readonly maximumCountMode: 'one-visible-scatter-per-reel';
+  readonly substitutesOnLines: boolean;
+  readonly wildSubstitutesForScatter: boolean;
+  readonly scatterSubstitutesForRegular: boolean;
+  readonly directCreditPaysEnabled: boolean;
+  readonly triggersFeature: boolean;
+}
+
+export interface RulesConfig {
+  readonly schemaVersion: ConfigVersion;
+  readonly wild: WildRules;
+  readonly lineAwardRules: LineAwardRules;
+  readonly scatter: ScatterRules;
 }
 
 export interface BonusAward {
@@ -42,6 +94,7 @@ export interface BonusConfig {
   readonly maximumRetriggers: number;
   readonly scatterPaysCredits: boolean;
   readonly useAlternateReelStrips: boolean;
+  readonly alternateReelStripConfigurationId?: string;
   readonly useAlternatePaytable: boolean;
   readonly notes?: string;
 }
@@ -49,18 +102,24 @@ export interface BonusConfig {
 export interface RuntimeGameConfig {
   readonly schemaVersion: ConfigVersion;
   readonly gameId: string;
+  readonly gameName: string;
   readonly gameVersion: ConfigVersion;
   readonly configurationId: string;
+  readonly selectedRtpProfile: string;
+  readonly payModel: 'fixed-paylines-left-to-right';
   readonly reelCount: number;
   readonly visibleRows: number;
   readonly lineBetCredits: BetCredits;
   readonly totalBetCredits: BetCredits;
   readonly maximumWinCredits: Credits;
+  readonly maximumWinScope: 'paid-spin-including-feature';
   readonly symbols: readonly SymbolDefinition[];
   readonly reelStrips: readonly (readonly SymbolId[])[];
+  readonly freeSpinReelStrips: readonly (readonly SymbolId[])[];
   readonly paylines: readonly Payline[];
   readonly paytable: readonly PayAward[];
   readonly bonus: BonusConfig;
+  readonly rules: RulesConfig;
 }
 
 export interface LineWin {
@@ -97,12 +156,13 @@ export interface FeatureResult {
 }
 
 export interface SpinResult extends ReelOutcome {
-  readonly baseLineWinCredits: Credits;
-  readonly baseScatterWinCredits: Credits;
-  readonly baseWinCredits: Credits;
-  readonly featureWinCredits: Credits;
+  readonly uncappedBaseLineWinCredits: Credits;
+  readonly uncappedBaseScatterWinCredits: Credits;
+  readonly uncappedBaseWinCredits: Credits;
+  readonly uncappedFeatureWinCredits: Credits;
   readonly uncappedTotalWinCredits: Credits;
   readonly totalWinCredits: Credits;
+  readonly capReductionCredits: Credits;
   readonly featureTriggered: boolean;
   readonly feature: FeatureResult | null;
   readonly maximumWinApplied: boolean;
@@ -122,51 +182,71 @@ export interface DistributionBucket {
   readonly probability: number;
 }
 
+export interface FeatureLengthPercentiles {
+  readonly median: number;
+  readonly p75: number;
+  readonly p90: number;
+  readonly p95: number;
+  readonly p99: number;
+}
+
 export interface SimulationReport {
   readonly schemaVersion: ConfigVersion;
+  readonly methodology: 'deterministic-monte-carlo';
   readonly gameVersion: ConfigVersion;
   readonly configurationId: string;
   readonly generatedAt: string;
   readonly seed: number;
   readonly paidSpins: number;
   readonly totalWageredCredits: Credits;
-  readonly basePayoutCredits: Credits;
-  readonly baseScatterPayoutCredits: Credits;
-  readonly featurePayoutCredits: Credits;
-  readonly totalPayoutCredits: Credits;
-  readonly baseRtp: number;
-  readonly baseScatterRtp: number;
-  readonly featureRtp: number;
-  readonly totalRtp: number;
+  readonly uncappedBaseLinePayoutCredits: Credits;
+  readonly uncappedBaseScatterPayoutCredits: Credits;
+  readonly uncappedBasePayoutCredits: Credits;
+  readonly uncappedFeaturePayoutCredits: Credits;
+  readonly uncappedTotalPayoutCredits: Credits;
+  readonly creditedTotalPayoutCredits: Credits;
+  readonly capReductionCredits: Credits;
+  readonly uncappedBaseLineRtp: number;
+  readonly uncappedBaseScatterRtp: number;
+  readonly uncappedFeatureRtp: number;
+  readonly uncappedTotalRtp: number;
+  readonly creditedTotalRtp: number;
   readonly baseHitFrequency: number;
   readonly featureTriggerFrequency: number;
+  readonly featureTriggerFrequencyByScatterCount: Readonly<Record<string, number>>;
   readonly featureInclusiveHitFrequency: number;
   readonly averageInitiallyAwardedFreeSpins: number;
   readonly averageTotalFreeSpinsPerTrigger: number;
   readonly averageRetriggersPerTrigger: number;
+  readonly featureLengthPercentiles: FeatureLengthPercentiles;
+  readonly maximumObservedFeatureLength: number;
+  readonly featureCapHitFrequency: number;
   readonly variance: number;
   readonly standardDeviation: number;
   readonly standardError: number;
   readonly confidenceInterval95: readonly [number, number];
   readonly maximumObservedWinCredits: Credits;
   readonly capApplications: number;
+  readonly capApplicationFrequency: number;
   readonly payoutDistribution: readonly DistributionBucket[];
 }
 
 export interface ExactMathReport {
   readonly schemaVersion: ConfigVersion;
-  readonly methodology: 'exact-uncapped';
+  readonly methodology: 'exact-uncapped' | 'exact-capped' | 'hybrid';
   readonly gameVersion: ConfigVersion;
   readonly configurationId: string;
   readonly generatedAt: string;
   readonly sourceHash: string;
   readonly totalPaidSpinCombinations: number;
   readonly probabilityReconciliation: number;
-  readonly baseLineRtp: number;
-  readonly baseScatterRtp: number;
-  readonly featureRtp: number;
-  readonly totalRtp: number;
+  readonly uncappedBaseLineRtp: number;
+  readonly uncappedBaseScatterRtp: number;
+  readonly uncappedFeatureRtp: number;
   readonly uncappedTotalRtp: number;
+  readonly creditedTotalRtp?: number;
+  readonly creditedTotalRtpMethodology?: 'exact' | 'monte-carlo-estimate';
+  readonly estimatedCapReductionRtp?: number;
   readonly triggerFrequency: number;
   readonly triggerFrequencyByScatterCount: Readonly<Record<string, number>>;
   readonly expectedInitiallyAwardedFreeSpins: number;

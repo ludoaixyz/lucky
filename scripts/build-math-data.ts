@@ -9,6 +9,8 @@ if (issues.length > 0) throw new Error(`Math build stopped: ${issues.length} val
 const artifact = {
   metadata: {
     schemaVersion: config.schemaVersion,
+    gameId: config.gameId,
+    gameName: config.gameName,
     gameVersion: config.gameVersion,
     configurationId: config.configurationId,
     sourceHash,

@@ -14,7 +14,7 @@ export {
   resolveFreeSpin,
   resolveFreeSpinFeature,
 } from './evaluation/bonus.js';
-export { validateConfig } from './validation/config.js';
+export { maximumReachableScatterCount, validateConfig } from './validation/config.js';
 export type { ValidationIssue } from './validation/config.js';
 export {
   SimulationAccumulator,

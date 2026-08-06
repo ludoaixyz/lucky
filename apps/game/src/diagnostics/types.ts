@@ -16,9 +16,11 @@ export interface DisplayedSpinOutcome {
 export interface CompletedSpin {
   readonly timestamp: string;
   readonly betCredits: BetCredits;
-  readonly baseWinCredits: Credits;
-  readonly featureWinCredits: Credits;
-  readonly totalWinCredits: Credits;
+  readonly uncappedBaseWinCredits: Credits;
+  readonly uncappedFeatureWinCredits: Credits;
+  readonly uncappedTotalWinCredits: Credits;
+  readonly creditedTotalWinCredits: Credits;
+  readonly capReductionCredits: Credits;
   readonly creditsBefore: Credits;
   readonly creditsAfter: Credits;
   readonly featureTriggered: boolean;
@@ -44,7 +46,12 @@ export interface SessionDiagnostics {
   readonly totalSpins: number;
   readonly totalWagered: Credits;
   readonly totalWon: Credits;
-  readonly rtp: number;
+  readonly totalUncappedWon: Credits;
+  readonly totalCapReduction: Credits;
+  readonly uncappedReturn: number;
+  readonly creditedRtp: number;
+  readonly featureTriggerRate: number;
+  readonly averageFeatureLength: number;
   readonly history: readonly SpinHistoryEntry[];
   readonly recentSpins: readonly SpinHistoryEntry[];
 }

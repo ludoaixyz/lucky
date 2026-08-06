@@ -6,6 +6,7 @@ import type {
   PayAward,
   Payline,
   RuntimeGameConfig,
+  RulesConfig,
   SymbolDefinition,
   SymbolId,
 } from '@lucky/shared-types';
@@ -13,13 +14,17 @@ import type {
 interface GameSource {
   schemaVersion: string;
   gameId: string;
+  gameName: string;
   gameVersion: string;
   configurationId: string;
+  selectedRtpProfile: string;
+  payModel: 'fixed-paylines-left-to-right';
   reelCount: number;
   visibleRows: number;
   lineBetCredits: number;
   totalBetCredits: number;
   maximumWinCredits: number;
+  maximumWinScope: 'paid-spin-including-feature';
 }
 
 const SOURCE = resolve(process.cwd(), 'math/source');
@@ -61,9 +66,11 @@ export async function loadSourceConfig(): Promise<{
   const sourceNames = [
     'game-config.json',
     'bonus-config.json',
+    'rules-config.json',
     'symbols.csv',
     'paytable.csv',
     'reel-strips.csv',
+    'free-spin-reel-strips.csv',
     'paylines.csv',
   ];
   const contents = await Promise.all(
@@ -71,9 +78,11 @@ export async function loadSourceConfig(): Promise<{
   );
   const game = JSON.parse(contents[0] as string) as GameSource;
   const bonus = JSON.parse(contents[1] as string) as BonusConfig;
+  const rules = JSON.parse(contents[2] as string) as RulesConfig;
   const symbolRows = await csv('symbols.csv');
   const payRows = await csv('paytable.csv');
   const reelRows = await csv('reel-strips.csv');
+  const freeSpinReelRows = await csv('free-spin-reel-strips.csv');
   const lineRows = await csv('paylines.csv');
   const symbols: SymbolDefinition[] = symbolRows.map((row) => ({
     id: row.symbol_id as SymbolId,
@@ -93,6 +102,12 @@ export async function loadSourceConfig(): Promise<{
       .sort((a, b) => Number(a.stop) - Number(b.stop))
       .map((row) => row.symbol_id as SymbolId),
   );
+  const freeSpinReelStrips = reelIds.map((id) =>
+    freeSpinReelRows
+      .filter((row) => row.reel_id === id)
+      .sort((a, b) => Number(a.stop) - Number(b.stop))
+      .map((row) => row.symbol_id as SymbolId),
+  );
   const paylines: Payline[] = lineRows.map((row, index) => ({
     id: row.payline_id ?? `L${index + 1}`,
     rows: reelIds.map((_, reel) =>
@@ -100,7 +115,16 @@ export async function loadSourceConfig(): Promise<{
     ),
   }));
   return {
-    config: { ...game, symbols, paytable, reelStrips, paylines, bonus },
+    config: {
+      ...game,
+      symbols,
+      paytable,
+      reelStrips,
+      freeSpinReelStrips: bonus.useAlternateReelStrips ? freeSpinReelStrips : reelStrips,
+      paylines,
+      bonus,
+      rules,
+    },
     sourceHash: createHash('sha256').update(contents.join('\n')).digest('hex'),
   };
 }

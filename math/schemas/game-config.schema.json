@@ -1,29 +1,37 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lucky.local/schemas/game-config.schema.json",
-  "title": "Lucky888 game source configuration",
+  "title": "LUCKY888 game source configuration",
   "type": "object",
   "required": [
     "schemaVersion",
     "gameId",
+    "gameName",
     "gameVersion",
     "configurationId",
+    "selectedRtpProfile",
+    "payModel",
     "reelCount",
     "visibleRows",
     "lineBetCredits",
     "totalBetCredits",
-    "maximumWinCredits"
+    "maximumWinCredits",
+    "maximumWinScope"
   ],
   "properties": {
     "schemaVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-    "gameId": { "type": "string", "minLength": 1 },
+    "gameId": { "const": "lucky888" },
+    "gameName": { "const": "LUCKY888" },
     "gameVersion": { "type": "string", "minLength": 1 },
     "configurationId": { "type": "string", "minLength": 1 },
+    "selectedRtpProfile": { "const": "lucky888-balanced-base-v1" },
+    "payModel": { "const": "fixed-paylines-left-to-right" },
     "reelCount": { "type": "integer", "minimum": 1 },
     "visibleRows": { "type": "integer", "minimum": 1 },
     "lineBetCredits": { "type": "integer", "minimum": 1 },
     "totalBetCredits": { "type": "integer", "minimum": 1 },
-    "maximumWinCredits": { "type": "integer", "minimum": 0 }
+    "maximumWinCredits": { "type": "integer", "minimum": 1 },
+    "maximumWinScope": { "const": "paid-spin-including-feature" }
   },
   "additionalProperties": true
 }

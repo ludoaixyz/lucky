@@ -57,9 +57,9 @@ export function attachController(
               ? ` (+${freeSpin.retriggeredFreeSpins} retrigger)`
               : '';
           message.textContent = `Free Spin ${freeSpin.spinIndex}/${result.feature.totalPlayedSpins} — ${remaining} remaining${retrigger}`;
-          await scene.present(freeSpin);
+          await scene.present(freeSpin, 'free-spin');
         }
-        message.textContent = `Free Spins complete — feature win ${result.featureWinCredits}`;
+        message.textContent = `Free Spins complete — feature win ${result.uncappedFeatureWinCredits}`;
       }
 
       if (disposed) return;
@@ -70,9 +70,11 @@ export function attachController(
       diagnostics.recordCompletedSpin({
         timestamp: new Date().toISOString(),
         betCredits: config.totalBetCredits,
-        baseWinCredits: result.baseWinCredits,
-        featureWinCredits: result.featureWinCredits,
-        totalWinCredits: result.totalWinCredits,
+        uncappedBaseWinCredits: result.uncappedBaseWinCredits,
+        uncappedFeatureWinCredits: result.uncappedFeatureWinCredits,
+        uncappedTotalWinCredits: result.uncappedTotalWinCredits,
+        creditedTotalWinCredits: result.totalWinCredits,
+        capReductionCredits: result.capReductionCredits,
         creditsBefore,
         creditsAfter: credits,
         featureTriggered: result.featureTriggered,
@@ -90,10 +92,10 @@ export function attachController(
         },
       });
       message.textContent = result.featureTriggered
-        ? `Win ${result.totalWinCredits} credits (base ${result.baseWinCredits} + feature ${result.featureWinCredits}).`
+        ? `Win ${result.totalWinCredits} credits (base ${result.uncappedBaseWinCredits} + feature ${result.uncappedFeatureWinCredits}).`
         : `Win ${result.totalWinCredits} credits.`;
     } catch (error: unknown) {
-      console.error('Lucky888 spin failed', error);
+      console.error('LUCKY888 spin failed', error);
       if (!disposed) {
         if (debited) credits += config.totalBetCredits;
         creditsText.textContent = String(credits);

@@ -35,12 +35,37 @@ button {
   text-align: center;
 }
 
-header h1 {
-  margin: 0 0 0.5rem;
+.brand-lockup {
+  display: flex;
+  justify-content: center;
+  gap: clamp(0.6rem, 2vw, 1.2rem);
+  align-items: center;
+  margin: 0 0 0.65rem;
+}
+
+.brand-mascot {
+  width: clamp(5.5rem, 12vw, 8rem);
+  height: auto;
+  filter: drop-shadow(0 0.5rem 1rem #0008);
+}
+
+.brand-lockup h1 {
+  margin: 0;
   color: #ffd66b;
   font-size: clamp(2.8rem, 8vw, 5.5rem);
   letter-spacing: 0.035em;
   line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .brand-lockup {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .brand-mascot {
+    width: 5.5rem;
+  }
 }
 
 .game-panel,
