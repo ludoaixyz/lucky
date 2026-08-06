@@ -1,4 +1,11 @@
-import type { BetCredits, Credits, LineWin, ReelStop, SymbolId } from '@lucky/shared-types';
+import type {
+  BetCredits,
+  Credits,
+  FeatureResult,
+  LineWin,
+  ReelStop,
+  SymbolId,
+} from '@lucky/shared-types';
 
 export interface DisplayedSpinOutcome {
   readonly visibleWindow: readonly (readonly SymbolId[])[];
@@ -9,10 +16,19 @@ export interface DisplayedSpinOutcome {
 export interface CompletedSpin {
   readonly timestamp: string;
   readonly betCredits: BetCredits;
-  readonly winCredits: Credits;
+  readonly baseWinCredits: Credits;
+  readonly featureWinCredits: Credits;
+  readonly totalWinCredits: Credits;
   readonly creditsBefore: Credits;
   readonly creditsAfter: Credits;
   readonly featureTriggered: boolean;
+  readonly scatterCount: number;
+  readonly initialFreeSpins: number;
+  readonly totalFreeSpinsPlayed: number;
+  readonly totalRetriggeredSpins: number;
+  readonly retriggerCount: number;
+  readonly maximumWinApplied: boolean;
+  readonly feature: FeatureResult | null;
   readonly outcome: DisplayedSpinOutcome;
 }
 

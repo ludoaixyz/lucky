@@ -8,6 +8,12 @@ export {
   enforceMaximumWin,
 } from './evaluation/evaluate.js';
 export { resolveSpin } from './evaluation/spin.js';
+export {
+  resolveBonusAward,
+  resolveRetriggerAward,
+  resolveFreeSpin,
+  resolveFreeSpinFeature,
+} from './evaluation/bonus.js';
 export { validateConfig } from './validation/config.js';
 export type { ValidationIssue } from './validation/config.js';
 export {
@@ -15,3 +21,4 @@ export {
   runSimulation,
   assertFiniteReport,
 } from './simulation/accumulator.js';
+export { enumerateExact } from './enumeration/exact.js';

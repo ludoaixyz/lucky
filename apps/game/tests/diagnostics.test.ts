@@ -10,10 +10,19 @@ function completedSpin(index: number): CompletedSpin {
   return {
     timestamp: `2026-08-06T00:00:${String(index).padStart(2, '0')}.000Z`,
     betCredits,
-    winCredits,
+    baseWinCredits: index === 3 ? 0 : winCredits,
+    featureWinCredits: index === 3 ? winCredits : 0,
+    totalWinCredits: winCredits,
     creditsBefore,
     creditsAfter: creditsBefore - betCredits + winCredits,
     featureTriggered: index === 3,
+    scatterCount: index === 3 ? 3 : 0,
+    initialFreeSpins: index === 3 ? 8 : 0,
+    totalFreeSpinsPlayed: index === 3 ? 8 : 0,
+    totalRetriggeredSpins: 0,
+    retriggerCount: 0,
+    maximumWinApplied: false,
+    feature: null,
     outcome: {
       visibleWindow: [
         ['A', 'K', 'Q'],
@@ -60,8 +69,10 @@ describe('CSV export', () => {
     const store = new SessionDiagnosticsStore();
     store.record(completedSpin(3));
     const csv = buildSpinHistoryCsv(store.snapshot().history);
-    expect(csv).toContain('spinNumber,timestamp,betCredits,winCredits,netCredits');
-    expect(csv).toContain('featureTriggered,visibleWindow,reelStops,lineWins');
+    expect(csv).toContain('spinNumber,timestamp,betCredits,creditsBefore,creditsAfter');
+    expect(csv).toContain('baseWinCredits,featureWinCredits,totalWinCredits,netCredits');
+    expect(csv).toContain('scatterCount,featureTriggered,initialFreeSpins,totalFreeSpinsPlayed');
+    expect(csv).toContain('baseReelStops,baseVisibleWindow,featureSpinSummary,lineWins');
     expect(csv).toContain('A|K|Q / J|A|K');
     expect(csv).toContain('L1:A×3=10');
   });

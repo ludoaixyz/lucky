@@ -7,11 +7,11 @@ export class SessionDiagnosticsStore {
 
   record(spin: CompletedSpin): SpinHistoryEntry {
     this.totalWagered += spin.betCredits;
-    this.totalWon += spin.winCredits;
+    this.totalWon += spin.totalWinCredits;
     const entry: SpinHistoryEntry = {
       ...spin,
       spinNumber: this.entries.length + 1,
-      netCredits: spin.winCredits - spin.betCredits,
+      netCredits: spin.totalWinCredits - spin.betCredits,
       sessionTotalSpins: this.entries.length + 1,
       sessionTotalWagered: this.totalWagered,
       sessionTotalWon: this.totalWon,

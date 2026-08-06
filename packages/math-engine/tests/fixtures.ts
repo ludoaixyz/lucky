@@ -27,6 +27,21 @@ export function fixtureConfig(): RuntimeGameConfig {
       { symbolId: 'A', count: 3, awardCredits: 10 },
       { symbolId: 'B', count: 3, awardCredits: 5 },
     ],
-    bonus: { triggerSymbolId: 'S', minimumCount: 3, freeSpins: 5, multiplier: 1 },
+    bonus: {
+      schemaVersion: '1.1.0',
+      enabled: true,
+      triggerSymbolId: 'S',
+      triggerEvaluation: 'anywhere',
+      minimumCount: 3,
+      awards: [{ count: 3, freeSpins: 2 }],
+      freeSpinMultiplier: 1,
+      retriggerEnabled: true,
+      retriggerAwards: [{ count: 3, freeSpins: 1 }],
+      maximumFeatureSpins: 10,
+      maximumRetriggers: 2,
+      scatterPaysCredits: false,
+      useAlternateReelStrips: false,
+      useAlternatePaytable: false,
+    },
   };
 }

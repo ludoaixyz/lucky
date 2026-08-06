@@ -23,6 +23,7 @@ Thumbs.db
 Desktop.ini
 math/reports/*
 !math/reports/.gitkeep
+!math/reports/lucky888-base-v1-par.md
 math/reports/raw/
 math/generated/*.json
 apps/game/public/data/runtime-config.json

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { ReelStop, RuntimeGameConfig, SpinResult, SymbolId } from '@lucky/shared-types';
+import type { ReelOutcome, ReelStop, RuntimeGameConfig, SymbolId } from '@lucky/shared-types';
 
 interface SceneLifecycle {
   readonly ready: () => void;
@@ -54,7 +54,7 @@ export class SlotScene extends Phaser.Scene {
     this.shutdownCallbacks.add(callback);
   }
 
-  present(result: SpinResult): Promise<void> {
+  present(result: ReelOutcome): Promise<void> {
     if (!this.created)
       return Promise.reject(new Error('Cannot present a spin before scene creation'));
     if (this.finishPresentation)
@@ -207,7 +207,7 @@ export class SlotScene extends Phaser.Scene {
     this.currentStops[reel] = finalStop;
   }
 
-  private validateResult(result: SpinResult): void {
+  private validateResult(result: ReelOutcome): void {
     if (result.window.length !== this.gameConfig.reelCount) {
       throw new Error(
         `Spin window has ${result.window.length} reels; expected ${this.gameConfig.reelCount}`,
@@ -229,7 +229,7 @@ export class SlotScene extends Phaser.Scene {
     });
   }
 
-  private reelStop(result: SpinResult, reel: number): ReelStop {
+  private reelStop(result: ReelOutcome, reel: number): ReelStop {
     const stop = result.stops[reel];
     const stripLength = this.gameConfig.reelStrips[reel]?.length ?? 0;
     if (stop === undefined || stop < 0 || stop >= stripLength) {

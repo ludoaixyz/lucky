@@ -1,9 +1,25 @@
 {
-  "schemaVersion": "1.0.0",
-  "triggerSymbolId": "SCATTER",
-  "minimumCount": 3,
-  "freeSpins": 8,
-  "multiplier": 1,
+  "schemaVersion": "1.1.0",
   "enabled": true,
-  "notes": "Trigger representation only; free-spin orchestration is not implemented in the shell."
+  "triggerSymbolId": "SCATTER",
+  "triggerEvaluation": "anywhere",
+  "minimumCount": 3,
+  "awards": [
+    { "count": 3, "freeSpins": 8 },
+    { "count": 4, "freeSpins": 10 },
+    { "count": 5, "freeSpins": 12 }
+  ],
+  "freeSpinMultiplier": 1,
+  "retriggerEnabled": true,
+  "retriggerAwards": [
+    { "count": 3, "freeSpins": 5 },
+    { "count": 4, "freeSpins": 8 },
+    { "count": 5, "freeSpins": 10 }
+  ],
+  "maximumFeatureSpins": 100,
+  "maximumRetriggers": 20,
+  "scatterPaysCredits": false,
+  "useAlternateReelStrips": false,
+  "useAlternatePaytable": false,
+  "notes": "Initial Lucky888 free-spin feature configuration."
 }

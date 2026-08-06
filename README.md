@@ -6,7 +6,7 @@ Lucky888 is a production-oriented workspace for an HTML5 slot-machine prototype 
 
 ## Status
 
-Repository initialization is complete. The game shell proves the data-to-result-to-presentation boundary; its theme, numerical inputs, RTP, volatility, bonus frequency, maximum win, and feature behavior are illustrative scaffolding and are **not finalized**.
+The game runs a complete Scatter-anywhere free-spin flow with bounded retriggers. Its theme, numerical inputs, RTP, volatility, bonus frequency, and maximum win remain illustrative and are **not finalized**.
 
 ## Architecture
 
@@ -52,6 +52,8 @@ npm run dev
 
 `dev` compiles current math sheets, then starts Vite. Open the printed local URL. Use the Spin button or Space. The fixed illustrative bet is five credits and starting credits are simulated.
 
+For repeatable local presentation checks, append an integer `?seed=` query (for example, `?seed=13`). This is a development-only deterministic RNG control, not production randomness.
+
 ## Commands
 
 | Command                                               | Purpose                                                |
@@ -64,6 +66,7 @@ npm run dev
 | `npm run typecheck`                                   | Strict TypeScript project build check                  |
 | `npm run math:validate`                               | Validate source math data with located errors          |
 | `npm run math:build`                                  | Compile source sheets without changing them            |
+| `npm run math:enumerate`                              | Exact stop/finite-feature enumeration and PAR report   |
 | `npm run math:simulate -- --spins 100000 --seed 2026` | Run a repeatable simulation                            |
 | `npm run validate`                                    | Format, lint, types, math, tests, and production build |
 | `npm run clean`                                       | Remove workspace build output                          |
@@ -75,18 +78,19 @@ The production output is static and uses a GitHub Pages-compatible `/lucky/` bas
 1. Edit only files in `math/source/`, retaining headers and stable IDs.
 2. Run `npm run math:validate`; errors name the file, record/row, field, value, and rule.
 3. Run `npm run math:build` to write fingerprinted runtime data. This never rewrites sources.
-4. Test or simulate: `npm run math:simulate -- --spins=10000 --seed=42`.
-5. Review ignored output in `math/reports/`; commit source inputs and intentional small fixtures, not bulk runs.
+4. Run `npm run math:enumerate` for exact finite-state feature expectations and the configuration PAR.
+5. Test or simulate: `npm run math:simulate -- --spins=10000 --seed=42`.
+6. Review ignored bulk output in `math/reports/`; the named configuration PAR is intentionally tracked.
 
 CSV files can be edited in Excel, LibreOffice, or Google Sheets. Import and export as UTF-8 comma-separated values; keep the first row, column order, exact IDs, integer credit fields, and leading text unchanged. Disable automatic date conversion where possible. JSON percentages/rates are decimal ratios (`0.96` means 96%), never ambiguous whole percentages.
 
 ## Terms
 
 - **Theoretical RTP:** expected payout divided by wager from exact probability weighting or enumeration.
-- **Hit frequency:** probability that a spin returns any positive award.
+- **Hit frequency:** probability that one paid spin, including its resulting feature, returns any positive award.
 - **Bonus frequency:** probability that a configured feature trigger occurs.
 - **Volatility:** dispersion of spin returns, described here with variance and standard deviation of bet multiples.
-- **Maximum win:** greatest credited result after applying the configured integer-credit cap.
+- **Maximum win:** the cap applied once to all base and feature payout arising from one paid spin.
 - **Pay distribution:** probabilities/counts grouped by payout multiple buckets.
 - **Confidence interval:** simulation-based range around an estimate; the included 95% RTP interval uses a normal approximation and is not an exact guarantee.
 - **Deterministic seed:** integer that reproduces the development PRNG sequence. This PRNG supports tests and offline simulations; it is not regulatory-grade production randomness.

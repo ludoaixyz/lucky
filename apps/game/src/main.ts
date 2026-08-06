@@ -10,10 +10,13 @@ try {
   const { game, scene } = await createGame(config);
   try {
     const diagnostics = attachDiagnostics();
+    const requestedSeed = new URLSearchParams(window.location.search).get('seed');
+    const parsedSeed = requestedSeed === null ? Number.NaN : Number(requestedSeed);
+    const developmentSeed = Number.isSafeInteger(parsedSeed) ? parsedSeed : Date.now();
     const disposeController = attachController(
       config,
       scene,
-      new SeededRandom(Date.now()),
+      new SeededRandom(developmentSeed),
       diagnostics,
     );
     scene.registerShutdown(() => {

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lucky.local/schemas/bonus-config.schema.json",
+  "title": "Lucky888 bonus configuration",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "enabled",
+    "triggerSymbolId",
+    "triggerEvaluation",
+    "minimumCount",
+    "awards",
+    "freeSpinMultiplier",
+    "retriggerEnabled",
+    "retriggerAwards",
+    "maximumFeatureSpins",
+    "maximumRetriggers",
+    "scatterPaysCredits",
+    "useAlternateReelStrips",
+    "useAlternatePaytable"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.1.0" },
+    "enabled": { "type": "boolean" },
+    "triggerSymbolId": { "type": "string", "minLength": 1 },
+    "triggerEvaluation": { "const": "anywhere" },
+    "minimumCount": { "type": "integer", "minimum": 1 },
+    "awards": { "$ref": "#/$defs/awards" },
+    "freeSpinMultiplier": { "type": "integer", "minimum": 1 },
+    "retriggerEnabled": { "type": "boolean" },
+    "retriggerAwards": { "$ref": "#/$defs/awards" },
+    "maximumFeatureSpins": { "type": "integer", "minimum": 1 },
+    "maximumRetriggers": { "type": "integer", "minimum": 0 },
+    "scatterPaysCredits": { "type": "boolean" },
+    "useAlternateReelStrips": { "type": "boolean" },
+    "useAlternatePaytable": { "type": "boolean" },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "awards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["count", "freeSpins"],
+        "properties": {
+          "count": { "type": "integer", "minimum": 1 },
+          "freeSpins": { "type": "integer", "minimum": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

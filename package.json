@@ -24,6 +24,7 @@
     "typecheck": "tsc -b --force packages/shared-types packages/math-engine --pretty false && tsc --noEmit -p packages/math-engine/tsconfig.test.json --pretty false && tsc --noEmit -p apps/game --pretty false && tsc --noEmit -p apps/game/tsconfig.test.json --pretty false && tsc --noEmit -p scripts --pretty false && tsc --noEmit -p tsconfig.json --pretty false",
     "math:build": "tsx scripts/build-math-data.ts",
     "math:validate": "tsx scripts/validate-math-data.ts",
+    "math:enumerate": "tsx scripts/enumerate.ts",
     "math:simulate": "tsx scripts/simulate.ts",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run build",
     "clean": "npm run clean --workspaces --if-present"
@@ -36,6 +37,7 @@
     "@types/node": "^22.19.1",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
+    "jsdom": "^29.1.1",
     "prettier": "^3.7.4",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

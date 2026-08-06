@@ -1,12 +1,11 @@
 # Data contracts
 
-All files use UTF-8 and semantic string versions. IDs are case-sensitive and stable. Awards, bets, counts, stops, and caps are integer units.
+All source files use UTF-8, case-sensitive stable IDs, semantic string versions, and integer credits/counts/stops/caps.
 
-- `game-config.json`: schema/game/configuration IDs and versions; reel/row counts; pay model; integer line/total bets and cap; selected illustrative profile; simulation defaults.
-- `bonus-config.json`: trigger symbol ID, minimum count, awarded free spins, integer multiplier, enabled flag, and notes.
-- `symbols.csv`: `symbol_id`, `name`, `category` (`regular`, `wild`, `scatter`, `bonus`), `display`.
-- `paytable.csv`: `symbol_id`, consecutive `count`, non-negative integer `award_credits`.
-- `reel-strips.csv`: `reel_id`, zero-based contiguous `stop`, `symbol_id`. Every configured reel must be non-empty and all symbols defined.
-- `paylines.csv`: `payline_id` and one zero-based row column per reel (`reel_1_row` through `reel_5_row`).
+- `game-config.json` defines identity, dimensions, fixed bet, pay model, and the aggregate paid-spin maximum.
+- `bonus-config.json` is schema `1.1.0`: enabled flag, Scatter-anywhere trigger, increasing initial/retrigger award tables, multiplier, direct Scatter-pay flag, alternate-asset flags, and finite spin/retrigger limits.
+- `symbols.csv`, `paytable.csv`, `reel-strips.csv`, and `paylines.csv` define symbols, left-to-right line awards, cyclic stops, and zero-based fixed row paths.
 
-Compiled artifacts add `schemaVersion`, `gameVersion`, `configurationId`, SHA-256 `sourceHash`, and ISO-8601 `generatedAt`. A breaking field/meaning change increments the schema major version; compatible additions increment minor; clarifications/fixes increment patch. Probabilities are decimal ratios: `0.01` is one percent. CSV editors must preserve headers, IDs, UTF-8 encoding, and comma delimiters.
+`SpinResult` retains base line/Scatter payout, feature payout, uncapped total, credited total, cap status, base stops/window/wins, and an optional full `FeatureResult`. Every `FreeSpinResult` retains its index, stops, window, line wins, Scatter count, allowed retrigger addition, raw award, multiplier, and win. Diagnostics store one entry per paid spin and serialize feature-spin summaries in CSV.
+
+Compiled runtime artifacts contain the complete validated config plus schema/game/configuration versions, SHA-256 source fingerprint, and generation timestamp. Builds read source sheets and write only ignored generated locations. Probabilities are decimal ratios (`0.01` means one percent).

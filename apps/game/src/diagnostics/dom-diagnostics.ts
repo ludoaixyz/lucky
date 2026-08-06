@@ -52,7 +52,9 @@ function renderEntry(entry: SpinHistoryEntry): HTMLLIElement {
   const netClass = entry.netCredits >= 0 ? 'positive' : 'negative';
   metrics.append(
     textElement('Bet', String(entry.betCredits)),
-    textElement('Win', String(entry.winCredits)),
+    textElement('Base', String(entry.baseWinCredits)),
+    textElement('Feature', String(entry.featureWinCredits)),
+    textElement('Total', String(entry.totalWinCredits)),
     textElement('Net', `${entry.netCredits >= 0 ? '+' : ''}${entry.netCredits}`, netClass),
   );
 
@@ -63,7 +65,18 @@ function renderEntry(entry: SpinHistoryEntry): HTMLLIElement {
     paragraph('Outcome', formatVisibleWindow(entry.outcome.visibleWindow), 'history-outcome'),
     paragraph('Stops', entry.outcome.reelStops.join('|'), 'history-detail'),
     paragraph('Line wins', formatLineWins(entry.outcome.lineWins), 'history-detail'),
-    paragraph('Feature', entry.featureTriggered ? 'Triggered' : 'No', 'history-detail'),
+    paragraph(
+      'Feature',
+      entry.featureTriggered
+        ? `${entry.initialFreeSpins} initial, ${entry.totalFreeSpinsPlayed} played, ${entry.totalRetriggeredSpins} added, ${entry.retriggerCount} retriggers`
+        : 'No',
+      'history-detail',
+    ),
+    paragraph(
+      'Scatters / cap',
+      `${entry.scatterCount} / ${entry.maximumWinApplied ? 'applied' : 'not applied'}`,
+      'history-detail',
+    ),
   );
   return item;
 }

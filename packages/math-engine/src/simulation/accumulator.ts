@@ -17,19 +17,44 @@ const BUCKETS = [
 ] as const;
 
 export class SimulationAccumulator {
+  private basePayout = 0;
+  private baseScatterPayout = 0;
+  private featurePayout = 0;
   private totalPayout = 0;
-  private winningSpins = 0;
+  private baseWinningSpins = 0;
   private featureTriggers = 0;
+  private featureInclusiveWinningSpins = 0;
+  private initiallyAwardedFreeSpins = 0;
+  private totalFreeSpins = 0;
+  private totalRetriggers = 0;
+  private maximumObservedWin = 0;
+  private capApplications = 0;
   private readonly returns: number[] = [];
   private readonly bucketCounts = Array<number>(BUCKETS.length).fill(0);
 
   constructor(private readonly config: SimulationConfig) {}
 
   record(result: SpinResult): void {
-    this.totalPayout += result.winCredits;
-    if (result.winCredits > 0) this.winningSpins += 1;
-    if (result.featureTriggered) this.featureTriggers += 1;
-    const multiple = result.winCredits / this.config.betCredits;
+    // The paid-spin cap is applied once to the aggregate result. For component reporting,
+    // credited base wins are allocated first and the feature receives the remainder.
+    const creditedBase = Math.min(result.baseWinCredits, result.totalWinCredits);
+    const creditedBaseScatter = Math.min(result.baseScatterWinCredits, creditedBase);
+    const creditedFeature = result.totalWinCredits - creditedBase;
+    this.basePayout += creditedBase;
+    this.baseScatterPayout += creditedBaseScatter;
+    this.featurePayout += creditedFeature;
+    this.totalPayout += result.totalWinCredits;
+    if (result.baseWinCredits > 0) this.baseWinningSpins += 1;
+    if (result.totalWinCredits > 0) this.featureInclusiveWinningSpins += 1;
+    if (result.feature) {
+      this.featureTriggers += 1;
+      this.initiallyAwardedFreeSpins += result.feature.initialAwardedSpins;
+      this.totalFreeSpins += result.feature.totalPlayedSpins;
+      this.totalRetriggers += result.feature.retriggerCount;
+    }
+    if (result.maximumWinApplied) this.capApplications += 1;
+    this.maximumObservedWin = Math.max(this.maximumObservedWin, result.totalWinCredits);
+    const multiple = result.totalWinCredits / this.config.betCredits;
     this.returns.push(multiple);
     const index = BUCKETS.findIndex((bucket) => {
       if (bucket.label === '0x') return multiple === 0;
@@ -42,35 +67,49 @@ export class SimulationAccumulator {
   }
 
   report(game: RuntimeGameConfig): SimulationReport {
-    const spins = this.returns.length;
-    if (spins === 0) throw new RangeError('At least one result is required');
-    const totalWager = spins * this.config.betCredits;
-    const mean = this.returns.reduce((sum, value) => sum + value, 0) / spins;
-    const variance = this.returns.reduce((sum, value) => sum + (value - mean) ** 2, 0) / spins;
+    const paidSpins = this.returns.length;
+    if (paidSpins === 0) throw new RangeError('At least one result is required');
+    const totalWageredCredits = paidSpins * this.config.betCredits;
+    const mean = this.totalPayout / totalWageredCredits;
+    const variance = this.returns.reduce((sum, value) => sum + (value - mean) ** 2, 0) / paidSpins;
     const standardDeviation = Math.sqrt(variance);
-    const margin = (1.96 * standardDeviation) / Math.sqrt(spins);
+    const standardError = standardDeviation / Math.sqrt(paidSpins);
+    const margin = 1.96 * standardError;
     const payoutDistribution: DistributionBucket[] = BUCKETS.map((bucket, index) => ({
       ...bucket,
       count: this.bucketCounts[index] ?? 0,
-      probability: (this.bucketCounts[index] ?? 0) / spins,
+      probability: (this.bucketCounts[index] ?? 0) / paidSpins,
     }));
     const report: SimulationReport = {
-      schemaVersion: '1.0.0',
+      schemaVersion: '1.1.0',
       gameVersion: game.gameVersion,
       configurationId: game.configurationId,
       generatedAt: new Date().toISOString(),
       seed: this.config.seed,
-      spinCount: spins,
-      totalWagerCredits: totalWager,
+      paidSpins,
+      totalWageredCredits,
+      basePayoutCredits: this.basePayout,
+      baseScatterPayoutCredits: this.baseScatterPayout,
+      featurePayoutCredits: this.featurePayout,
       totalPayoutCredits: this.totalPayout,
-      winningSpinCount: this.winningSpins,
-      featureTriggerCount: this.featureTriggers,
-      rtp: this.totalPayout / totalWager,
-      hitFrequency: this.winningSpins / spins,
-      bonusFrequency: this.featureTriggers / spins,
+      baseRtp: this.basePayout / totalWageredCredits,
+      baseScatterRtp: this.baseScatterPayout / totalWageredCredits,
+      featureRtp: this.featurePayout / totalWageredCredits,
+      totalRtp: mean,
+      baseHitFrequency: this.baseWinningSpins / paidSpins,
+      featureTriggerFrequency: this.featureTriggers / paidSpins,
+      featureInclusiveHitFrequency: this.featureInclusiveWinningSpins / paidSpins,
+      averageInitiallyAwardedFreeSpins: this.initiallyAwardedFreeSpins / paidSpins,
+      averageTotalFreeSpinsPerTrigger:
+        this.featureTriggers === 0 ? 0 : this.totalFreeSpins / this.featureTriggers,
+      averageRetriggersPerTrigger:
+        this.featureTriggers === 0 ? 0 : this.totalRetriggers / this.featureTriggers,
       variance,
       standardDeviation,
-      rtpConfidence95: [Math.max(0, mean - margin), mean + margin],
+      standardError,
+      confidenceInterval95: [Math.max(0, mean - margin), mean + margin],
+      maximumObservedWinCredits: this.maximumObservedWin,
+      capApplications: this.capApplications,
       payoutDistribution,
     };
     assertFiniteReport(report);
@@ -94,12 +133,20 @@ export function runSimulation(
 
 export function assertFiniteReport(report: SimulationReport): void {
   const rates = [
-    report.rtp,
-    report.hitFrequency,
-    report.bonusFrequency,
+    report.baseRtp,
+    report.baseScatterRtp,
+    report.featureRtp,
+    report.totalRtp,
+    report.baseHitFrequency,
+    report.featureTriggerFrequency,
+    report.featureInclusiveHitFrequency,
+    report.averageInitiallyAwardedFreeSpins,
+    report.averageTotalFreeSpinsPerTrigger,
+    report.averageRetriggersPerTrigger,
     report.variance,
     report.standardDeviation,
-    ...report.rtpConfidence95,
+    report.standardError,
+    ...report.confidenceInterval95,
     ...report.payoutDistribution.map((bucket) => bucket.probability),
   ];
   if (rates.some((value) => !Number.isFinite(value) || value < 0))

@@ -17,6 +17,10 @@ function integerField(value: unknown, path: string): void {
   if (!Number.isSafeInteger(value)) throw new Error(`${path} must be a safe integer`);
 }
 
+function booleanField(value: unknown, path: string): void {
+  if (typeof value !== 'boolean') throw new Error(`${path} must be a boolean`);
+}
+
 function arrayField(value: unknown, path: string): readonly unknown[] {
   if (!Array.isArray(value)) throw new Error(`${path} must be an array`);
   return value;
@@ -74,9 +78,32 @@ function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
     integerField(award.awardCredits, `config.paytable[${index}].awardCredits`);
   });
   const bonus = record(config.bonus, 'config.bonus');
+  stringField(bonus.schemaVersion, 'config.bonus.schemaVersion');
   stringField(bonus.triggerSymbolId, 'config.bonus.triggerSymbolId');
-  for (const field of ['minimumCount', 'freeSpins', 'multiplier'] as const) {
+  stringField(bonus.triggerEvaluation, 'config.bonus.triggerEvaluation');
+  for (const field of [
+    'minimumCount',
+    'freeSpinMultiplier',
+    'maximumFeatureSpins',
+    'maximumRetriggers',
+  ] as const) {
     integerField(bonus[field], `config.bonus.${field}`);
+  }
+  for (const field of [
+    'enabled',
+    'retriggerEnabled',
+    'scatterPaysCredits',
+    'useAlternateReelStrips',
+    'useAlternatePaytable',
+  ] as const) {
+    booleanField(bonus[field], `config.bonus.${field}`);
+  }
+  for (const field of ['awards', 'retriggerAwards'] as const) {
+    arrayField(bonus[field], `config.bonus.${field}`).forEach((value, index) => {
+      const award = record(value, `config.bonus.${field}[${index}]`);
+      integerField(award.count, `config.bonus.${field}[${index}].count`);
+      integerField(award.freeSpins, `config.bonus.${field}[${index}].freeSpins`);
+    });
   }
   return config as unknown as RuntimeGameConfig;
 }

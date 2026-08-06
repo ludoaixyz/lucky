@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type {
-  BonusRule,
+  BonusConfig,
   PayAward,
   Payline,
   RuntimeGameConfig,
@@ -70,7 +70,7 @@ export async function loadSourceConfig(): Promise<{
     sourceNames.map((name) => readFile(resolve(SOURCE, name), 'utf8')),
   );
   const game = JSON.parse(contents[0] as string) as GameSource;
-  const bonus = JSON.parse(contents[1] as string) as BonusRule;
+  const bonus = JSON.parse(contents[1] as string) as BonusConfig;
   const symbolRows = await csv('symbols.csv');
   const payRows = await csv('paytable.csv');
   const reelRows = await csv('reel-strips.csv');

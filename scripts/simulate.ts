@@ -25,6 +25,6 @@ await mkdir(resolve(process.cwd(), 'math/reports'), { recursive: true });
 const output = resolve(process.cwd(), `math/reports/simulation-${seed}-${spins}.json`);
 await writeFile(output, `${JSON.stringify(report, null, 2)}\n`);
 console.log(
-  `Simulated ${spins.toLocaleString()} spins: RTP ${(report.rtp * 100).toFixed(4)}%, hit ${(report.hitFrequency * 100).toFixed(4)}%.`,
+  `Simulated ${spins.toLocaleString()} paid spins: total RTP ${(report.totalRtp * 100).toFixed(4)}%, feature RTP ${(report.featureRtp * 100).toFixed(4)}%, hit ${(report.featureInclusiveHitFrequency * 100).toFixed(4)}%.`,
 );
 console.log(`Report: ${output}`);

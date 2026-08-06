@@ -1,8 +1,8 @@
 import { resolveSpin } from '@lucky/math-engine';
 import type { RandomSource } from '@lucky/math-engine';
 import type { RuntimeGameConfig } from '@lucky/shared-types';
-import type { SlotScene } from '../game/scenes/SlotScene.js';
 import type { SpinDiagnosticsRecorder } from '../diagnostics/types.js';
+import type { SlotScene } from '../game/scenes/SlotScene.js';
 
 function element<T extends HTMLElement>(id: string): T {
   const found = document.querySelector<T>(`#${id}`);
@@ -39,24 +39,50 @@ export function attachController(
     let debited = false;
     try {
       const creditsBefore = credits;
+      // Resolve the paid spin and its entire bounded feature before presentation begins.
       const result = resolveSpin(config, rng);
       credits -= config.totalBetCredits;
       debited = true;
       creditsText.textContent = String(credits);
       winText.textContent = '0';
-      message.textContent = 'Presenting resolved result…';
+      message.textContent = 'Base spin';
       await scene.present(result);
+
+      if (result.feature) {
+        for (const freeSpin of result.feature.freeSpins) {
+          if (disposed) return;
+          const remaining = result.feature.totalPlayedSpins - freeSpin.spinIndex;
+          const retrigger =
+            freeSpin.retriggeredFreeSpins > 0
+              ? ` (+${freeSpin.retriggeredFreeSpins} retrigger)`
+              : '';
+          message.textContent = `Free Spin ${freeSpin.spinIndex}/${result.feature.totalPlayedSpins} — ${remaining} remaining${retrigger}`;
+          await scene.present(freeSpin);
+        }
+        message.textContent = `Free Spins complete — feature win ${result.featureWinCredits}`;
+      }
+
       if (disposed) return;
-      credits += result.winCredits;
+      // One aggregate credit boundary prevents free-spin and total-win double crediting.
+      credits += result.totalWinCredits;
       creditsText.textContent = String(credits);
-      winText.textContent = String(result.winCredits);
+      winText.textContent = String(result.totalWinCredits);
       diagnostics.recordCompletedSpin({
         timestamp: new Date().toISOString(),
         betCredits: config.totalBetCredits,
-        winCredits: result.winCredits,
+        baseWinCredits: result.baseWinCredits,
+        featureWinCredits: result.featureWinCredits,
+        totalWinCredits: result.totalWinCredits,
         creditsBefore,
         creditsAfter: credits,
         featureTriggered: result.featureTriggered,
+        scatterCount: result.scatterCount,
+        initialFreeSpins: result.feature?.initialAwardedSpins ?? 0,
+        totalFreeSpinsPlayed: result.feature?.totalPlayedSpins ?? 0,
+        totalRetriggeredSpins: result.feature?.totalRetriggeredSpins ?? 0,
+        retriggerCount: result.feature?.retriggerCount ?? 0,
+        maximumWinApplied: result.maximumWinApplied,
+        feature: result.feature,
         outcome: {
           visibleWindow: result.window,
           reelStops: result.stops,
@@ -64,8 +90,8 @@ export function attachController(
         },
       });
       message.textContent = result.featureTriggered
-        ? `Win ${result.winCredits}. Illustrative feature trigger.`
-        : `Win ${result.winCredits} credits.`;
+        ? `Win ${result.totalWinCredits} credits (base ${result.baseWinCredits} + feature ${result.featureWinCredits}).`
+        : `Win ${result.totalWinCredits} credits.`;
     } catch (error: unknown) {
       console.error('Lucky888 spin failed', error);
       if (!disposed) {
