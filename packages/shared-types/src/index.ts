@@ -75,6 +75,12 @@ export interface RulesConfig {
   readonly scatter: ScatterRules;
 }
 
+export interface CascadeConfig {
+  readonly enabled: boolean;
+  readonly scatterEvaluation?: 'initial-grid-only';
+  readonly maximumCascadesPerSpin?: number;
+}
+
 export interface BonusAward {
   readonly count: number;
   readonly freeSpins: number;
@@ -120,6 +126,7 @@ export interface RuntimeGameConfig {
   readonly paytable: readonly PayAward[];
   readonly bonus: BonusConfig;
   readonly rules: RulesConfig;
+  readonly cascades?: CascadeConfig;
 }
 
 export interface LineWin {
@@ -129,7 +136,28 @@ export interface LineWin {
   readonly awardCredits: AwardCredits;
 }
 
-export interface ReelOutcome {
+export interface GridCoordinate {
+  readonly reel: number;
+  readonly row: number;
+}
+
+export interface CascadeStage {
+  /** Zero is the initial board; positive values are additional cascade boards. */
+  readonly index: number;
+  readonly window: readonly (readonly SymbolId[])[];
+  readonly lineWins: readonly LineWin[];
+  readonly payoutCredits: Credits;
+  readonly multiplier: 1;
+  readonly removedCoordinates: readonly GridCoordinate[];
+}
+
+export interface CascadeOutcome {
+  readonly cascadeCount?: number;
+  readonly cascades?: readonly CascadeStage[];
+  readonly cascadePayoutCredits?: Credits;
+}
+
+export interface ReelOutcome extends CascadeOutcome {
   readonly stops: readonly ReelStop[];
   readonly window: readonly (readonly SymbolId[])[];
   readonly lineWins: readonly LineWin[];
@@ -259,6 +287,25 @@ export interface SimulationReport {
   readonly capApplications: number;
   readonly capApplicationFrequency: number;
   readonly payoutDistribution: readonly DistributionBucket[];
+  readonly cascadeEnabled: boolean;
+  readonly spinsWithCascade: number;
+  readonly eligibleCascadeSpins: number;
+  readonly cascadeSpinRate: number;
+  readonly totalCascadeSteps: number;
+  readonly averageCascadeStepsPerPaidSpin: number;
+  readonly averageCascadeStepsWhenTriggered: number;
+  readonly maxCascadeDepthObserved: number;
+  readonly cascadePayout: Credits;
+  readonly cascadePayoutCredits: Credits;
+  readonly cascadeRtpContribution: number;
+  readonly baseGameSpinsWithCascade: number;
+  readonly baseGameCascadeSpinRate: number;
+  readonly baseGameCascadeSteps: number;
+  readonly baseGameCascadePayoutCredits: Credits;
+  readonly freeSpinSpinsWithCascade: number;
+  readonly freeSpinCascadeSpinRate: number;
+  readonly freeSpinCascadeSteps: number;
+  readonly freeSpinCascadePayoutCredits: Credits;
 }
 
 export interface ExactMathReport {

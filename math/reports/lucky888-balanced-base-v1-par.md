@@ -7,7 +7,7 @@
 - Game: LUCKY888 (`lucky888`)
 - Game version: 0.3.0
 - Configuration: lucky888-balanced-base-v1
-- Source SHA-256: `5c4cb470e9ca5ac3d610d80d883f92cc26e9ff1f88775da47e542bf52ab15f96`
+- Source SHA-256: `b24edd2c79aa957df11d3621f2f4d81672dc4e3c984b5a16f990d95e12b7b1e6`
 - Exact methodology: hybrid
 - Credited methodology: deterministic Monte Carlo estimate
 - Exact paid-stop combinations: 24,300,000
@@ -57,11 +57,11 @@ Internal RTP values are decimal ratios: 1.0 is 100%. Formatting multiplies by 10
 
 | Measure | Result |
 | --- | ---: |
-| Exact uncapped base line RTP | 88.101872% |
+| Exact uncapped base line RTP | 90.802016% |
 | Exact uncapped base Scatter RTP | 0.000000% |
-| Exact uncapped feature RTP | 6.996542% |
-| Exact uncapped total RTP | 95.098414% |
-| Simulated credited total RTP | 95.372360% |
+| Exact uncapped feature RTP | 7.210971% |
+| Exact uncapped total RTP | 98.012988% |
+| Simulated credited total RTP | 98.292060% |
 | Simulated cap reduction RTP | 0.000000% |
 | Exact trigger frequency | 0.856000% |
 | Exact base hit frequency | 32.699588% |
@@ -86,7 +86,7 @@ Internal RTP values are decimal ratios: 1.0 is 100%. Formatting multiplies by 10
 | p99 | 13 |
 | Maximum observed | 17 |
 | Feature-cap hit frequency | 0.000000% |
-| Credited-return standard deviation | 2.377289 bet multiples |
+| Credited-return standard deviation | 2.431359 bet multiples |
 
 The volatility random variable is credited payout from one paid spin and its complete feature divided by the five-credit paid wager. Free spins add no wager.
 
@@ -94,9 +94,9 @@ The volatility random variable is credited payout from one paid spin and its com
 | --- | ---: | ---: |
 | 0x | 66.557029% | 66.503300% |
 | (0,1)x | 5.642262% | 5.645100% |
-| [1,5)x | 23.558165% | 23.598000% |
-| [5,20)x | 4.108155% | 4.119600% |
-| 20x+ | 0.134388% | 0.134000% |
+| [1,5)x | 23.210848% | 23.245700% |
+| [5,20)x | 4.447935% | 4.464200% |
+| 20x+ | 0.141926% | 0.141700% |
 
 ## Maximum and cap
 
@@ -110,7 +110,7 @@ Exact state equations calculate uncapped feature expectation. The aggregate maxi
 
 ## Simulation comparison
 
-Seed 2026; 1,000,000 paid spins; credited RTP 95% interval 94.906411% to 95.838309%. The deterministic RNG supports reproducible engineering tests and is not production-approved.
+Seed 2026; 1,000,000 paid spins; credited RTP 95% interval 97.815514% to 98.768606%. The deterministic RNG supports reproducible engineering tests and is not production-approved.
 
 ## Remaining decisions
 

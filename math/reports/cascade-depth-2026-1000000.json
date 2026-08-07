@@ -1,0 +1,36 @@
+{
+  "methodology": "deterministic-cascade-depth-analysis",
+  "configurationId": "lucky888-balanced-base-v1",
+  "sourceHash": "f5749eeaf29943c00ca191ccbb9fa76b14242232117e4336d3bf317bfc2f8da9",
+  "seed": 2026,
+  "paidSpins": 1000000,
+  "totalWageredCredits": 5000000,
+  "stages": [
+    {
+      "label": "stage-1",
+      "boardOccurrences": 296925,
+      "payoutCredits": 708546,
+      "rtpContribution": 0.1417092
+    },
+    {
+      "label": "stage-2",
+      "boardOccurrences": 55019,
+      "payoutCredits": 147392,
+      "rtpContribution": 0.0294784
+    },
+    {
+      "label": "stage-3",
+      "boardOccurrences": 11061,
+      "payoutCredits": 25832,
+      "rtpContribution": 0.0051664
+    },
+    {
+      "label": "stage-4-plus",
+      "boardOccurrences": 2412,
+      "payoutCredits": 5320,
+      "rtpContribution": 0.001064
+    }
+  ],
+  "totalCascadePayoutCredits": 887090,
+  "cascadeRtpContribution": 0.177418
+}

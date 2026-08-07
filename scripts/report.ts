@@ -34,28 +34,42 @@ if (issues.length > 0)
   throw new Error(`Report generation stopped: ${issues.length} math validation issue(s)`);
 
 const reportsDirectory = resolve(process.cwd(), 'math/reports');
-const exact = await optionalExact(
-  resolve(reportsDirectory, `${config.configurationId}-exact.json`),
-);
-if (!exact) throw new Error('Default checkpoint reporting requires the exact math report');
+const cascadesEnabled = config.cascades?.enabled === true;
+const exact = cascadesEnabled
+  ? null
+  : await optionalExact(resolve(reportsDirectory, `${config.configurationId}-exact.json`));
+if (!cascadesEnabled && !exact)
+  throw new Error('Default checkpoint reporting requires the exact math report');
+if (cascadesEnabled)
+  console.log(
+    'Exact enumeration currently supports non-cascading profiles only. Using deterministic Monte Carlo for this cascade-enabled report.',
+  );
 const checkpoints = spins === 1_000_000 ? undefined : [spins];
 const series = runSimulationCheckpoints(
   config,
   { seed, betCredits: config.totalBetCredits, ...(checkpoints ? { checkpoints } : {}) },
   new SeededRandom(seed),
-  exact.uncappedTotalRtp,
+  exact?.uncappedTotalRtp ?? 0,
   (checkpoint, progress) =>
     console.log(
       `Checkpoint completed: ${checkpoint.bets.toLocaleString()} bets (${(progress * 100).toFixed(2)}%).`,
     ),
 );
+const theoreticalRtp = exact?.uncappedTotalRtp ?? series.finalReport.creditedTotalRtp;
+const reportCheckpoints = exact
+  ? series.checkpoints
+  : series.checkpoints.map((checkpoint) => ({
+      ...checkpoint,
+      theoreticalRtp,
+      rtpDeviation: checkpoint.simulatedRtp - theoreticalRtp,
+    }));
 const report = buildDurableReport(
   config,
   sourceHash,
   series.finalReport,
   exact,
-  series.checkpoints,
-  series.theoreticalRtp,
+  reportCheckpoints,
+  theoreticalRtp,
 );
 const basename = `${config.configurationId}-simulation`;
 await mkdir(reportsDirectory, { recursive: true });

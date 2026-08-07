@@ -4,8 +4,8 @@
 
 | Measure | Old illustrative profile | Balanced candidate | Provisional target |
 | --- | ---: | ---: | ---: |
-| Exact uncapped total RTP | 264.522224% | 95.098414% | 94%–97% credited |
-| Simulated credited RTP | 262.818600% (100k, seed 2026) | 95.372360% | 94%–97% |
+| Exact uncapped total RTP | 264.522224% | 98.012988% | 94%–97% credited |
+| Simulated credited RTP | 262.818600% (100k, seed 2026) | 98.292060% | 94%–97% |
 | Trigger frequency | 10.351563% | 0.856000% | 0.667%–1.25% |
 | Average feature length | 19.003980 | 9.286738 | 9–14 preferred |
 | Feature p95 | Not recorded by legacy report | 11 | Below 30 preferred |

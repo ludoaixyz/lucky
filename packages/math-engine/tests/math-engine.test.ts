@@ -8,12 +8,15 @@ import type { RandomSource } from '../src/index.js';
 import {
   assertFiniteReport,
   buildVisibleWindow,
+  collapseAndRefill,
   countScatters,
   enforceMaximumWin,
   enumerateExact,
   evaluatePaylines,
+  extractWinningCoordinates,
   maximumReachableScatterCount,
   resolveBonusAward,
+  resolveCascadeSequence,
   resolveFreeSpin,
   resolveFreeSpinFeature,
   resolveRetriggerAward,
@@ -103,6 +106,270 @@ describe('deterministic random source', () => {
       expect(value).toBeGreaterThanOrEqual(0);
       expect(value).toBeLessThan(12);
     }
+  });
+});
+
+describe('cascading tiles', () => {
+  const enabled = (overrides: Partial<RuntimeGameConfig> = {}): RuntimeGameConfig => ({
+    ...fixtureConfig(),
+    reelStrips: [
+      ['A', 'B'],
+      ['A', 'B'],
+      ['A', 'B'],
+    ],
+    freeSpinReelStrips: [
+      ['A', 'B'],
+      ['A', 'B'],
+      ['A', 'B'],
+    ],
+    cascades: { enabled: true, scatterEvaluation: 'initial-grid-only' },
+    bonus: { ...fixtureConfig().bonus, enabled: false },
+    ...overrides,
+  });
+
+  it('leaves the legacy seeded result byte-for-byte unchanged when disabled or omitted', () => {
+    const legacy = fixtureConfig();
+    expect(resolveSpin({ ...legacy, cascades: { enabled: false } }, new SeededRandom(42))).toEqual(
+      resolveSpin(legacy, new SeededRandom(42)),
+    );
+  });
+
+  it('resolves one additional board inside one paid spin and aggregates its payout once', () => {
+    const result = resolveSpin(enabled(), new SequenceRandom([0, 0, 0, 1, 0, 1]));
+    expect(result).toMatchObject({
+      cascadeCount: 1,
+      uncappedBaseLineWinCredits: 10,
+      uncappedTotalWinCredits: 10,
+    });
+    expect(result.cascades).toHaveLength(2);
+    expect(result.cascades?.map((stage) => stage.payoutCredits)).toEqual([10, 0]);
+  });
+
+  it('resolves multiple wins without double counting evaluated stages', () => {
+    const result = resolveSpin(enabled(), new SequenceRandom([0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1]));
+    expect(result.cascadeCount).toBe(3);
+    expect(result.cascades?.map((stage) => stage.payoutCredits)).toEqual([10, 5, 10, 0]);
+    expect(result.uncappedBaseLineWinCredits).toBe(25);
+    expect(result.cascadePayoutCredits).toBe(15);
+  });
+
+  it('collapses downward, preserves survivor order, and refills only removed cells', () => {
+    expect(
+      collapseAndRefill(
+        [['A', 'B', 'A', 'B', 'A']],
+        [
+          { reel: 0, row: 2 },
+          { reel: 0, row: 4 },
+        ],
+        [['A', 'B']],
+        new SequenceRandom([1, 0]),
+      ),
+    ).toEqual([['B', 'A', 'A', 'B', 'B']]);
+  });
+
+  it('deduplicates overlapping paylines and includes participating Wild positions', () => {
+    const config: RuntimeGameConfig = {
+      ...fixtureConfig(),
+      visibleRows: 2,
+      paylines: [
+        { id: 'L1', rows: [0, 0, 0] },
+        { id: 'L2', rows: [0, 0, 1] },
+      ],
+      rules: {
+        ...fixtureConfig().rules,
+        lineAwardRules: { ...fixtureConfig().rules.lineAwardRules, activePaylines: 2 },
+      },
+    };
+    const window = [
+      ['W', 'B'],
+      ['A', 'B'],
+      ['A', 'A'],
+    ];
+    const wins = evaluatePaylines(window, config);
+    expect(wins).toHaveLength(2);
+    expect(extractWinningCoordinates(wins, config)).toEqual([
+      { reel: 0, row: 0 },
+      { reel: 1, row: 0 },
+      { reel: 2, row: 0 },
+      { reel: 2, row: 1 },
+    ]);
+  });
+
+  it('evaluates feature scatters only on the initial grid', () => {
+    const config = enabled({
+      visibleRows: 2,
+      reelStrips: [
+        ['A', 'S', 'B'],
+        ['A', 'S', 'B'],
+        ['A', 'B', 'S'],
+      ],
+      bonus: fixtureConfig().bonus,
+    });
+    const result = resolveSpin(config, new SequenceRandom([0, 0, 0, 2, 2, 2]));
+    expect(result.scatterCount).toBe(2);
+    expect(result.cascades?.[1]?.window.flat().filter((symbol) => symbol === 'S')).toHaveLength(3);
+    expect(result.featureTriggered).toBe(false);
+  });
+
+  it('still triggers a feature from three Scatters on the initial grid', () => {
+    const config = enabled({
+      reelStrips: [['S'], ['S'], ['S']],
+      freeSpinReelStrips: [['S'], ['S'], ['S']],
+      bonus: {
+        ...fixtureConfig().bonus,
+        retriggerEnabled: false,
+        retriggerAwards: [],
+      },
+    });
+    const result = resolveSpin(config, new SequenceRandom([]));
+    expect(result).toMatchObject({ scatterCount: 3, featureTriggered: true });
+    expect(result.feature?.totalPlayedSpins).toBe(2);
+  });
+
+  it('allows five cascades in one free spin without consuming more free spins', () => {
+    const config = enabled({
+      bonus: {
+        ...fixtureConfig().bonus,
+        retriggerEnabled: false,
+        retriggerAwards: [],
+        maximumFeatureSpins: 1,
+      },
+    });
+    const feature = resolveFreeSpinFeature(
+      config,
+      new SequenceRandom([0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1]),
+      1,
+    );
+    expect(feature.totalPlayedSpins).toBe(1);
+    expect(feature.freeSpins[0]?.cascadeCount).toBe(5);
+  });
+
+  it('applies the free-spin multiplier to cascade contribution reporting', () => {
+    const config = enabled({
+      maximumWinCredits: 100,
+      bonus: {
+        ...fixtureConfig().bonus,
+        enabled: false,
+        freeSpinMultiplier: 2,
+        retriggerEnabled: false,
+        retriggerAwards: [],
+      },
+    });
+    const freeSpin = resolveFreeSpin(config, new SequenceRandom([0, 0, 0, 1, 1, 1, 1, 0, 1]), 1);
+    expect(freeSpin).toMatchObject({
+      rawWinCredits: 15,
+      winCredits: 30,
+      cascadePayoutCredits: 5,
+    });
+    const template = result(30, true);
+    const paidResult: SpinResult = {
+      ...template,
+      feature: {
+        ...(template.feature as NonNullable<SpinResult['feature']>),
+        totalPlayedSpins: 1,
+        totalWinCredits: 30,
+        freeSpins: [freeSpin],
+      },
+    };
+    const accumulator = new SimulationAccumulator({ spins: 1, seed: 1, betCredits: 1 });
+    accumulator.record(paidResult);
+    expect(accumulator.report(config).freeSpinCascadePayoutCredits).toBe(10);
+  });
+
+  it('applies the maximum-win cap once after aggregating cascade payouts', () => {
+    const config = enabled({
+      maximumWinCredits: 5_000,
+      paytable: [
+        { symbolId: 'A', count: 3, awardCredits: 3_000 },
+        { symbolId: 'B', count: 3, awardCredits: 3_000 },
+      ],
+    });
+    expect(resolveSpin(config, new SequenceRandom([0, 0, 0, 1, 1, 1, 1, 0, 1]))).toMatchObject({
+      uncappedBaseWinCredits: 6_000,
+      uncappedTotalWinCredits: 6_000,
+      totalWinCredits: 5_000,
+      capReductionCredits: 1_000,
+      maximumWinApplied: true,
+    });
+  });
+
+  it('reconciles base and multiplied free-spin cascade metrics and maximum depth', () => {
+    const config = enabled({
+      maximumWinCredits: 100,
+      bonus: {
+        ...fixtureConfig().bonus,
+        enabled: false,
+        freeSpinMultiplier: 2,
+        retriggerEnabled: false,
+        retriggerAwards: [],
+      },
+    });
+    const base = resolveSpin(config, new SequenceRandom([0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1]));
+    const freeSpin = resolveFreeSpin(config, new SequenceRandom([0, 0, 0, 1, 1, 1, 1, 0, 1]), 1);
+    const combined: SpinResult = {
+      ...base,
+      uncappedFeatureWinCredits: freeSpin.winCredits,
+      uncappedTotalWinCredits: base.uncappedBaseWinCredits + freeSpin.winCredits,
+      totalWinCredits: base.uncappedBaseWinCredits + freeSpin.winCredits,
+      featureTriggered: true,
+      feature: {
+        triggered: true,
+        initialAwardedSpins: 1,
+        totalPlayedSpins: 1,
+        totalRetriggeredSpins: 0,
+        retriggerCount: 0,
+        totalWinCredits: freeSpin.winCredits,
+        freeSpins: [freeSpin],
+        limitReached: false,
+      },
+    };
+    const accumulator = new SimulationAccumulator({ spins: 1, seed: 1, betCredits: 1 });
+    accumulator.record(combined);
+    expect(accumulator.report(config)).toMatchObject({
+      baseGameCascadeSteps: 3,
+      freeSpinCascadeSteps: 2,
+      totalCascadeSteps: 5,
+      baseGameCascadePayoutCredits: 15,
+      freeSpinCascadePayoutCredits: 10,
+      cascadePayoutCredits: 25,
+      baseGameSpinsWithCascade: 1,
+      freeSpinSpinsWithCascade: 1,
+      spinsWithCascade: 2,
+      maxCascadeDepthObserved: 3,
+      paidSpins: 1,
+      totalWageredCredits: 1,
+    });
+  });
+
+  it('is seeded-reproducible and never adds wagers for cascade evaluations', () => {
+    const config = enabled();
+    expect(resolveSpin(config, new SeededRandom(7))).toEqual(
+      resolveSpin(config, new SeededRandom(7)),
+    );
+    const accumulator = new SimulationAccumulator({ spins: 1, seed: 1, betCredits: 1 });
+    accumulator.record(resolveSpin(config, new SequenceRandom([0, 0, 0, 1, 0, 1])));
+    const report = accumulator.report(config);
+    expect(report).toMatchObject({
+      paidSpins: 1,
+      totalWageredCredits: 1,
+      totalCascadeSteps: 1,
+      spinsWithCascade: 1,
+    });
+  });
+
+  it('throws explicitly at the configured runaway guard', () => {
+    const config = enabled({
+      reelStrips: [['A'], ['A'], ['A']],
+      cascades: { enabled: true, maximumCascadesPerSpin: 1 },
+    });
+    expect(() =>
+      resolveCascadeSequence(
+        [['A'], ['A'], ['A']],
+        config.reelStrips,
+        config,
+        new SequenceRandom([]),
+      ),
+    ).toThrow('Cascade safety limit reached');
   });
 });
 
@@ -360,6 +627,23 @@ describe('validation', () => {
       }),
     );
   });
+  it('rejects invalid cascade flags, scatter modes, and safety limits', () => {
+    const config = {
+      ...fixtureConfig(),
+      cascades: {
+        enabled: 'yes',
+        scatterEvaluation: 'each-cascade',
+        maximumCascadesPerSpin: 0,
+      },
+    } as unknown as RuntimeGameConfig;
+    expect(validateConfig(config)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ record: 'cascades', field: 'enabled' }),
+        expect.objectContaining({ record: 'cascades', field: 'scatterEvaluation' }),
+        expect.objectContaining({ record: 'cascades', field: 'maximumCascadesPerSpin' }),
+      ]),
+    );
+  });
 });
 
 function result(totalWinCredits: number, featureTriggered = false): SpinResult {
@@ -407,6 +691,12 @@ describe('feature-inclusive RTP and simulation accounting', () => {
       12,
     );
     expect(report.triggerFrequency).toBe(0);
+  });
+  it('rejects cascade-enabled exact enumeration without affecting legacy exact mode', () => {
+    expect(() =>
+      enumerateExact({ ...fixtureConfig(), cascades: { enabled: true } }, 'fixture'),
+    ).toThrow('Exact enumeration currently supports non-cascading profiles only');
+    expect(() => enumerateExact(fixtureConfig(), 'fixture')).not.toThrow();
   });
   it('counts one paid wager per full feature and reconciles payout components', () => {
     const accumulator = new SimulationAccumulator({ spins: 3, seed: 1, betCredits: 2 });

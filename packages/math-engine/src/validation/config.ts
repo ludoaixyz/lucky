@@ -34,6 +34,32 @@ export function validateConfig(
     issues.push({ file, record, field, value, rule });
   };
   const symbolIds = new Set(config.symbols.map((symbol) => symbol.id));
+  const cascades = config.cascades;
+  if (cascades !== undefined) {
+    if (typeof cascades.enabled !== 'boolean')
+      issue('cascades', 'enabled', cascades.enabled, 'must be a boolean');
+    if (
+      cascades.scatterEvaluation !== undefined &&
+      cascades.scatterEvaluation !== 'initial-grid-only'
+    )
+      issue(
+        'cascades',
+        'scatterEvaluation',
+        cascades.scatterEvaluation,
+        "must be 'initial-grid-only'",
+      );
+    if (
+      cascades.maximumCascadesPerSpin !== undefined &&
+      (!Number.isSafeInteger(cascades.maximumCascadesPerSpin) ||
+        cascades.maximumCascadesPerSpin <= 0)
+    )
+      issue(
+        'cascades',
+        'maximumCascadesPerSpin',
+        cascades.maximumCascadesPerSpin,
+        'must be a positive safe integer',
+      );
+  }
   const validateStrips = (
     name: 'reelStrips' | 'freeSpinReelStrips',
     strips: readonly (readonly SymbolId[])[],

@@ -31,7 +31,17 @@
     "lineBetCredits": { "type": "integer", "minimum": 1 },
     "totalBetCredits": { "type": "integer", "minimum": 1 },
     "maximumWinCredits": { "type": "integer", "minimum": 1 },
-    "maximumWinScope": { "const": "paid-spin-including-feature" }
+    "maximumWinScope": { "const": "paid-spin-including-feature" },
+    "cascades": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "scatterEvaluation": { "const": "initial-grid-only" },
+        "maximumCascadesPerSpin": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
   },
   "additionalProperties": true
 }

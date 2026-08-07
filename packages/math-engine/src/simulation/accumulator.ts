@@ -49,6 +49,14 @@ export class SimulationAccumulator {
   private readonly triggerCounts = new Map<number, number>();
   private readonly featureLengths: number[] = [];
   private readonly bucketCounts = Array<number>(BUCKETS.length).fill(0);
+  private baseGameSpinsWithCascade = 0;
+  private baseGameCascadeSteps = 0;
+  private baseGameCascadePayout = 0;
+  private freeSpinEligibleCascadeSpins = 0;
+  private freeSpinSpinsWithCascade = 0;
+  private freeSpinCascadeSteps = 0;
+  private freeSpinCascadePayout = 0;
+  private maxCascadeDepthObserved = 0;
 
   constructor(private readonly config: SimulationConfig) {}
 
@@ -60,6 +68,11 @@ export class SimulationAccumulator {
     this.uncappedTotalPayout += result.uncappedTotalWinCredits;
     this.creditedTotalPayout += result.totalWinCredits;
     this.capReduction += result.capReductionCredits;
+    const baseCascadeCount = result.cascadeCount ?? 0;
+    if (baseCascadeCount > 0) this.baseGameSpinsWithCascade += 1;
+    this.baseGameCascadeSteps += baseCascadeCount;
+    this.baseGameCascadePayout += result.cascadePayoutCredits ?? 0;
+    this.maxCascadeDepthObserved = Math.max(this.maxCascadeDepthObserved, baseCascadeCount);
     if (result.uncappedBaseWinCredits > 0) this.baseWinningSpins += 1;
     if (result.totalWinCredits > 0) this.featureInclusiveWinningSpins += 1;
     if (result.feature) {
@@ -77,6 +90,14 @@ export class SimulationAccumulator {
         result.feature.totalPlayedSpins,
       );
       if (result.feature.limitReached) this.featureCapHits += 1;
+      this.freeSpinEligibleCascadeSpins += result.feature.freeSpins.length;
+      for (const freeSpin of result.feature.freeSpins) {
+        const cascadeCount = freeSpin.cascadeCount ?? 0;
+        if (cascadeCount > 0) this.freeSpinSpinsWithCascade += 1;
+        this.freeSpinCascadeSteps += cascadeCount;
+        this.freeSpinCascadePayout += (freeSpin.cascadePayoutCredits ?? 0) * freeSpin.multiplier;
+        this.maxCascadeDepthObserved = Math.max(this.maxCascadeDepthObserved, cascadeCount);
+      }
     }
     if (result.maximumWinApplied) this.capApplications += 1;
     this.maximumObservedWin = Math.max(this.maximumObservedWin, result.totalWinCredits);
@@ -114,6 +135,10 @@ export class SimulationAccumulator {
       count: this.bucketCounts[index] ?? 0,
       probability: (this.bucketCounts[index] ?? 0) / this.paidSpins,
     }));
+    const eligibleCascadeSpins = this.paidSpins + this.freeSpinEligibleCascadeSpins;
+    const spinsWithCascade = this.baseGameSpinsWithCascade + this.freeSpinSpinsWithCascade;
+    const totalCascadeSteps = this.baseGameCascadeSteps + this.freeSpinCascadeSteps;
+    const cascadePayoutCredits = this.baseGameCascadePayout + this.freeSpinCascadePayout;
     const report: SimulationReport = {
       schemaVersion: '1.2.0',
       methodology: 'deterministic-monte-carlo',
@@ -162,6 +187,29 @@ export class SimulationAccumulator {
       capApplications: this.capApplications,
       capApplicationFrequency: this.capApplications / this.paidSpins,
       payoutDistribution,
+      cascadeEnabled: game.cascades?.enabled === true,
+      spinsWithCascade,
+      eligibleCascadeSpins,
+      cascadeSpinRate: spinsWithCascade / eligibleCascadeSpins,
+      totalCascadeSteps,
+      averageCascadeStepsPerPaidSpin: totalCascadeSteps / this.paidSpins,
+      averageCascadeStepsWhenTriggered:
+        spinsWithCascade === 0 ? 0 : totalCascadeSteps / spinsWithCascade,
+      maxCascadeDepthObserved: this.maxCascadeDepthObserved,
+      cascadePayout: cascadePayoutCredits,
+      cascadePayoutCredits,
+      cascadeRtpContribution: cascadePayoutCredits / totalWageredCredits,
+      baseGameSpinsWithCascade: this.baseGameSpinsWithCascade,
+      baseGameCascadeSpinRate: this.baseGameSpinsWithCascade / this.paidSpins,
+      baseGameCascadeSteps: this.baseGameCascadeSteps,
+      baseGameCascadePayoutCredits: this.baseGameCascadePayout,
+      freeSpinSpinsWithCascade: this.freeSpinSpinsWithCascade,
+      freeSpinCascadeSpinRate:
+        this.freeSpinEligibleCascadeSpins === 0
+          ? 0
+          : this.freeSpinSpinsWithCascade / this.freeSpinEligibleCascadeSpins,
+      freeSpinCascadeSteps: this.freeSpinCascadeSteps,
+      freeSpinCascadePayoutCredits: this.freeSpinCascadePayout,
     };
     assertFiniteReport(report);
     return report;
@@ -263,6 +311,12 @@ export function assertFiniteReport(report: SimulationReport): void {
     report.averageRetriggersPerTrigger,
     report.featureCapHitFrequency,
     report.capApplicationFrequency,
+    report.cascadeSpinRate,
+    report.averageCascadeStepsPerPaidSpin,
+    report.averageCascadeStepsWhenTriggered,
+    report.cascadeRtpContribution,
+    report.baseGameCascadeSpinRate,
+    report.freeSpinCascadeSpinRate,
     report.variance,
     report.standardDeviation,
     report.standardError,

@@ -8,6 +8,7 @@ import type {
 import type { RandomSource } from '../rng/random-source.js';
 import { aggregateWins, countScatters, evaluatePaylines } from './evaluate.js';
 import { buildVisibleWindow, selectReelStops } from './reels.js';
+import { resolveCascadeSequence } from './cascade.js';
 
 function awardForCount(awards: readonly BonusAward[], scatterCount: number): number {
   let freeSpins = 0;
@@ -36,9 +37,12 @@ export function resolveFreeSpin(
   const strips = config.freeSpinReelStrips;
   const stops = selectReelStops(strips, rng);
   const window = buildVisibleWindow(strips, stops, config.visibleRows);
-  const lineWins = evaluatePaylines(window, config);
+  const cascadeSequence = config.cascades?.enabled
+    ? resolveCascadeSequence(window, strips, config, rng)
+    : null;
+  const lineWins = cascadeSequence?.stages[0]?.lineWins ?? evaluatePaylines(window, config);
   const scatterCount = countScatters(window, config.bonus.triggerSymbolId);
-  const rawWinCredits = aggregateWins(lineWins);
+  const rawWinCredits = cascadeSequence?.totalPayoutCredits ?? aggregateWins(lineWins);
   const winCredits = rawWinCredits * config.bonus.freeSpinMultiplier;
   if (!Number.isSafeInteger(winCredits))
     throw new RangeError('Free-spin win exceeds safe integer range');
@@ -52,6 +56,13 @@ export function resolveFreeSpin(
     rawWinCredits,
     multiplier: config.bonus.freeSpinMultiplier,
     winCredits,
+    ...(cascadeSequence
+      ? {
+          cascadeCount: cascadeSequence.cascadeCount,
+          cascades: cascadeSequence.stages,
+          cascadePayoutCredits: cascadeSequence.cascadePayoutCredits,
+        }
+      : {}),
   };
 }
 

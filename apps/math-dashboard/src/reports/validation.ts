@@ -184,6 +184,39 @@ export function validateSimulationReport(value: unknown): ValidationResult {
         errors.push({ key: 'invalidCheckpoints', field: 'simulationCheckpoints' });
     }
   }
+  if (value.cascadeEnabled !== undefined && typeof value.cascadeEnabled !== 'boolean')
+    errors.push({ key: 'invalidNestedMetric', field: 'cascadeEnabled' });
+  if (
+    value.uncappedBasePayoutCredits !== undefined &&
+    (typeof value.uncappedBasePayoutCredits !== 'number' ||
+      !Number.isFinite(value.uncappedBasePayoutCredits))
+  )
+    errors.push({ key: 'finiteNumber', field: 'uncappedBasePayoutCredits' });
+  for (const field of [
+    'spinsWithCascade',
+    'eligibleCascadeSpins',
+    'cascadeSpinRate',
+    'totalCascadeSteps',
+    'averageCascadeStepsPerPaidSpin',
+    'averageCascadeStepsWhenTriggered',
+    'maxCascadeDepthObserved',
+    'cascadePayout',
+    'cascadePayoutCredits',
+    'cascadeRtpContribution',
+    'baseGameSpinsWithCascade',
+    'baseGameCascadeSpinRate',
+    'baseGameCascadeSteps',
+    'baseGameCascadePayoutCredits',
+    'freeSpinSpinsWithCascade',
+    'freeSpinCascadeSpinRate',
+    'freeSpinCascadeSteps',
+    'freeSpinCascadePayoutCredits',
+  ] as const)
+    if (
+      value[field] !== undefined &&
+      (typeof value[field] !== 'number' || !Number.isFinite(value[field]))
+    )
+      errors.push({ key: 'finiteNumber', field });
   if (errors.length > 0) return { ok: false, errors };
   const report = value as unknown as SimulationReport;
   return {

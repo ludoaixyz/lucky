@@ -28,6 +28,8 @@ math/reports/*
 !math/reports/lucky888-balance-seeds.md
 !math/reports/lucky888-balanced-base-v1-simulation.json
 !math/reports/lucky888-balanced-base-v1-simulation.md
+!math/reports/lucky888-cascade-tuning.md
+!math/reports/cascade-depth-2026-1000000.json
 math/reports/raw/
 math/generated/*.json
 apps/game/public/data/runtime-config.json

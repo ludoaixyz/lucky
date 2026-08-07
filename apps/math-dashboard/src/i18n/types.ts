@@ -67,6 +67,7 @@ export interface DashboardTranslations {
     readonly numberOfBets: string;
     readonly simulatedRtp: string;
     readonly theoreticalRtp: string;
+    readonly monteCarloRtpReference: string;
     readonly rtpDeviation: string;
     readonly bonusFrequency: string;
     readonly maxWin: string;
@@ -99,6 +100,15 @@ export interface DashboardTranslations {
     readonly baseHitFrequency: string;
     readonly maximumObservedWinCredits: string;
     readonly capFrequency: string;
+    readonly cascadeRate: string;
+    readonly averageCascadesWhenTriggered: string;
+    readonly maximumCascadeChain: string;
+    readonly cascadeRtpContribution: string;
+    readonly cascades: string;
+    readonly averageCascadesPerPaidSpin: string;
+    readonly baseGameCascadeRate: string;
+    readonly freeSpinCascadeRate: string;
+    readonly cascadePayout: string;
   };
   readonly metricDescriptions: {
     readonly creditedRtp: string;
@@ -113,6 +123,14 @@ export interface DashboardTranslations {
     readonly standardDeviation: string;
     readonly maximumObservedWin: string;
     readonly capHitFrequency: string;
+    readonly cascadeRate: string;
+    readonly averageCascadesWhenTriggered: string;
+    readonly maximumCascadeChain: string;
+    readonly cascadeRtpContribution: string;
+    readonly averageCascadesPerPaidSpin: string;
+    readonly baseGameCascadeRate: string;
+    readonly freeSpinCascadeRate: string;
+    readonly cascadePayout: string;
   };
   readonly targets: {
     readonly creditedRtp: string;
@@ -201,7 +219,8 @@ export interface DashboardTranslations {
     readonly checkpointAria: (
       bets: string,
       simulatedRtp: string,
-      theoreticalRtp: string,
+      referenceLabel: string,
+      referenceRtp: string,
       deviation: string,
     ) => string;
     readonly exportFooter: (language: string, reportId: string, exportedAt: string) => string;

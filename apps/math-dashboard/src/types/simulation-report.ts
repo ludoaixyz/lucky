@@ -20,6 +20,7 @@ export interface SimulationReport {
   readonly totalWageredCredits: number;
   readonly uncappedBaseLinePayoutCredits: number;
   readonly uncappedBaseScatterPayoutCredits: number;
+  readonly uncappedBasePayoutCredits?: number;
   readonly uncappedFeaturePayoutCredits: number;
   readonly uncappedTotalPayoutCredits: number;
   readonly creditedTotalPayoutCredits: number;
@@ -61,6 +62,26 @@ export interface SimulationReport {
   readonly maxSimulatedBets?: number;
   readonly cumulativeSimulation?: true;
   readonly simulationCheckpoints?: readonly SimulationCheckpoint[];
+  readonly exactEnumeration?: Readonly<Record<string, unknown>> | null;
+  readonly cascadeEnabled?: boolean;
+  readonly spinsWithCascade?: number;
+  readonly eligibleCascadeSpins?: number;
+  readonly cascadeSpinRate?: number;
+  readonly totalCascadeSteps?: number;
+  readonly averageCascadeStepsPerPaidSpin?: number;
+  readonly averageCascadeStepsWhenTriggered?: number;
+  readonly maxCascadeDepthObserved?: number;
+  readonly cascadePayout?: number;
+  readonly cascadePayoutCredits?: number;
+  readonly cascadeRtpContribution?: number;
+  readonly baseGameSpinsWithCascade?: number;
+  readonly baseGameCascadeSpinRate?: number;
+  readonly baseGameCascadeSteps?: number;
+  readonly baseGameCascadePayoutCredits?: number;
+  readonly freeSpinSpinsWithCascade?: number;
+  readonly freeSpinCascadeSpinRate?: number;
+  readonly freeSpinCascadeSteps?: number;
+  readonly freeSpinCascadePayoutCredits?: number;
 }
 
 export interface ReportIndexEntry {

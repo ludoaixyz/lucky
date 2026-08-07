@@ -1,6 +1,6 @@
 symbol_id,count,award_credits
 A,3,4
-A,4,10
+A,4,15
 A,5,26
 K,3,6
 K,4,13
@@ -11,6 +11,6 @@ Q,5,45
 J,3,9
 J,4,22
 J,5,67
-GEM,3,18
-GEM,4,67
+GEM,3,21
+GEM,4,69
 GEM,5,181

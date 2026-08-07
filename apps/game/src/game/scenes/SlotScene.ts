@@ -124,6 +124,18 @@ export class SlotScene extends Phaser.Scene {
 
       const reelsFinished = async (): Promise<void> => {
         await this.presentLineWins(result.lineWins, token);
+        const cascadeStages = result.cascades?.slice(1) ?? [];
+        for (const stage of cascadeStages) {
+          if (token.cancelled) break;
+          this.clearWinPresentation();
+          stage.window.forEach((column, reel) => {
+            this.snapToResolvedWindow(reel, result.stops[reel] ?? 0, column, strips);
+          });
+          await new Promise<void>((stageReady) => {
+            this.time.delayedCall(timing.symbolLanding, stageReady);
+          });
+          await this.presentLineWins(stage.lineWins, token);
+        }
         finish();
       };
       this.reelViews.forEach((_, reel) => {
@@ -473,6 +485,15 @@ export class SlotScene extends Phaser.Scene {
       }
       reel.forEach((symbol) => this.displaySymbol(symbol));
       this.reelStop(result, index, strips);
+    });
+    result.cascades?.forEach((stage) => {
+      if (stage.window.length !== this.gameConfig.reelCount)
+        throw new Error(`Cascade ${stage.index} has an invalid reel count`);
+      stage.window.forEach((column, reel) => {
+        if (column.length !== this.gameConfig.visibleRows)
+          throw new Error(`Cascade ${stage.index}, reel ${reel + 1} has an invalid row count`);
+        column.forEach((symbol) => this.displaySymbol(symbol));
+      });
     });
   }
 

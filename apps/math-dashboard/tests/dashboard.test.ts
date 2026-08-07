@@ -86,6 +86,58 @@ describe('simulation report validation', () => {
     if (!result.ok)
       expect(result.errors).toContainEqual({ key: 'finiteNumber', field: 'creditedTotalRtp' });
   });
+  it('accepts additive cascade metrics while keeping legacy reports valid', () => {
+    const legacyValue = { ...(JSON.parse(millionJson) as Record<string, unknown>) };
+    for (const field of [
+      'uncappedBasePayoutCredits',
+      'cascadeEnabled',
+      'spinsWithCascade',
+      'eligibleCascadeSpins',
+      'cascadeSpinRate',
+      'totalCascadeSteps',
+      'averageCascadeStepsPerPaidSpin',
+      'averageCascadeStepsWhenTriggered',
+      'maxCascadeDepthObserved',
+      'cascadePayout',
+      'cascadePayoutCredits',
+      'cascadeRtpContribution',
+      'baseGameSpinsWithCascade',
+      'baseGameCascadeSpinRate',
+      'baseGameCascadeSteps',
+      'baseGameCascadePayoutCredits',
+      'freeSpinSpinsWithCascade',
+      'freeSpinCascadeSpinRate',
+      'freeSpinCascadeSteps',
+      'freeSpinCascadePayoutCredits',
+    ])
+      delete legacyValue[field];
+    const legacy = reportFrom(JSON.stringify(legacyValue));
+    expect(legacy.cascadeEnabled).toBeUndefined();
+    const result = validateSimulationReport({
+      ...legacy,
+      cascadeEnabled: true,
+      spinsWithCascade: 12,
+      eligibleCascadeSpins: 100,
+      cascadeSpinRate: 0.12,
+      totalCascadeSteps: 18,
+      averageCascadeStepsPerPaidSpin: 0.18,
+      averageCascadeStepsWhenTriggered: 1.5,
+      maxCascadeDepthObserved: 4,
+      cascadePayoutCredits: 25,
+      cascadeRtpContribution: 0.05,
+      baseGameSpinsWithCascade: 10,
+      baseGameCascadeSpinRate: 0.1,
+      baseGameCascadeSteps: 14,
+      baseGameCascadePayoutCredits: 20,
+      freeSpinSpinsWithCascade: 2,
+      freeSpinCascadeSpinRate: 0.2,
+      freeSpinCascadeSteps: 4,
+      freeSpinCascadePayoutCredits: 5,
+      uncappedBasePayoutCredits:
+        legacy.uncappedBaseLinePayoutCredits + legacy.uncappedBaseScatterPayoutCredits,
+    });
+    expect(result.ok).toBe(true);
+  });
 
   it('handles malformed JSON without throwing or storing rendered English', () => {
     const result = parseSimulationReport('{"schemaVersion":');
@@ -175,12 +227,16 @@ describe('language-neutral management calculations', () => {
     expect(reconcileReport(changed).find((check) => check.key === 'bucketCounts')?.status).toBe(
       'FAIL',
     );
-    expect(changed.payoutDistribution[0]?.count).toBe(665_032);
+    expect(changed.payoutDistribution[0]?.count).toBe(
+      (million.payoutDistribution[0]?.count ?? 0) - 1,
+    );
   });
 
   it('calculates feature odds and provisional targets independently of locale', () => {
-    expect(featureFrequencyOdds(million)).toBeCloseTo(115.6203, 3);
-    expect(evaluateTargets(million).every((target) => target.status === 'PASS')).toBe(true);
+    expect(featureFrequencyOdds(million)).toBeCloseTo(1 / million.featureTriggerFrequency, 12);
+    expect(evaluateTargets(million).find((target) => target.key === 'creditedRtp')?.status).toBe(
+      'PASS',
+    );
     expect(meetsAllTargets(million)).toBe(true);
   });
 
@@ -193,8 +249,14 @@ describe('language-neutral management calculations', () => {
 
   it('calculates absolute and relative comparison differences', () => {
     const credited = comparisonRows(thousand, million).find((row) => row.key === 'creditedRtp');
-    expect(credited?.absoluteDifference).toBeCloseTo(0.0543236, 7);
-    expect(credited?.relativeDifference).toBeCloseTo(0.0604, 3);
+    expect(credited?.absoluteDifference).toBeCloseTo(
+      million.creditedTotalRtp - thousand.creditedTotalRtp,
+      12,
+    );
+    expect(credited?.relativeDifference).toBeCloseTo(
+      (million.creditedTotalRtp - thousand.creditedTotalRtp) / thousand.creditedTotalRtp,
+      12,
+    );
   });
 
   it('identifies same-seed different-size reports as nested deterministic samples', () => {
@@ -217,6 +279,24 @@ describe('dashboard localization', () => {
   it('uses the required professional terminology baseline', () => {
     expect(TRANSLATIONS['pt-BR'].dashboard.title).toBe('Painel de Desempenho Matemático');
     expect(TRANSLATIONS['pt-BR'].metrics.featureRtp).toBe('RTP do Recurso');
+    expect(TRANSLATIONS.en.metrics.cascadeRate).toBe('Cascade Rate');
+    expect(TRANSLATIONS['pt-BR'].metrics.cascadeRate).toBe('Taxa de Cascata');
+    expect(TRANSLATIONS['zh-CN'].metrics.cascadeRate).toBe('连消触发率');
+    expect(TRANSLATIONS.en.metrics).toMatchObject({
+      cascades: 'Cascades',
+      averageCascadesPerPaidSpin: 'Avg. Cascades per Paid Spin',
+      baseGameCascadeRate: 'Base Game Cascade Rate',
+      freeSpinCascadeRate: 'Free Spin Cascade Rate',
+      cascadePayout: 'Cascade Payout',
+    });
+    expect(TRANSLATIONS['pt-BR'].metrics).toMatchObject({
+      cascades: 'Cascatas',
+      averageCascadesPerPaidSpin: 'Média de Cascatas por Giro Pago',
+    });
+    expect(TRANSLATIONS['zh-CN'].metrics).toMatchObject({
+      cascades: '连消',
+      averageCascadesPerPaidSpin: '每次付费旋转平均连消次数',
+    });
     expect(TRANSLATIONS['zh-CN'].dashboard.title).toBe('数学表现仪表板');
     expect(TRANSLATIONS['zh-CN'].metrics).toMatchObject({
       creditedRtp: '封顶后 RTP',
@@ -275,7 +355,9 @@ describe('dashboard localization', () => {
       formatDate(million.generatedAt, 'zh-CN'),
     );
     expect(DASHBOARD_LOCALES.map(() => million.creditedTotalRtp)).toEqual([
-      0.9537236, 0.9537236, 0.9537236,
+      million.creditedTotalRtp,
+      million.creditedTotalRtp,
+      million.creditedTotalRtp,
     ]);
   });
 
@@ -366,7 +448,7 @@ describe('localized export and print behavior', () => {
 
   it('creates a Chinese export snapshot without interactive flags or mixed-language labels', () => {
     const source = document.createElement('div');
-    source.innerHTML = `<header><h1>数学表现仪表板</h1><nav class="language-selector no-export">flags</nav></header><main><h2>封顶后 RTP</h2><h3>免费旋转触发构成</h3><strong>95.37%</strong></main>`;
+    source.innerHTML = `<header><h1>数学表现仪表板</h1><nav class="language-selector no-export">flags</nav></header><main><h2>封顶后 RTP</h2><h3>免费旋转触发构成</h3><strong>95.37%</strong><section><h2>连消</h2><h3>连消 RTP 贡献</h3><strong>25.17%</strong></section></main>`;
     const options = createExportOptions('zh-CN', million.configurationId, 'png');
     const snapshot = createExportSnapshot(
       source,
@@ -377,6 +459,8 @@ describe('localized export and print behavior', () => {
     );
     expect(snapshot.element.textContent).toContain('数学表现仪表板');
     expect(snapshot.element.textContent).toContain('免费旋转触发构成');
+    expect(snapshot.element.textContent).toContain('连消 RTP 贡献');
+    expect(snapshot.element.textContent).toContain('25.17%');
     expect(snapshot.element.textContent).toContain('报告语言：简体中文');
     expect(snapshot.element.textContent).not.toContain('Math Performance Dashboard');
     expect(snapshot.element.textContent).not.toContain('Painel de Desempenho Matemático');

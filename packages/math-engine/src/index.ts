@@ -2,6 +2,12 @@ export type { RandomSource, ProductionRandomSource } from './rng/random-source.j
 export { SeededRandom } from './rng/seeded-random.js';
 export { selectReelStops, buildVisibleWindow } from './evaluation/reels.js';
 export {
+  DEFAULT_MAXIMUM_CASCADES_PER_SPIN,
+  collapseAndRefill,
+  extractWinningCoordinates,
+  resolveCascadeSequence,
+} from './evaluation/cascade.js';
+export {
   countScatters,
   evaluatePaylines,
   aggregateWins,

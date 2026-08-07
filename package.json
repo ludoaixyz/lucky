@@ -29,6 +29,7 @@
     "math:validate": "tsx scripts/validate-math-data.ts",
     "math:enumerate": "tsx scripts/enumerate.ts",
     "math:balance": "tsx scripts/balance.ts",
+    "math:analyze-cascades": "tsx scripts/analyze-cascades.ts",
     "math:simulate": "tsx scripts/simulate.ts",
     "math:report": "tsx scripts/report.ts",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run dashboard:build && npm run build",

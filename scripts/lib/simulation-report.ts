@@ -82,6 +82,24 @@ export function reconcileSimulation(
       report.featureTriggerFrequency,
       RECONCILIATION_TOLERANCE,
     ),
+    check(
+      'cascade-payout-components',
+      report.baseGameCascadePayoutCredits + report.freeSpinCascadePayoutCredits,
+      report.cascadePayoutCredits,
+      0,
+    ),
+    check(
+      'cascade-step-components',
+      report.baseGameCascadeSteps + report.freeSpinCascadeSteps,
+      report.totalCascadeSteps,
+      0,
+    ),
+    check(
+      'cascade-spin-components',
+      report.baseGameSpinsWithCascade + report.freeSpinSpinsWithCascade,
+      report.spinsWithCascade,
+      0,
+    ),
   ];
 }
 
@@ -167,6 +185,9 @@ function number(value: number, decimals = 6): string {
 }
 
 export function renderSimulationMarkdown(report: DurableSimulationReport): string {
+  const rtpReferenceLabel = report.exactEnumeration
+    ? 'Theoretical RTP'
+    : 'Final deterministic Monte Carlo estimate (exact cascade enumeration unsupported)';
   const checkpoints = report.simulationCheckpoints
     .map(
       (checkpoint) =>
@@ -202,6 +223,25 @@ export function renderSimulationMarkdown(report: DurableSimulationReport): strin
       return `| ${item.measure} | ${shown} | ${item.target} | ${item.status} |`;
     })
     .join('\n');
+  const cascadeSection = report.cascadeEnabled
+    ? `## Cascades
+
+Approximately ${formatPercentRatio(report.cascadeSpinRate, 4)} of eligible base/free-spin resolutions generated at least one additional board. Cascade-triggering resolutions produced ${number(report.averageCascadeStepsWhenTriggered, 3)} additional boards on average. Uncapped cascade-stage awards contributed ${formatPercentRatio(report.cascadeRtpContribution, 6)} of paid-wager RTP.
+
+| Measure | Result |
+| --- | ---: |
+| Spins with cascades | ${report.spinsWithCascade.toLocaleString('en-US')} |
+| Eligible spin resolutions | ${report.eligibleCascadeSpins.toLocaleString('en-US')} |
+| Cascade rate | ${formatPercentRatio(report.cascadeSpinRate, 6)} |
+| Total additional boards | ${report.totalCascadeSteps.toLocaleString('en-US')} |
+| Average additional boards / paid spin | ${number(report.averageCascadeStepsPerPaidSpin)} |
+| Average additional boards when triggered | ${number(report.averageCascadeStepsWhenTriggered)} |
+| Maximum cascade chain | ${report.maxCascadeDepthObserved} |
+| Uncapped cascade payout | ${report.cascadePayoutCredits.toLocaleString('en-US')} credits |
+| Cascade RTP contribution | ${formatPercentRatio(report.cascadeRtpContribution, 6)} |
+
+`
+    : '';
   return `# ${report.gameName} simulation report
 
 > Provisional engineering simulation. This report does not claim certification.
@@ -221,9 +261,9 @@ export function renderSimulationMarkdown(report: DurableSimulationReport): strin
 
 ## Cumulative RTP convergence
 
-All checkpoints are immutable snapshots from one seeded cumulative simulation run. The theoretical reference is ${formatPercentRatio(report.theoreticalRtp, 6)}.
+All checkpoints are immutable snapshots from one seeded cumulative simulation run. The ${rtpReferenceLabel.toLowerCase()} is ${formatPercentRatio(report.theoreticalRtp, 6)}.
 
-| Bets | Simulated RTP | Theoretical RTP | Deviation | Hit frequency | Bonus frequency | Max win |
+| Bets | Simulated RTP | ${rtpReferenceLabel} | Deviation | Hit frequency | Bonus frequency | Max win |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 ${checkpoints}
 
@@ -247,6 +287,8 @@ Results at 100 and 1,000 bets are expected to fluctuate significantly. The 10,00
 | Triggering Scatters | Frequency per paid spin |
 | ---: | ---: |
 ${scatterFrequencies}
+
+${cascadeSection}
 
 ## Feature length
 

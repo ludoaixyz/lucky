@@ -3,13 +3,17 @@ import type { RandomSource } from '../rng/random-source.js';
 import { aggregateWins, countScatters, enforceMaximumWin, evaluatePaylines } from './evaluate.js';
 import { resolveBonusAward, resolveFreeSpinFeature } from './bonus.js';
 import { buildVisibleWindow, selectReelStops } from './reels.js';
+import { resolveCascadeSequence } from './cascade.js';
 
 export function resolveSpin(config: RuntimeGameConfig, rng: RandomSource): SpinResult {
   const stops = selectReelStops(config.reelStrips, rng);
   const window = buildVisibleWindow(config.reelStrips, stops, config.visibleRows);
-  const lineWins = evaluatePaylines(window, config);
+  const cascadeSequence = config.cascades?.enabled
+    ? resolveCascadeSequence(window, config.reelStrips, config, rng)
+    : null;
+  const lineWins = cascadeSequence?.stages[0]?.lineWins ?? evaluatePaylines(window, config);
   const scatterCount = countScatters(window, config.bonus.triggerSymbolId);
-  const uncappedBaseLineWinCredits = aggregateWins(lineWins);
+  const uncappedBaseLineWinCredits = cascadeSequence?.totalPayoutCredits ?? aggregateWins(lineWins);
   const uncappedBaseScatterWinCredits = 0;
   const uncappedBaseWinCredits = uncappedBaseLineWinCredits + uncappedBaseScatterWinCredits;
   const initialAward = resolveBonusAward(config.bonus, scatterCount);
@@ -32,5 +36,12 @@ export function resolveSpin(config: RuntimeGameConfig, rng: RandomSource): SpinR
     featureTriggered: feature !== null,
     feature,
     maximumWinApplied: capped.capped,
+    ...(cascadeSequence
+      ? {
+          cascadeCount: cascadeSequence.cascadeCount,
+          cascades: cascadeSequence.stages,
+          cascadePayoutCredits: cascadeSequence.cascadePayoutCredits,
+        }
+      : {}),
   };
 }

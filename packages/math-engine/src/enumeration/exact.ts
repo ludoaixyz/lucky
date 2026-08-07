@@ -175,6 +175,11 @@ function featureCalculator(config: RuntimeGameConfig, outcomes: readonly Outcome
 }
 
 export function enumerateExact(config: RuntimeGameConfig, sourceHash: string): ExactMathReport {
+  if (config.cascades?.enabled === true) {
+    throw new Error(
+      'Exact enumeration currently supports non-cascading profiles only. Use Monte Carlo simulation for cascade-enabled profiles.',
+    );
+  }
   const { outcomes, combinations, probability } = enumerateOutcomeClasses(
     config,
     config.reelStrips,

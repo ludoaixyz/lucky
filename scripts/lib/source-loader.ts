@@ -25,6 +25,7 @@ interface GameSource {
   totalBetCredits: number;
   maximumWinCredits: number;
   maximumWinScope: 'paid-spin-including-feature';
+  cascades?: RuntimeGameConfig['cascades'];
 }
 
 const SOURCE = resolve(process.cwd(), 'math/source');
@@ -84,6 +85,7 @@ export async function loadSourceConfig(): Promise<{
   const reelRows = await csv('reel-strips.csv');
   const freeSpinReelRows = await csv('free-spin-reel-strips.csv');
   const lineRows = await csv('paylines.csv');
+  const { cascades, ...gameWithoutCascades } = game;
   const symbols: SymbolDefinition[] = symbolRows.map((row) => ({
     id: row.symbol_id as SymbolId,
     name: row.name ?? '',
@@ -116,7 +118,8 @@ export async function loadSourceConfig(): Promise<{
   }));
   return {
     config: {
-      ...game,
+      ...gameWithoutCascades,
+      ...(cascades === undefined ? {} : { cascades }),
       symbols,
       paytable,
       reelStrips,

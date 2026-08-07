@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { enumerateExact, runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
 import {
   formatPercentRatio,
@@ -174,41 +175,101 @@ The candidate was selected because it corrects the extreme trigger rate and feat
 `;
 }
 
-const { config, sourceHash } = await loadSourceConfig();
-const issues = validateConfig(config, 'math/source');
-if (issues.length > 0) throw new Error(`Enumeration stopped: ${issues.length} validation issue(s)`);
-const exact = enumerateExact(config, sourceHash);
-if (Math.abs(exact.probabilityReconciliation - 1) > 1e-12)
-  throw new Error(`Exact probability reconciled to ${exact.probabilityReconciliation}, expected 1`);
-const simulation = runSimulation(
-  config,
-  { spins: 1_000_000, seed: 2026, betCredits: config.totalBetCredits },
-  new SeededRandom(2026),
-);
-const hybrid: ExactMathReport = {
-  ...exact,
-  methodology: 'hybrid',
-  creditedTotalRtp: simulation.creditedTotalRtp,
-  creditedTotalRtpMethodology: 'monte-carlo-estimate',
-  estimatedCapReductionRtp: simulation.uncappedTotalRtp - simulation.creditedTotalRtp,
+interface EnumerationCliDependencies {
+  readonly loadSource: typeof loadSourceConfig;
+  readonly validate: typeof validateConfig;
+  readonly enumerate: typeof enumerateExact;
+  readonly runLegacy: (
+    config: RuntimeGameConfig,
+    sourceHash: string,
+    exact: ExactMathReport,
+  ) => Promise<void>;
+  readonly log: (message: string) => void;
+}
+
+async function runLegacyEnumeration(
+  config: RuntimeGameConfig,
+  _sourceHash: string,
+  exact: ExactMathReport,
+): Promise<void> {
+  if (Math.abs(exact.probabilityReconciliation - 1) > 1e-12)
+    throw new Error(
+      `Exact probability reconciled to ${exact.probabilityReconciliation}, expected 1`,
+    );
+  const simulation = runSimulation(
+    config,
+    { spins: 1_000_000, seed: 2026, betCredits: config.totalBetCredits },
+    new SeededRandom(2026),
+  );
+  const hybrid: ExactMathReport = {
+    ...exact,
+    methodology: 'hybrid',
+    creditedTotalRtp: simulation.creditedTotalRtp,
+    creditedTotalRtpMethodology: 'monte-carlo-estimate',
+    estimatedCapReductionRtp: simulation.uncappedTotalRtp - simulation.creditedTotalRtp,
+  };
+  const reports = resolve(process.cwd(), 'math/reports');
+  await mkdir(reports, { recursive: true });
+  await Promise.all([
+    writeFile(
+      resolve(reports, 'lucky888-balanced-base-v1-exact.json'),
+      `${JSON.stringify(hybrid, null, 2)}\n`,
+    ),
+    writeFile(
+      resolve(reports, 'lucky888-balanced-base-v1-par.md'),
+      parReport(config, hybrid, simulation),
+    ),
+    writeFile(
+      resolve(reports, 'lucky888-balance-comparison.md'),
+      balanceComparison(hybrid, simulation),
+    ),
+  ]);
+  console.log(
+    `Exact ${exact.totalPaidSpinCombinations.toLocaleString()} combinations: uncapped RTP ${formatPercentRatio(exact.uncappedTotalRtp, 6)}, trigger ${formatPercentRatio(exact.triggerFrequency, 6)}.`,
+  );
+  console.log(`PAR report: ${resolve(reports, 'lucky888-balanced-base-v1-par.md')}`);
+}
+
+const DEFAULT_DEPENDENCIES: EnumerationCliDependencies = {
+  loadSource: loadSourceConfig,
+  validate: validateConfig,
+  enumerate: enumerateExact,
+  runLegacy: runLegacyEnumeration,
+  log: console.log,
 };
-const reports = resolve(process.cwd(), 'math/reports');
-await mkdir(reports, { recursive: true });
-await Promise.all([
-  writeFile(
-    resolve(reports, 'lucky888-balanced-base-v1-exact.json'),
-    `${JSON.stringify(hybrid, null, 2)}\n`,
-  ),
-  writeFile(
-    resolve(reports, 'lucky888-balanced-base-v1-par.md'),
-    parReport(config, hybrid, simulation),
-  ),
-  writeFile(
-    resolve(reports, 'lucky888-balance-comparison.md'),
-    balanceComparison(hybrid, simulation),
-  ),
-]);
-console.log(
-  `Exact ${exact.totalPaidSpinCombinations.toLocaleString()} combinations: uncapped RTP ${formatPercentRatio(exact.uncappedTotalRtp, 6)}, trigger ${formatPercentRatio(exact.triggerFrequency, 6)}.`,
-);
-console.log(`PAR report: ${resolve(reports, 'lucky888-balanced-base-v1-par.md')}`);
+
+export async function runEnumerationCli(
+  dependencies: EnumerationCliDependencies = DEFAULT_DEPENDENCIES,
+): Promise<'completed' | 'not-applicable'> {
+  const { config, sourceHash } = await dependencies.loadSource();
+  const issues = dependencies.validate(config, 'math/source');
+  if (issues.length > 0)
+    throw new Error(`Enumeration stopped: ${issues.length} validation issue(s)`);
+
+  if (config.cascades?.enabled === true) {
+    dependencies.log(`LUCKY888 Exact Enumeration
+
+Configuration: ${config.configurationId}
+Cascades: enabled
+
+Exact enumeration: SKIPPED
+
+Exact enumeration currently supports non-cascading profiles only.
+Cascade refill introduces additional RNG draws and variable-length resolution sequences.
+
+Use deterministic Monte Carlo for this profile:
+
+npm run math:report -- --spins 1000000 --seed 2026
+
+Status: NOT APPLICABLE`);
+    return 'not-applicable';
+  }
+
+  const exact = dependencies.enumerate(config, sourceHash);
+  await dependencies.runLegacy(config, sourceHash, exact);
+  return 'completed';
+}
+
+const entryPath = process.argv[1];
+if (entryPath && import.meta.url === pathToFileURL(resolve(entryPath)).href)
+  await runEnumerationCli();

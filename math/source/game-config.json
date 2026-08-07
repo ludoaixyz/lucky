@@ -12,6 +12,11 @@
   "maximumWinCredits": 5000,
   "maximumWinScope": "paid-spin-including-feature",
   "selectedRtpProfile": "lucky888-balanced-base-v1",
+  "cascades": {
+    "enabled": true,
+    "scatterEvaluation": "initial-grid-only",
+    "maximumCascadesPerSpin": 100
+  },
   "simulationMetadata": { "defaultSpins": 1000000, "defaultSeed": 2026 },
   "notes": "Provisional balanced engineering profile; not a certification claim."
 }

@@ -205,6 +205,15 @@ function checkpointDeviation(value: number, locale: DashboardLocale): string {
   return `${sign}${formatDecimal(value * 100, locale, 4)} pp`;
 }
 
+function checkpointReferenceLabel(
+  report: SimulationReport,
+  translations: DashboardTranslations,
+): string {
+  return report.cascadeEnabled === true && report.exactEnumeration === null
+    ? translations.dashboard.monteCarloRtpReference
+    : translations.dashboard.theoreticalRtp;
+}
+
 function checkpointSection(
   report: SimulationReport,
   model: CheckpointViewModel,
@@ -216,6 +225,7 @@ function checkpointSection(
       <div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.cumulativeSimulation)}</p><h2 id="checkpoint-heading">${escapeHtml(translations.dashboard.simulationCheckpoints)}</h2></div>
       <p class="notice">${escapeHtml(translations.dashboard.checkpointCompatibilityWarning)}</p>
     </section>`;
+  const referenceLabel = checkpointReferenceLabel(report, translations);
   const rows = model.tableRows
     .map(
       (checkpoint) => `<tr>
@@ -234,7 +244,7 @@ function checkpointSection(
     <div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.cumulativeSimulation)}</p><h2 id="checkpoint-heading">${escapeHtml(translations.dashboard.simulationCheckpoints)}</h2><p>${escapeHtml(translations.dashboard.maximumSimulatedBets)}: ${formatInteger(report.maxSimulatedBets ?? report.paidSpins, locale)}</p></div>
     ${model.isCanonical ? '' : `<p class="notice">${escapeHtml(translations.dashboard.checkpointCompatibilityWarning)}</p>`}
     <article class="chart-card checkpoint-chart"><h3>${escapeHtml(translations.charts.convergence)}</h3><div id="checkpoint-convergence-chart" class="chart-surface"></div></article>
-    <div class="table-scroll checkpoint-table"><table><thead><tr><th>${escapeHtml(translations.dashboard.numberOfBets)}</th><th>${escapeHtml(translations.dashboard.simulatedRtp)}</th><th>${escapeHtml(translations.dashboard.theoreticalRtp)}</th><th>${escapeHtml(translations.dashboard.rtpDeviation)}</th><th>${escapeHtml(translations.metrics.hitFrequency)}</th><th>${escapeHtml(translations.dashboard.bonusFrequency)}</th><th>${escapeHtml(translations.dashboard.maxWin)}</th><th>${escapeHtml(translations.dashboard.confidenceInterval95)}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="table-scroll checkpoint-table"><table><thead><tr><th>${escapeHtml(translations.dashboard.numberOfBets)}</th><th>${escapeHtml(translations.dashboard.simulatedRtp)}</th><th>${escapeHtml(referenceLabel)}</th><th>${escapeHtml(translations.dashboard.rtpDeviation)}</th><th>${escapeHtml(translations.metrics.hitFrequency)}</th><th>${escapeHtml(translations.dashboard.bonusFrequency)}</th><th>${escapeHtml(translations.dashboard.maxWin)}</th><th>${escapeHtml(translations.dashboard.confidenceInterval95)}</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="notice convergence-interpretation">${escapeHtml(translations.dashboard.convergenceInterpretation)}</p>
   </section>`;
 }
@@ -416,6 +426,53 @@ function renderDashboard(): void {
       translations.templates.capApplications(formatInteger(report.capApplications, currentLocale)),
     ],
   ];
+  const cascadeKpis: readonly [string, string, string][] =
+    report.cascadeEnabled === true
+      ? [
+          [
+            translations.metrics.cascadeRate,
+            formatPercent(report.cascadeSpinRate ?? 0, currentLocale),
+            translations.metricDescriptions.cascadeRate,
+          ],
+          [
+            translations.metrics.averageCascadesWhenTriggered,
+            formatDecimal(report.averageCascadeStepsWhenTriggered ?? 0, currentLocale, 2),
+            translations.metricDescriptions.averageCascadesWhenTriggered,
+          ],
+          [
+            translations.metrics.averageCascadesPerPaidSpin,
+            formatDecimal(report.averageCascadeStepsPerPaidSpin ?? 0, currentLocale, 2),
+            translations.metricDescriptions.averageCascadesPerPaidSpin,
+          ],
+          [
+            translations.metrics.maximumCascadeChain,
+            formatInteger(report.maxCascadeDepthObserved ?? 0, currentLocale),
+            translations.metricDescriptions.maximumCascadeChain,
+          ],
+          [
+            translations.metrics.cascadeRtpContribution,
+            formatPercent(report.cascadeRtpContribution ?? 0, currentLocale),
+            translations.metricDescriptions.cascadeRtpContribution,
+          ],
+          [
+            translations.metrics.baseGameCascadeRate,
+            formatPercent(report.baseGameCascadeSpinRate ?? 0, currentLocale),
+            translations.metricDescriptions.baseGameCascadeRate,
+          ],
+          [
+            translations.metrics.freeSpinCascadeRate,
+            formatPercent(report.freeSpinCascadeSpinRate ?? 0, currentLocale),
+            translations.metricDescriptions.freeSpinCascadeRate,
+          ],
+          [
+            translations.metrics.cascadePayout,
+            translations.templates.credits(
+              formatInteger(report.cascadePayoutCredits ?? 0, currentLocale),
+            ),
+            translations.metricDescriptions.cascadePayout,
+          ],
+        ]
+      : [];
   app.innerHTML = `
     <header class="dashboard-header">
       <div><p class="eyebrow">${escapeHtml(translations.dashboard.simulationManagement)}</p><h1>LUCKY888 <span>— ${escapeHtml(t(currentLocale, 'dashboard.title'))}</span></h1></div>
@@ -450,6 +507,7 @@ function renderDashboard(): void {
       <section aria-labelledby="kpi-heading"><div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.executiveView)}</p><h2 id="kpi-heading">${escapeHtml(t(currentLocale, 'dashboard.keyPerformanceIndicators'))}</h2></div>
         <div class="kpi-grid">${kpis.map(([label, value, detail]) => `<article class="kpi-card"><h3>${escapeHtml(label)}</h3><strong>${escapeHtml(value)}</strong><p>${escapeHtml(detail)}</p></article>`).join('')}</div>
       </section>
+      ${cascadeKpis.length === 0 ? '' : `<section aria-labelledby="cascade-heading"><div class="section-heading"><h2 id="cascade-heading">${escapeHtml(translations.metrics.cascades)}</h2></div><div class="kpi-grid">${cascadeKpis.map(([label, value, detail]) => `<article class="kpi-card"><h3>${escapeHtml(label)}</h3><strong>${escapeHtml(value)}</strong><p>${escapeHtml(detail)}</p></article>`).join('')}</div></section>`}
       <section class="summary-card"><p class="eyebrow">${escapeHtml(translations.dashboard.plainLanguageSummary)}</p><p>${escapeHtml(summary)}</p></section>
       <section aria-labelledby="targets-heading"><div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.provisionalTargets)}</p><h2 id="targets-heading">${escapeHtml(translations.dashboard.managementTargetAssessment)}</h2><p>${escapeHtml(translations.dashboard.complianceNote)}</p></div>
         <div class="table-scroll"><table><thead><tr><th>${escapeHtml(translations.dashboard.metric)}</th><th>${escapeHtml(translations.dashboard.result)}</th><th>${escapeHtml(translations.dashboard.target)}</th><th>${escapeHtml(translations.dashboard.status)}</th><th>${escapeHtml(translations.dashboard.interpretation)}</th></tr></thead><tbody>${targetRows(targets, currentLocale, translations)}</tbody></table></div>
@@ -602,7 +660,8 @@ function renderCharts(
   const checkpointConvergence = document.querySelector<HTMLElement>(
     '#checkpoint-convergence-chart',
   );
-  if (checkpointConvergence && checkpointModel.checkpoints.length > 0)
+  if (checkpointConvergence && checkpointModel.checkpoints.length > 0) {
+    const referenceLabel = checkpointReferenceLabel(report, translations);
     renderCheckpointConvergenceChart(
       checkpointConvergence,
       checkpointModel.checkpoints.map((checkpoint, index) => {
@@ -619,17 +678,19 @@ function renderCharts(
           tooltip: translations.templates.checkpointAria(
             bets,
             simulatedRtp,
+            referenceLabel,
             theoreticalRtp,
             deviation,
           ),
         };
       }),
-      `${translations.dashboard.theoreticalRtp} ${formatPercent(
+      `${referenceLabel} ${formatPercent(
         report.theoreticalRtp ?? checkpointModel.checkpoints[0]?.theoreticalRtp ?? 0,
         locale,
         4,
       )}`,
     );
+  }
 }
 
 async function addUpload(file: File): Promise<void> {

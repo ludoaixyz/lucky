@@ -58,6 +58,14 @@ function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
     throw new Error('config.totalBetCredits must be positive');
   if ((config.maximumWinCredits as number) < 0)
     throw new Error('config.maximumWinCredits must be non-negative');
+  if (config.cascades !== undefined) {
+    const cascades = record(config.cascades, 'config.cascades');
+    booleanField(cascades.enabled, 'config.cascades.enabled');
+    if (cascades.scatterEvaluation !== undefined)
+      stringField(cascades.scatterEvaluation, 'config.cascades.scatterEvaluation');
+    if (cascades.maximumCascadesPerSpin !== undefined)
+      integerField(cascades.maximumCascadesPerSpin, 'config.cascades.maximumCascadesPerSpin');
+  }
 
   arrayField(config.symbols, 'config.symbols').forEach((value, index) => {
     const symbol = record(value, `config.symbols[${index}]`);

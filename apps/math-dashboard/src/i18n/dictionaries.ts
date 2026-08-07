@@ -70,6 +70,7 @@ const en = {
     numberOfBets: 'Number of Bets',
     simulatedRtp: 'Simulated RTP',
     theoreticalRtp: 'Theoretical RTP',
+    monteCarloRtpReference: 'Final Monte Carlo Estimate',
     rtpDeviation: 'RTP Deviation',
     bonusFrequency: 'Bonus Frequency',
     maxWin: 'Max Win',
@@ -99,6 +100,15 @@ const en = {
     baseHitFrequency: 'Base Hit Frequency',
     maximumObservedWinCredits: 'Maximum Observed Win',
     capFrequency: 'Cap Frequency',
+    cascadeRate: 'Cascade Rate',
+    averageCascadesWhenTriggered: 'Avg Cascades When Triggered',
+    maximumCascadeChain: 'Maximum Cascade Depth',
+    cascadeRtpContribution: 'Cascade RTP Contribution',
+    cascades: 'Cascades',
+    averageCascadesPerPaidSpin: 'Avg. Cascades per Paid Spin',
+    baseGameCascadeRate: 'Base Game Cascade Rate',
+    freeSpinCascadeRate: 'Free Spin Cascade Rate',
+    cascadePayout: 'Cascade Payout',
   },
   metricDescriptions: {
     creditedRtp: 'Estimated credited return',
@@ -113,6 +123,14 @@ const en = {
     standardDeviation: 'Bet-multiple return dispersion',
     maximumObservedWin: 'Highest observed paid-spin result',
     capHitFrequency: 'Observed maximum-win cap applications',
+    cascadeRate: 'Eligible spin resolutions producing another board',
+    averageCascadesWhenTriggered: 'Additional boards per triggered resolution',
+    maximumCascadeChain: 'Largest number of additional boards observed',
+    cascadeRtpContribution: 'Uncapped cascade-stage awards per paid wager',
+    averageCascadesPerPaidSpin: 'Additional boards per paid spin, including free-spin cascades',
+    baseGameCascadeRate: 'Paid spins producing at least one additional board',
+    freeSpinCascadeRate: 'Free spins producing at least one additional board',
+    cascadePayout: 'Uncapped awards from boards after the initial board',
   },
   targets: {
     creditedRtp: '94.00%–97.00%',
@@ -206,8 +224,8 @@ const en = {
     confidenceAria: (estimate, low, high) =>
       `Credited RTP estimate ${estimate}, 95% confidence interval ${low} to ${high}`,
     convergenceAria: (label, spins, rtp) => `${label}: ${spins} spins at ${rtp}`,
-    checkpointAria: (bets, simulatedRtp, theoreticalRtp, deviation) =>
-      `${bets} cumulative bets: simulated RTP ${simulatedRtp}, theoretical RTP ${theoreticalRtp}, deviation ${deviation}`,
+    checkpointAria: (bets, simulatedRtp, referenceLabel, referenceRtp, deviation) =>
+      `${bets} cumulative bets: simulated RTP ${simulatedRtp}, ${referenceLabel} ${referenceRtp}, deviation ${deviation}`,
     exportFooter: (language, reportId, exportedAt) =>
       `Language: ${language} · Report: ${reportId} · Exported: ${exportedAt}`,
   },
@@ -300,6 +318,7 @@ const ptBR = {
     numberOfBets: 'Número de Apostas',
     simulatedRtp: 'RTP Simulado',
     theoreticalRtp: 'RTP Teórico',
+    monteCarloRtpReference: 'Estimativa Final de Monte Carlo',
     rtpDeviation: 'Desvio do RTP',
     bonusFrequency: 'Frequência do Recurso',
     maxWin: 'Maior Prêmio',
@@ -329,6 +348,15 @@ const ptBR = {
     baseHitFrequency: 'Frequência de Acerto Base',
     maximumObservedWinCredits: 'Maior Prêmio Observado',
     capFrequency: 'Frequência do Limite',
+    cascadeRate: 'Taxa de Cascata',
+    averageCascadesWhenTriggered: 'Média de Cascatas Quando Acionadas',
+    maximumCascadeChain: 'Maior Cadeia de Cascatas',
+    cascadeRtpContribution: 'Contribuição das Cascatas ao RTP',
+    cascades: 'Cascatas',
+    averageCascadesPerPaidSpin: 'Média de Cascatas por Giro Pago',
+    baseGameCascadeRate: 'Taxa de Cascata do Jogo Base',
+    freeSpinCascadeRate: 'Taxa de Cascata dos Giros Grátis',
+    cascadePayout: 'Premiação de Cascatas',
   },
   metricDescriptions: {
     creditedRtp: 'Retorno creditado estimado',
@@ -343,6 +371,14 @@ const ptBR = {
     standardDeviation: 'Dispersão do retorno em múltiplos da aposta',
     maximumObservedWin: 'Maior resultado observado em um giro pago',
     capHitFrequency: 'Aplicações observadas do limite de prêmio máximo',
+    cascadeRate: 'Resoluções elegíveis que produziram outro tabuleiro',
+    averageCascadesWhenTriggered: 'Tabuleiros adicionais por resolução acionada',
+    maximumCascadeChain: 'Maior número observado de tabuleiros adicionais',
+    cascadeRtpContribution: 'Prêmios de cascatas sem limite por aposta paga',
+    averageCascadesPerPaidSpin: 'Tabuleiros adicionais por giro pago, incluindo giros grátis',
+    baseGameCascadeRate: 'Giros pagos que produziram ao menos um tabuleiro adicional',
+    freeSpinCascadeRate: 'Giros grátis que produziram ao menos um tabuleiro adicional',
+    cascadePayout: 'Prêmios sem limite originados após o tabuleiro inicial',
   },
   targets: {
     creditedRtp: '94,00%–97,00%',
@@ -437,8 +473,8 @@ const ptBR = {
     confidenceAria: (estimate, low, high) =>
       `Estimativa de RTP creditado ${estimate}, intervalo de confiança de 95% de ${low} a ${high}`,
     convergenceAria: (label, spins, rtp) => `${label}: ${spins} giros com RTP de ${rtp}`,
-    checkpointAria: (bets, simulatedRtp, theoreticalRtp, deviation) =>
-      `${bets} apostas cumulativas: RTP simulado ${simulatedRtp}, RTP teórico ${theoreticalRtp}, desvio ${deviation}`,
+    checkpointAria: (bets, simulatedRtp, referenceLabel, referenceRtp, deviation) =>
+      `${bets} apostas cumulativas: RTP simulado ${simulatedRtp}, ${referenceLabel} ${referenceRtp}, desvio ${deviation}`,
     exportFooter: (language, reportId, exportedAt) =>
       `Idioma: ${language} · Relatório: ${reportId} · Exportado em: ${exportedAt}`,
   },
@@ -527,6 +563,7 @@ const zhCN = {
     numberOfBets: '投注次数',
     simulatedRtp: '模拟 RTP',
     theoreticalRtp: '理论 RTP',
+    monteCarloRtpReference: '蒙特卡洛最终估计值',
     rtpDeviation: 'RTP 偏差',
     bonusFrequency: '免费旋转触发频率',
     maxWin: '最高派彩',
@@ -556,6 +593,15 @@ const zhCN = {
     baseHitFrequency: '基础游戏命中频率',
     maximumObservedWinCredits: '模拟观测最高派彩',
     capFrequency: '封顶触发频率',
+    cascadeRate: '连消触发率',
+    averageCascadesWhenTriggered: '触发时平均连消次数',
+    maximumCascadeChain: '最长连消链',
+    cascadeRtpContribution: '连消 RTP 贡献',
+    cascades: '连消',
+    averageCascadesPerPaidSpin: '每次付费旋转平均连消次数',
+    baseGameCascadeRate: '基础游戏连消触发率',
+    freeSpinCascadeRate: '免费旋转连消触发率',
+    cascadePayout: '连消派彩',
   },
   metricDescriptions: {
     creditedRtp: '应用最高赢额限制后，实际计入玩家余额的估算回报率',
@@ -570,6 +616,14 @@ const zhCN = {
     standardDeviation: '以投注倍数计的回报离散程度',
     maximumObservedWin: '本次模拟中观测到的最高单次付费旋转总派彩',
     capHitFrequency: '触发最高赢额限制的付费旋转比例',
+    cascadeRate: '产生额外盘面的合资格旋转结算比例',
+    averageCascadesWhenTriggered: '每次触发结算产生的平均额外盘面数',
+    maximumCascadeChain: '观察到的最大额外盘面数',
+    cascadeRtpContribution: '未封顶连消阶段派彩占付费投注的比例',
+    averageCascadesPerPaidSpin: '每次付费旋转产生的额外盘面数，包含免费旋转内的连消',
+    baseGameCascadeRate: '产生至少一个额外盘面的付费旋转比例',
+    freeSpinCascadeRate: '产生至少一个额外盘面的免费旋转比例',
+    cascadePayout: '初始盘面之后各连消盘面产生的未封顶派彩',
   },
   targets: {
     creditedRtp: '94.00%–97.00%',
@@ -672,8 +726,8 @@ const zhCN = {
     confidenceAria: (estimate, low, high) =>
       `封顶后 RTP 估计值 ${estimate}，95% 置信区间为 ${low} 至 ${high}`,
     convergenceAria: (label, spins, rtp) => `${label}：${spins} 次付费旋转，RTP 为 ${rtp}`,
-    checkpointAria: (bets, simulatedRtp, theoreticalRtp, deviation) =>
-      `${bets} 次累计投注：模拟 RTP ${simulatedRtp}，理论 RTP ${theoreticalRtp}，偏差 ${deviation}`,
+    checkpointAria: (bets, simulatedRtp, referenceLabel, referenceRtp, deviation) =>
+      `${bets} 次累计投注：模拟 RTP ${simulatedRtp}，${referenceLabel} ${referenceRtp}，偏差 ${deviation}`,
     exportFooter: (language, reportId, exportedAt) =>
       `报告语言：${language} · 配置：${reportId} · 导出时间：${exportedAt}`,
   },
