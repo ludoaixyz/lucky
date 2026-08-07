@@ -27,3 +27,19 @@ The flag icons are local SVG assets under `apps/game/public/assets/flags`. HTML 
 6. Run `npm run validate` and manually verify the selector, active sequences, payline highlights, diagnostic history, refresh persistence, and browser console.
 
 Do not store rendered sentences as game or diagnostic state. Add a typed message key and parameters, then render it with the current locale. This keeps existing history and in-progress status re-translatable.
+
+## Math dashboard Simplified Chinese glossary
+
+The Math Performance Dashboard has its own typed dictionaries under `apps/math-dashboard/src/i18n`. Dashboard report data remains language-neutral; chart labels, summaries, interpretations, errors, accessibility text, and export metadata are rendered from semantic keys after a locale is selected.
+
+Use the following domain terminology for `zh-CN`:
+
+- `封顶后 RTP` is the estimated RTP after the maximum-win limit has been applied to the payout credited to the simulated player balance. It is distinct from `未封顶 RTP`, even when no cap application occurred and the values are equal.
+- Use `免费旋转` for this game's specific free-spin mechanic. Reserve `奖励功能` for a genuinely generic bonus-feature abstraction; never use bare `功能` as the visible name of the mechanic.
+- Use `回本频率` for the probability that a paid spin returns at least one times the wager. It does not imply a strictly profitable result.
+- Metrics measured in counts of free spins use `局数` and `局免费旋转`, never `时长`, because they do not measure elapsed time.
+- Use `正派彩频率`, `模拟观测最高派彩`, and `封顶触发频率` for the corresponding award-frequency, maximum-observed-win, and cap-application concepts.
+
+Simplified Chinese translations must be reviewed as complete domain-specific phrases. Do not assemble Chinese sentences by concatenating independently translated English fragments.
+
+Interactive language controls are marked `no-export` and must remain absent from PDF and PNG snapshots. Static exports identify their language through localized footer metadata such as `报告语言：简体中文`; they must not resemble an interactive interface.

@@ -1,3 +1,5 @@
+import type { DashboardLocale } from '../i18n/types.js';
+
 export interface PayoutBucket {
   readonly label: string;
   readonly minimumMultiple: number;
@@ -53,6 +55,7 @@ export interface SimulationReport {
   readonly capApplicationFrequency: number;
   readonly payoutDistribution: readonly PayoutBucket[];
   readonly baseBetCredits?: number;
+  readonly dashboardLocale?: DashboardLocale;
 }
 
 export interface ReportIndexEntry {

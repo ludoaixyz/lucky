@@ -79,6 +79,13 @@ export function renderConfidenceChart(
   estimate: number,
   interval: readonly [number, number],
   target: readonly [number, number],
+  labels: {
+    readonly ariaLabel: string;
+    readonly estimate: string;
+    readonly low: string;
+    readonly high: string;
+    readonly targetBand: string;
+  },
 ): void {
   container.replaceChildren();
   const width = 640;
@@ -89,7 +96,7 @@ export function renderConfidenceChart(
   const svg = svgElement('svg', {
     viewBox: `0 0 ${width} ${height}`,
     role: 'img',
-    'aria-label': `Credited RTP estimate ${(estimate * 100).toFixed(2)}%, 95% confidence interval ${(interval[0] * 100).toFixed(2)}% to ${(interval[1] * 100).toFixed(2)}%`,
+    'aria-label': labels.ariaLabel,
   });
   svg.append(
     svgElement('rect', {
@@ -111,18 +118,24 @@ export function renderConfidenceChart(
     }),
   );
   svg.append(svgElement('circle', { cx: scale(estimate), cy: 76, r: 9, class: 'estimate-point' }));
-  svg.append(textNode(`${(interval[0] * 100).toFixed(2)}%`, scale(interval[0]), 125, 'axis-label'));
-  svg.append(
-    textNode(`Estimate ${(estimate * 100).toFixed(2)}%`, scale(estimate), 30, 'value-label'),
-  );
-  svg.append(textNode(`${(interval[1] * 100).toFixed(2)}%`, scale(interval[1]), 125, 'axis-label'));
-  svg.append(textNode('Gold band: provisional 94%–97% target', width / 2, 160, 'chart-note'));
+  svg.append(textNode(labels.low, scale(interval[0]), 125, 'axis-label'));
+  svg.append(textNode(labels.estimate, scale(estimate), 30, 'value-label'));
+  svg.append(textNode(labels.high, scale(interval[1]), 125, 'axis-label'));
+  svg.append(textNode(labels.targetBand, width / 2, 160, 'chart-note'));
   container.append(svg);
 }
 
 export function renderConvergenceChart(
   container: HTMLElement,
-  points: readonly { readonly label: string; readonly spins: number; readonly rtp: number }[],
+  points: readonly {
+    readonly label: string;
+    readonly spins: number;
+    readonly rtp: number;
+    readonly spinsDisplay: string;
+    readonly compactSpinsDisplay: string;
+    readonly rtpDisplay: string;
+    readonly ariaLabel: string;
+  }[],
 ): void {
   container.replaceChildren();
   const sorted = [...points].sort((a, b) => a.spins - b.spins);
@@ -142,9 +155,7 @@ export function renderConvergenceChart(
   const svg = svgElement('svg', {
     viewBox: `0 0 ${width} ${height}`,
     role: 'img',
-    'aria-label': sorted
-      .map((point) => `${point.label}: ${point.spins} spins at ${(point.rtp * 100).toFixed(2)}%`)
-      .join(', '),
+    'aria-label': sorted.map((point) => point.ariaLabel).join(', '),
   });
   svg.append(
     svgElement('line', {
@@ -165,22 +176,8 @@ export function renderConvergenceChart(
     svg.append(
       svgElement('circle', { cx: x(point.spins), cy: y(point.rtp), r: 7, class: 'estimate-point' }),
     );
-    svg.append(
-      textNode(
-        `${(point.rtp * 100).toFixed(2)}%`,
-        x(point.spins),
-        y(point.rtp) - 13,
-        'value-label',
-      ),
-    );
-    svg.append(
-      textNode(
-        new Intl.NumberFormat('en-US', { notation: 'compact' }).format(point.spins),
-        x(point.spins),
-        height - 22,
-        'axis-label',
-      ),
-    );
+    svg.append(textNode(point.rtpDisplay, x(point.spins), y(point.rtp) - 13, 'value-label'));
+    svg.append(textNode(point.compactSpinsDisplay, x(point.spins), height - 22, 'axis-label'));
   }
   container.append(svg);
 }

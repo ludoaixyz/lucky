@@ -4,28 +4,68 @@ import {
 } from '../config/management-targets.js';
 import type { LoadedReport, SimulationReport, Status } from '../types/simulation-report.js';
 
+export type ReconciliationKey =
+  | 'creditedRtp'
+  | 'uncappedRtp'
+  | 'payoutComponents'
+  | 'capEquation'
+  | 'bucketCounts'
+  | 'bucketProbabilities';
+
 export interface ReconciliationCheck {
-  readonly label: string;
+  readonly key: ReconciliationKey;
   readonly expected: number;
   readonly reported: number;
   readonly status: 'PASS' | 'FAIL';
 }
 
+export type TargetKey =
+  | 'creditedRtp'
+  | 'baseHitFrequency'
+  | 'featureOccurrence'
+  | 'averageFeatureLength'
+  | 'p95FeatureLength'
+  | 'capHitFrequency';
+
 export interface TargetEvaluation {
-  readonly metric: string;
-  readonly result: string;
-  readonly target: string;
+  readonly key: TargetKey;
+  readonly value: number;
   readonly status: Status;
-  readonly interpretation: string;
 }
+
+export type RiskKey =
+  | 'none'
+  | 'rtpOutside'
+  | 'confidenceCrosses'
+  | 'featureFrequencyOutside'
+  | 'featureDurationOutside'
+  | 'p95Above'
+  | 'capApplications'
+  | 'featureCapHits'
+  | 'smokeSample'
+  | 'limitedSample'
+  | 'reconciliationFailure';
 
 export interface RiskFlag {
   readonly status: 'WARN' | 'FAIL' | 'INFO';
-  readonly message: string;
+  readonly key: RiskKey;
+  readonly count?: number;
 }
 
+export type ComparisonMetricKey =
+  | 'creditedRtp'
+  | 'baseRtp'
+  | 'featureRtp'
+  | 'hitFrequency'
+  | 'featureFrequency'
+  | 'averageFeatureLength'
+  | 'p95FeatureLength'
+  | 'standardDeviation'
+  | 'maximumObservedWinCredits'
+  | 'capFrequency';
+
 export interface ComparisonRow {
-  readonly metric: string;
+  readonly key: ComparisonMetricKey;
   readonly a: number;
   readonly b: number;
   readonly absoluteDifference: number;
@@ -35,16 +75,6 @@ export interface ComparisonRow {
 
 const close = (left: number, right: number, tolerance = 1e-9): boolean =>
   Math.abs(left - right) <= tolerance * Math.max(1, Math.abs(left), Math.abs(right));
-
-export const percentage = (value: number, digits = 2): string =>
-  new Intl.NumberFormat('en-US', {
-    style: 'percent',
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(value);
-
-export const number = (value: number, digits = 2): string =>
-  new Intl.NumberFormat('en-US', { maximumFractionDigits: digits }).format(value);
 
 export function featureFrequencyOdds(report: SimulationReport): number {
   return report.featureTriggerFrequency > 0 ? 1 / report.featureTriggerFrequency : Infinity;
@@ -58,7 +88,7 @@ export function maximumWinMultiple(report: SimulationReport): number {
   return report.maximumObservedWinCredits / baseBetCredits(report);
 }
 
-export function betReturnFrequency(report: SimulationReport): number {
+export function netReturnFrequency(report: SimulationReport): number {
   return (
     report.payoutDistribution
       .filter((bucket) => bucket.minimumMultiple >= 1)
@@ -72,19 +102,19 @@ export function reconcileReport(report: SimulationReport): readonly Reconciliati
     (sum, bucket) => sum + bucket.probability,
     0,
   );
-  const checks = [
+  const checks: readonly Omit<ReconciliationCheck, 'status'>[] = [
     {
-      label: 'Credited RTP = credited payout ÷ wagered',
+      key: 'creditedRtp',
       expected: report.creditedTotalPayoutCredits / report.totalWageredCredits,
       reported: report.creditedTotalRtp,
     },
     {
-      label: 'Uncapped RTP = uncapped payout ÷ wagered',
+      key: 'uncappedRtp',
       expected: report.uncappedTotalPayoutCredits / report.totalWageredCredits,
       reported: report.uncappedTotalRtp,
     },
     {
-      label: 'Base line + Scatter + feature = uncapped payout',
+      key: 'payoutComponents',
       expected:
         report.uncappedBaseLinePayoutCredits +
         report.uncappedBaseScatterPayoutCredits +
@@ -92,16 +122,12 @@ export function reconcileReport(report: SimulationReport): readonly Reconciliati
       reported: report.uncappedTotalPayoutCredits,
     },
     {
-      label: 'Credited payout + cap reduction = uncapped payout',
+      key: 'capEquation',
       expected: report.creditedTotalPayoutCredits + report.capReductionCredits,
       reported: report.uncappedTotalPayoutCredits,
     },
-    {
-      label: 'Payout bucket counts = paid spins',
-      expected: report.paidSpins,
-      reported: totalBucketCount,
-    },
-    { label: 'Payout bucket probabilities sum to 1', expected: 1, reported: totalProbability },
+    { key: 'bucketCounts', expected: report.paidSpins, reported: totalBucketCount },
+    { key: 'bucketProbabilities', expected: 1, reported: totalProbability },
   ];
   return checks.map((check) => ({
     ...check,
@@ -118,74 +144,64 @@ export function evaluateTargets(report: SimulationReport): readonly TargetEvalua
   const targets = MANAGEMENT_TARGETS;
   return [
     {
-      metric: 'Credited RTP',
-      result: percentage(report.creditedTotalRtp),
-      target: '94.00%–97.00%',
+      key: 'creditedRtp',
+      value: report.creditedTotalRtp,
       status: rangeStatus(
         report.creditedTotalRtp,
         targets.creditedRtp.minimum,
         targets.creditedRtp.maximum,
       ),
-      interpretation: 'Estimated credited return against the provisional balancing range.',
     },
     {
-      metric: 'Base hit frequency',
-      result: percentage(report.baseHitFrequency),
-      target: '20.00%–35.00%',
+      key: 'baseHitFrequency',
+      value: report.baseHitFrequency,
       status: rangeStatus(
         report.baseHitFrequency,
         targets.baseHitFrequency.minimum,
         targets.baseHitFrequency.maximum,
       ),
-      interpretation: 'Share of paid spins with a base-game award.',
     },
     {
-      metric: 'Feature occurrence',
-      result: `1 in ${number(odds, 1)}`,
-      target: '1 in 80–150 paid spins',
+      key: 'featureOccurrence',
+      value: odds,
       status: rangeStatus(
         odds,
         targets.featureOccurrenceOdds.minimum,
         targets.featureOccurrenceOdds.maximum,
       ),
-      interpretation: 'Estimated interval between feature triggers.',
     },
     {
-      metric: 'Average feature length',
-      result: number(report.averageTotalFreeSpinsPerTrigger),
-      target: '9–14 free spins',
+      key: 'averageFeatureLength',
+      value: report.averageTotalFreeSpinsPerTrigger,
       status: rangeStatus(
         report.averageTotalFreeSpinsPerTrigger,
         targets.averageFeatureLength.minimum,
         targets.averageFeatureLength.maximum,
       ),
-      interpretation: 'Average total free spins, including retriggers.',
     },
     {
-      metric: 'P95 feature length',
-      result: number(report.featureLengthPercentiles.p95, 0),
-      target: '< 30 free spins',
+      key: 'p95FeatureLength',
+      value: report.featureLengthPercentiles.p95,
       status:
         report.featureLengthPercentiles.p95 < targets.p95FeatureLengthMaximumExclusive
           ? 'PASS'
           : 'FAIL',
-      interpretation: 'Upper-tail feature duration for presentation planning.',
     },
     {
-      metric: 'Cap hit frequency',
-      result: percentage(report.capApplicationFrequency, 4),
-      target: 'Effectively zero',
+      key: 'capHitFrequency',
+      value: report.capApplicationFrequency,
       status: report.capApplicationFrequency <= targets.capHitFrequencyMaximum ? 'PASS' : 'FAIL',
-      interpretation: 'Observed paid-spin outcomes reduced by the maximum-win cap.',
     },
   ];
 }
 
-export function sampleSizeGuidance(paidSpins: number): string {
-  if (paidSpins < 10_000) return 'Smoke test only';
-  if (paidSpins < 100_000) return 'Early design check';
-  if (paidSpins < 1_000_000) return 'Useful balancing evidence';
-  return 'Management review-quality Monte Carlo estimate';
+export type SampleGuidanceKey = 'smoke' | 'early' | 'useful' | 'management';
+
+export function sampleSizeGuidance(paidSpins: number): SampleGuidanceKey {
+  if (paidSpins < 10_000) return 'smoke';
+  if (paidSpins < 100_000) return 'early';
+  if (paidSpins < 1_000_000) return 'useful';
+  return 'management';
 }
 
 export function riskFlags(report: SimulationReport): readonly RiskFlag[] {
@@ -195,47 +211,28 @@ export function riskFlags(report: SimulationReport): readonly RiskFlag[] {
     report.creditedTotalRtp < targets.creditedRtp.minimum ||
     report.creditedTotalRtp > targets.creditedRtp.maximum
   )
-    flags.push({
-      status: 'FAIL',
-      message: 'Credited RTP is outside the provisional target range.',
-    });
+    flags.push({ status: 'FAIL', key: 'rtpOutside' });
   const [low, high] = report.confidenceInterval95;
   if (low < targets.creditedRtp.minimum || high > targets.creditedRtp.maximum)
-    flags.push({
-      status: 'WARN',
-      message: 'The 95% confidence interval crosses an RTP target boundary.',
-    });
+    flags.push({ status: 'WARN', key: 'confidenceCrosses' });
   const odds = featureFrequencyOdds(report);
   if (odds < targets.featureOccurrenceOdds.minimum || odds > targets.featureOccurrenceOdds.maximum)
-    flags.push({
-      status: 'FAIL',
-      message: 'Feature occurrence is outside the provisional target range.',
-    });
+    flags.push({ status: 'FAIL', key: 'featureFrequencyOutside' });
   if (
     report.averageTotalFreeSpinsPerTrigger < targets.averageFeatureLength.minimum ||
     report.averageTotalFreeSpinsPerTrigger > targets.averageFeatureLength.maximum
   )
-    flags.push({ status: 'FAIL', message: 'Average feature duration is outside target.' });
+    flags.push({ status: 'FAIL', key: 'featureDurationOutside' });
   if (report.featureLengthPercentiles.p95 >= targets.p95FeatureLengthMaximumExclusive)
-    flags.push({ status: 'FAIL', message: 'P95 feature duration is above target.' });
+    flags.push({ status: 'FAIL', key: 'p95Above' });
   if (report.capApplications > 0)
-    flags.push({
-      status: 'WARN',
-      message: `${number(report.capApplications, 0)} cap applications were observed.`,
-    });
-  if (report.featureCapHitFrequency > 0)
-    flags.push({ status: 'WARN', message: 'Feature cap hits were observed.' });
-  if (report.paidSpins < 10_000)
-    flags.push({
-      status: 'WARN',
-      message: 'Smoke-test-only sample: fewer than 10,000 paid spins.',
-    });
-  else if (report.paidSpins < 100_000)
-    flags.push({ status: 'WARN', message: 'Limited sample: fewer than 100,000 paid spins.' });
+    flags.push({ status: 'WARN', key: 'capApplications', count: report.capApplications });
+  if (report.featureCapHitFrequency > 0) flags.push({ status: 'WARN', key: 'featureCapHits' });
+  if (report.paidSpins < 10_000) flags.push({ status: 'WARN', key: 'smokeSample' });
+  else if (report.paidSpins < 100_000) flags.push({ status: 'WARN', key: 'limitedSample' });
   if (reconcileReport(report).some((check) => check.status === 'FAIL'))
-    flags.push({ status: 'FAIL', message: 'One or more report reconciliations failed.' });
-  if (flags.length === 0)
-    flags.push({ status: 'INFO', message: 'No current risk flags were triggered.' });
+    flags.push({ status: 'FAIL', key: 'reconciliationFailure' });
+  if (flags.length === 0) flags.push({ status: 'INFO', key: 'none' });
   return flags;
 }
 
@@ -246,37 +243,35 @@ export function overallStatus(report: SimulationReport): 'PASS' | 'WARN' | 'FAIL
   return 'PASS';
 }
 
-export function plainLanguageSummary(report: SimulationReport): string {
-  const targetResults = evaluateTargets(report);
-  const allMet = targetResults.every((target) => target.status === 'PASS');
-  return `The current profile returned an estimated ${percentage(report.creditedTotalRtp)} over ${number(report.paidSpins, 0)} simulated paid spins. Approximately ${percentage(report.featureInclusiveHitFrequency)} of spins produced an award. The feature occurred once every ${number(featureFrequencyOdds(report), 1)} spins and lasted ${number(report.averageTotalFreeSpinsPerTrigger, 1)} spins on average. The profile ${allMet ? 'met' : 'did not meet'} all current provisional targets.`;
+export function meetsAllTargets(report: SimulationReport): boolean {
+  return evaluateTargets(report).every((target) => target.status === 'PASS');
 }
 
 export function comparisonRows(a: SimulationReport, b: SimulationReport): readonly ComparisonRow[] {
-  const metrics: readonly [string, number, number, ComparisonRow['format']][] = [
-    ['Credited RTP', a.creditedTotalRtp, b.creditedTotalRtp, 'percent'],
-    ['Base RTP', a.uncappedBaseLineRtp, b.uncappedBaseLineRtp, 'percent'],
-    ['Feature RTP', a.uncappedFeatureRtp, b.uncappedFeatureRtp, 'percent'],
-    ['Hit frequency', a.featureInclusiveHitFrequency, b.featureInclusiveHitFrequency, 'percent'],
-    ['Feature frequency', a.featureTriggerFrequency, b.featureTriggerFrequency, 'percent'],
+  const metrics: readonly [ComparisonMetricKey, number, number, ComparisonRow['format']][] = [
+    ['creditedRtp', a.creditedTotalRtp, b.creditedTotalRtp, 'percent'],
+    ['baseRtp', a.uncappedBaseLineRtp, b.uncappedBaseLineRtp, 'percent'],
+    ['featureRtp', a.uncappedFeatureRtp, b.uncappedFeatureRtp, 'percent'],
+    ['hitFrequency', a.featureInclusiveHitFrequency, b.featureInclusiveHitFrequency, 'percent'],
+    ['featureFrequency', a.featureTriggerFrequency, b.featureTriggerFrequency, 'percent'],
     [
-      'Average feature length',
+      'averageFeatureLength',
       a.averageTotalFreeSpinsPerTrigger,
       b.averageTotalFreeSpinsPerTrigger,
       'number',
     ],
+    ['p95FeatureLength', a.featureLengthPercentiles.p95, b.featureLengthPercentiles.p95, 'number'],
+    ['standardDeviation', a.standardDeviation, b.standardDeviation, 'number'],
     [
-      'P95 feature length',
-      a.featureLengthPercentiles.p95,
-      b.featureLengthPercentiles.p95,
-      'number',
+      'maximumObservedWinCredits',
+      a.maximumObservedWinCredits,
+      b.maximumObservedWinCredits,
+      'credits',
     ],
-    ['Standard deviation', a.standardDeviation, b.standardDeviation, 'number'],
-    ['Maximum observed win', a.maximumObservedWinCredits, b.maximumObservedWinCredits, 'credits'],
-    ['Cap frequency', a.capApplicationFrequency, b.capApplicationFrequency, 'percent'],
+    ['capFrequency', a.capApplicationFrequency, b.capApplicationFrequency, 'percent'],
   ];
-  return metrics.map(([metric, left, right, format]) => ({
-    metric,
+  return metrics.map(([key, left, right, format]) => ({
+    key,
     a: left,
     b: right,
     absoluteDifference: right - left,
@@ -285,11 +280,9 @@ export function comparisonRows(a: SimulationReport, b: SimulationReport): readon
   }));
 }
 
-export function nestedSampleNotice(reports: readonly LoadedReport[]): string | null {
-  if (reports.length < 2) return null;
+export function isNestedDeterministicSamples(reports: readonly LoadedReport[]): boolean {
+  if (reports.length < 2) return false;
   const sameSeed = reports.every((entry) => entry.report.seed === reports[0]?.report.seed);
   const counts = new Set(reports.map((entry) => entry.report.paidSpins));
-  return sameSeed && counts.size > 1
-    ? 'These reports use the same seed with different spin counts and are nested deterministic samples, not independent runs.'
-    : null;
+  return sameSeed && counts.size > 1;
 }

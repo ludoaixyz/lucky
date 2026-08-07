@@ -1,8 +1,26 @@
 import type { PayoutBucket, SimulationReport } from '../types/simulation-report.js';
 
+export type ValidationIssueKey =
+  | 'malformedJson'
+  | 'rootObject'
+  | 'schemaVersion'
+  | 'methodology'
+  | 'requiredString'
+  | 'finiteNumber'
+  | 'positiveSpins'
+  | 'invalidNestedMetric'
+  | 'confidenceInterval'
+  | 'payoutDistribution';
+
+export interface ValidationIssue {
+  readonly key: ValidationIssueKey;
+  readonly field?: string;
+  readonly technicalDetail?: string;
+}
+
 export type ValidationResult =
   | { readonly ok: true; readonly report: SimulationReport }
-  | { readonly ok: false; readonly errors: readonly string[] };
+  | { readonly ok: false; readonly errors: readonly ValidationIssue[] };
 
 const numberFields = [
   'seed',
@@ -41,47 +59,49 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function validateBucket(value: unknown, index: number, errors: string[]): value is PayoutBucket {
+function validateBucket(
+  value: unknown,
+  index: number,
+  errors: ValidationIssue[],
+): value is PayoutBucket {
+  const prefix = `payoutDistribution[${index}]`;
   if (!isRecord(value)) {
-    errors.push(`payoutDistribution[${index}] must be an object.`);
+    errors.push({ key: 'invalidNestedMetric', field: prefix });
     return false;
   }
   if (typeof value.label !== 'string' || value.label.length === 0)
-    errors.push(`payoutDistribution[${index}].label must be a non-empty string.`);
-  for (const field of ['minimumMultiple', 'count', 'probability'] as const) {
+    errors.push({ key: 'requiredString', field: `${prefix}.label` });
+  for (const field of ['minimumMultiple', 'count', 'probability'] as const)
     if (typeof value[field] !== 'number' || !Number.isFinite(value[field]))
-      errors.push(`payoutDistribution[${index}].${field} must be a finite number.`);
-  }
+      errors.push({ key: 'finiteNumber', field: `${prefix}.${field}` });
   if (value.maximumMultiple !== null && !Number.isFinite(value.maximumMultiple))
-    errors.push(`payoutDistribution[${index}].maximumMultiple must be a number or null.`);
+    errors.push({ key: 'finiteNumber', field: `${prefix}.maximumMultiple` });
   return true;
 }
 
 export function validateSimulationReport(value: unknown): ValidationResult {
-  if (!isRecord(value)) return { ok: false, errors: ['Report root must be a JSON object.'] };
-  const errors: string[] = [];
+  if (!isRecord(value)) return { ok: false, errors: [{ key: 'rootObject' }] };
+  const errors: ValidationIssue[] = [];
   if (value.schemaVersion !== '1.2.0')
-    errors.push(`schemaVersion must be "1.2.0"; received ${String(value.schemaVersion)}.`);
+    errors.push({ key: 'schemaVersion', field: 'schemaVersion' });
   if (value.methodology !== 'deterministic-monte-carlo')
-    errors.push('methodology must be "deterministic-monte-carlo".');
-  for (const field of ['gameVersion', 'configurationId', 'generatedAt'] as const) {
+    errors.push({ key: 'methodology', field: 'methodology' });
+  for (const field of ['gameVersion', 'configurationId', 'generatedAt'] as const)
     if (typeof value[field] !== 'string' || value[field].length === 0)
-      errors.push(`${field} must be a non-empty string.`);
-  }
+      errors.push({ key: 'requiredString', field });
   if (typeof value.generatedAt === 'string' && Number.isNaN(Date.parse(value.generatedAt)))
-    errors.push('generatedAt must be a valid timestamp.');
-  for (const field of numberFields) {
+    errors.push({ key: 'requiredString', field: 'generatedAt' });
+  for (const field of numberFields)
     if (typeof value[field] !== 'number' || !Number.isFinite(value[field]))
-      errors.push(`${field} must be a finite number.`);
-  }
+      errors.push({ key: 'finiteNumber', field });
   if (
     typeof value.paidSpins === 'number' &&
     (!Number.isInteger(value.paidSpins) || value.paidSpins < 1)
   )
-    errors.push('paidSpins must be a positive integer.');
+    errors.push({ key: 'positiveSpins', field: 'paidSpins' });
   if (!isRecord(value.featureTriggerFrequencyByScatterCount))
-    errors.push('featureTriggerFrequencyByScatterCount must be an object.');
-  else {
+    errors.push({ key: 'invalidNestedMetric', field: 'featureTriggerFrequencyByScatterCount' });
+  else
     for (const key of Object.keys(value.featureTriggerFrequencyByScatterCount)) {
       const frequency = value.featureTriggerFrequencyByScatterCount[key];
       if (
@@ -89,25 +109,25 @@ export function validateSimulationReport(value: unknown): ValidationResult {
         typeof frequency !== 'number' ||
         !Number.isFinite(frequency)
       )
-        errors.push(
-          `featureTriggerFrequencyByScatterCount.${key} must be a finite 3/4/5 Scatter frequency.`,
-        );
+        errors.push({
+          key: 'invalidNestedMetric',
+          field: `featureTriggerFrequencyByScatterCount.${key}`,
+        });
     }
-  }
   if (!isRecord(value.featureLengthPercentiles))
-    errors.push('featureLengthPercentiles must be an object.');
+    errors.push({ key: 'invalidNestedMetric', field: 'featureLengthPercentiles' });
   else
     for (const field of percentileFields)
       if (typeof value.featureLengthPercentiles[field] !== 'number')
-        errors.push(`featureLengthPercentiles.${field} must be a number.`);
+        errors.push({ key: 'finiteNumber', field: `featureLengthPercentiles.${field}` });
   if (
     !Array.isArray(value.confidenceInterval95) ||
     value.confidenceInterval95.length !== 2 ||
     value.confidenceInterval95.some((entry) => typeof entry !== 'number' || !Number.isFinite(entry))
   )
-    errors.push('confidenceInterval95 must contain exactly two finite numbers.');
+    errors.push({ key: 'confidenceInterval', field: 'confidenceInterval95' });
   if (!Array.isArray(value.payoutDistribution) || value.payoutDistribution.length === 0)
-    errors.push('payoutDistribution must be a non-empty array.');
+    errors.push({ key: 'payoutDistribution', field: 'payoutDistribution' });
   else value.payoutDistribution.forEach((bucket, index) => validateBucket(bucket, index, errors));
   return errors.length > 0
     ? { ok: false, errors }
@@ -118,11 +138,13 @@ export function parseSimulationReport(json: string): ValidationResult {
   try {
     return validateSimulationReport(JSON.parse(json) as unknown);
   } catch (error: unknown) {
+    const issue: ValidationIssue =
+      error instanceof Error
+        ? { key: 'malformedJson', technicalDetail: error.message }
+        : { key: 'malformedJson' };
     return {
       ok: false,
-      errors: [
-        `Malformed JSON: ${error instanceof Error ? error.message : 'unable to parse file'}`,
-      ],
+      errors: [issue],
     };
   }
 }
