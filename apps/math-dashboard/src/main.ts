@@ -1,5 +1,10 @@
 import './style.css';
-import { renderBarChart, renderConfidenceChart, renderConvergenceChart } from './charts.js';
+import {
+  renderBarChart,
+  renderCheckpointConvergenceChart,
+  renderConfidenceChart,
+  renderConvergenceChart,
+} from './charts.js';
 import { MANAGEMENT_TARGETS } from './config/management-targets.js';
 import { createExportOptions, exportDashboard } from './export.js';
 import type { ExportFormat } from './export.js';
@@ -40,6 +45,8 @@ import type {
   RiskFlag,
   TargetEvaluation,
 } from './reports/analysis.js';
+import { createCheckpointViewModel } from './reports/checkpoints.js';
+import type { CheckpointViewModel } from './reports/checkpoints.js';
 import { parseSimulationReport, validateSimulationReport } from './reports/validation.js';
 import type { ValidationIssue } from './reports/validation.js';
 import type {
@@ -193,6 +200,45 @@ function comparisonMetric(key: ComparisonMetricKey, translations: DashboardTrans
   return translations.metrics[key];
 }
 
+function checkpointDeviation(value: number, locale: DashboardLocale): string {
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${formatDecimal(value * 100, locale, 4)} pp`;
+}
+
+function checkpointSection(
+  report: SimulationReport,
+  model: CheckpointViewModel,
+  locale: DashboardLocale,
+  translations: DashboardTranslations,
+): string {
+  if (model.checkpoints.length === 0)
+    return `<section id="simulation-checkpoints" aria-labelledby="checkpoint-heading">
+      <div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.cumulativeSimulation)}</p><h2 id="checkpoint-heading">${escapeHtml(translations.dashboard.simulationCheckpoints)}</h2></div>
+      <p class="notice">${escapeHtml(translations.dashboard.checkpointCompatibilityWarning)}</p>
+    </section>`;
+  const rows = model.tableRows
+    .map(
+      (checkpoint) => `<tr>
+        <th scope="row">${formatInteger(checkpoint.bets, locale)}</th>
+        <td>${formatPercent(checkpoint.simulatedRtp, locale, 4)}</td>
+        <td>${formatPercent(checkpoint.theoreticalRtp, locale, 4)}</td>
+        <td>${checkpointDeviation(checkpoint.rtpDeviation, locale)}</td>
+        <td>${formatPercent(checkpoint.hitFrequency, locale, 4)}</td>
+        <td>${formatPercent(checkpoint.bonusFrequency, locale, 4)}</td>
+        <td>${translations.templates.credits(formatInteger(checkpoint.maximumWinCredits, locale))}</td>
+        <td>${formatPercent(checkpoint.confidenceInterval95[0], locale, 4)}&ndash;${formatPercent(checkpoint.confidenceInterval95[1], locale, 4)}</td>
+      </tr>`,
+    )
+    .join('');
+  return `<section id="simulation-checkpoints" aria-labelledby="checkpoint-heading">
+    <div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.cumulativeSimulation)}</p><h2 id="checkpoint-heading">${escapeHtml(translations.dashboard.simulationCheckpoints)}</h2><p>${escapeHtml(translations.dashboard.maximumSimulatedBets)}: ${formatInteger(report.maxSimulatedBets ?? report.paidSpins, locale)}</p></div>
+    ${model.isCanonical ? '' : `<p class="notice">${escapeHtml(translations.dashboard.checkpointCompatibilityWarning)}</p>`}
+    <article class="chart-card checkpoint-chart"><h3>${escapeHtml(translations.charts.convergence)}</h3><div id="checkpoint-convergence-chart" class="chart-surface"></div></article>
+    <div class="table-scroll checkpoint-table"><table><thead><tr><th>${escapeHtml(translations.dashboard.numberOfBets)}</th><th>${escapeHtml(translations.dashboard.simulatedRtp)}</th><th>${escapeHtml(translations.dashboard.theoreticalRtp)}</th><th>${escapeHtml(translations.dashboard.rtpDeviation)}</th><th>${escapeHtml(translations.metrics.hitFrequency)}</th><th>${escapeHtml(translations.dashboard.bonusFrequency)}</th><th>${escapeHtml(translations.dashboard.maxWin)}</th><th>${escapeHtml(translations.dashboard.confidenceInterval95)}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="notice convergence-interpretation">${escapeHtml(translations.dashboard.convergenceInterpretation)}</p>
+  </section>`;
+}
+
 function comparisonValue(
   value: number,
   format: ComparisonRow['format'],
@@ -232,7 +278,7 @@ function comparisonSection(
       <thead><tr><th>${escapeHtml(translations.dashboard.metric)}</th><th>${escapeHtml(localizedReportLabel(first, translations))}</th><th>${escapeHtml(localizedReportLabel(second, translations))}</th><th>${escapeHtml(translations.dashboard.absoluteDifference)}</th><th>${escapeHtml(translations.dashboard.relativeDifference)}</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>
-    ${incompatible ? `<p class="notice">${escapeHtml(translations.dashboard.incompatibleConvergence)}</p>` : `<article class="chart-card comparison-chart"><h3>${escapeHtml(translations.charts.convergence)}</h3><div id="convergence-chart" class="chart-surface"></div></article>`}`;
+    ${incompatible ? `<p class="notice">${escapeHtml(translations.dashboard.incompatibleConvergence)}</p>` : `<article class="chart-card comparison-chart"><h3>${escapeHtml(translations.charts.reportRtpComparison)}</h3><div id="convergence-chart" class="chart-surface"></div></article>`}`;
 }
 
 function validationErrorText(
@@ -275,6 +321,7 @@ function renderDashboard(): void {
     return;
   }
   const report = active.report;
+  const checkpointModel = createCheckpointViewModel(report);
   const status = overallStatus(report);
   const targets = evaluateTargets(report);
   const reconciliations = reconcileReport(report);
@@ -416,6 +463,7 @@ function renderDashboard(): void {
           <article class="chart-card chart-wide"><h3>${escapeHtml(translations.charts.confidenceInterval)}</h3><div id="confidence-chart" class="chart-surface"></div></article>
         </div>
       </section>
+      ${checkpointSection(report, checkpointModel, currentLocale, translations)}
       <section class="review-grid">
         <article><div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.riskReview)}</p><h2>${escapeHtml(translations.dashboard.riskFlags)}</h2></div><ul class="risk-list">${riskItems(risks, currentLocale, translations)}</ul></article>
         <article><div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.dataIntegrity)}</p><h2>${escapeHtml(translations.dashboard.reconciliation)}</h2></div><div class="table-scroll"><table><thead><tr><th>${escapeHtml(translations.dashboard.check)}</th><th>${escapeHtml(translations.dashboard.reported)}</th><th>${escapeHtml(translations.dashboard.calculated)}</th><th>${escapeHtml(translations.dashboard.status)}</th></tr></thead><tbody>${reconciliationRows(reconciliations, currentLocale, translations)}</tbody></table></div></article>
@@ -425,11 +473,12 @@ function renderDashboard(): void {
     <footer><p>${escapeHtml(translations.dashboard.footer)}</p></footer>`;
 
   wireInteractions(active);
-  renderCharts(report, selectedComparisons, currentLocale, translations);
+  renderCharts(report, checkpointModel, selectedComparisons, currentLocale, translations);
 }
 
 function renderCharts(
   report: SimulationReport,
+  checkpointModel: CheckpointViewModel,
   selected: readonly LoadedReport[],
   locale: DashboardLocale,
   translations: DashboardTranslations,
@@ -550,6 +599,37 @@ function renderCharts(
         };
       }),
     );
+  const checkpointConvergence = document.querySelector<HTMLElement>(
+    '#checkpoint-convergence-chart',
+  );
+  if (checkpointConvergence && checkpointModel.checkpoints.length > 0)
+    renderCheckpointConvergenceChart(
+      checkpointConvergence,
+      checkpointModel.checkpoints.map((checkpoint, index) => {
+        const bets = formatInteger(checkpoint.bets, locale);
+        const simulatedRtp = formatPercent(checkpoint.simulatedRtp, locale, 4);
+        const theoreticalRtp = formatPercent(checkpoint.theoreticalRtp, locale, 4);
+        const deviation = checkpointDeviation(checkpoint.rtpDeviation, locale);
+        return {
+          bets: checkpoint.bets,
+          simulatedRtp: checkpoint.simulatedRtp,
+          theoreticalRtp: checkpoint.theoreticalRtp,
+          axisLabel: checkpointModel.labels[index] ?? String(checkpoint.bets),
+          rtpDisplay: simulatedRtp,
+          tooltip: translations.templates.checkpointAria(
+            bets,
+            simulatedRtp,
+            theoreticalRtp,
+            deviation,
+          ),
+        };
+      }),
+      `${translations.dashboard.theoreticalRtp} ${formatPercent(
+        report.theoreticalRtp ?? checkpointModel.checkpoints[0]?.theoreticalRtp ?? 0,
+        locale,
+        4,
+      )}`,
+    );
 }
 
 async function addUpload(file: File): Promise<void> {
@@ -577,6 +657,13 @@ async function runExport(format: ExportFormat, active: LoadedReport): Promise<vo
   exportInProgress = true;
   renderDashboard();
   try {
+    const exportCheckpointModel = createCheckpointViewModel(active.report);
+    if (
+      active.source === 'built-in' &&
+      active.report.simulationCheckpoints !== undefined &&
+      !exportCheckpointModel.isCanonical
+    )
+      throw new Error('Built-in export requires the canonical seven-checkpoint series.');
     await exportDashboard(options, app, translations.languageName, (exportedAt) =>
       translations.templates.exportFooter(
         translations.languageName,

@@ -66,6 +66,20 @@ const en = {
     builtInThousand: '1,000-spin smoke test',
     builtInMillion: '1,000,000-spin management run',
     uploadedSuffix: 'uploaded',
+    simulationCheckpoints: 'Simulation Checkpoints',
+    numberOfBets: 'Number of Bets',
+    simulatedRtp: 'Simulated RTP',
+    theoreticalRtp: 'Theoretical RTP',
+    rtpDeviation: 'RTP Deviation',
+    bonusFrequency: 'Bonus Frequency',
+    maxWin: 'Max Win',
+    confidenceInterval95: '95% Confidence Interval',
+    cumulativeSimulation: 'Cumulative Simulation',
+    maximumSimulatedBets: 'Maximum Simulated Bets',
+    checkpointCompatibilityWarning:
+      'Compatibility warning: this report does not contain the complete canonical seven-checkpoint series. Available checkpoints are shown without inferring missing values.',
+    convergenceInterpretation:
+      'Results at 100 and 1,000 bets are expected to fluctuate significantly. The 10,000 and 100,000 checkpoints provide an intermediate convergence view; 250,000 and 500,000 help reveal stabilization; and 1,000,000 is the strongest default indicator in this report. A small-sample difference does not by itself indicate a mathematical defect. Simulation provides empirical validation and convergence evidence, but does not replace exact mathematical verification.',
   },
   status: { PASS: 'Pass', WARN: 'Warning', FAIL: 'Fail', INFO: 'Info' },
   metrics: {
@@ -121,6 +135,7 @@ const en = {
     featureLengthPercentiles: 'Feature-Length Percentiles',
     confidenceInterval: 'Credited RTP Estimate and 95% Confidence Interval',
     convergence: 'Credited RTP Convergence',
+    reportRtpComparison: 'Selected Report RTP Comparison',
     base: 'Base',
     feature: 'Feature',
     scatter: 'Scatter',
@@ -191,6 +206,8 @@ const en = {
     confidenceAria: (estimate, low, high) =>
       `Credited RTP estimate ${estimate}, 95% confidence interval ${low} to ${high}`,
     convergenceAria: (label, spins, rtp) => `${label}: ${spins} spins at ${rtp}`,
+    checkpointAria: (bets, simulatedRtp, theoreticalRtp, deviation) =>
+      `${bets} cumulative bets: simulated RTP ${simulatedRtp}, theoretical RTP ${theoreticalRtp}, deviation ${deviation}`,
     exportFooter: (language, reportId, exportedAt) =>
       `Language: ${language} · Report: ${reportId} · Exported: ${exportedAt}`,
   },
@@ -209,6 +226,7 @@ const en = {
     reportIndex: 'The report index is malformed.',
     loadFailed: 'Unable to load built-in reports.',
     exportFailed: 'The export could not be created. Please try again.',
+    invalidCheckpoints: 'Simulation checkpoints must be complete and ordered.',
   },
 } satisfies DashboardTranslations;
 
@@ -278,6 +296,20 @@ const ptBR = {
     builtInThousand: 'Teste de fumaça com 1.000 giros',
     builtInMillion: 'Execução gerencial com 1.000.000 de giros',
     uploadedSuffix: 'carregado',
+    simulationCheckpoints: 'Pontos de Controle da Simulação',
+    numberOfBets: 'Número de Apostas',
+    simulatedRtp: 'RTP Simulado',
+    theoreticalRtp: 'RTP Teórico',
+    rtpDeviation: 'Desvio do RTP',
+    bonusFrequency: 'Frequência do Recurso',
+    maxWin: 'Maior Prêmio',
+    confidenceInterval95: 'Intervalo de Confiança de 95%',
+    cumulativeSimulation: 'Simulação Cumulativa',
+    maximumSimulatedBets: 'Máximo de Apostas Simuladas',
+    checkpointCompatibilityWarning:
+      'Aviso de compatibilidade: este relatório não contém a série canônica completa de sete pontos de controle. Os pontos disponíveis são exibidos sem inferir valores ausentes.',
+    convergenceInterpretation:
+      'É esperado que os resultados de 100 e 1.000 apostas oscilem significativamente. Os pontos de 10.000 e 100.000 oferecem uma visão intermediária; 250.000 e 500.000 ajudam a revelar a estabilização; e 1.000.000 é o indicador padrão mais forte deste relatório. Uma diferença em amostra pequena não indica, por si só, um defeito matemático. A simulação fornece validação empírica e evidência de convergência, mas não substitui a verificação matemática exata.',
   },
   status: { PASS: 'Aprovado', WARN: 'Aviso', FAIL: 'Reprovado', INFO: 'Informação' },
   metrics: {
@@ -334,6 +366,7 @@ const ptBR = {
     featureLengthPercentiles: 'Percentis de Duração do Recurso',
     confidenceInterval: 'Estimativa de RTP Creditado e Intervalo de Confiança de 95%',
     convergence: 'Convergência do RTP Creditado',
+    reportRtpComparison: 'Comparação de RTP dos Relatórios Selecionados',
     base: 'Base',
     feature: 'Recurso',
     scatter: 'Scatter',
@@ -404,6 +437,8 @@ const ptBR = {
     confidenceAria: (estimate, low, high) =>
       `Estimativa de RTP creditado ${estimate}, intervalo de confiança de 95% de ${low} a ${high}`,
     convergenceAria: (label, spins, rtp) => `${label}: ${spins} giros com RTP de ${rtp}`,
+    checkpointAria: (bets, simulatedRtp, theoreticalRtp, deviation) =>
+      `${bets} apostas cumulativas: RTP simulado ${simulatedRtp}, RTP teórico ${theoreticalRtp}, desvio ${deviation}`,
     exportFooter: (language, reportId, exportedAt) =>
       `Idioma: ${language} · Relatório: ${reportId} · Exportado em: ${exportedAt}`,
   },
@@ -422,6 +457,7 @@ const ptBR = {
     reportIndex: 'O índice de relatórios está malformado.',
     loadFailed: 'Não foi possível carregar os relatórios integrados.',
     exportFailed: 'Não foi possível criar a exportação. Tente novamente.',
+    invalidCheckpoints: 'Os pontos de controle da simulação devem estar completos e ordenados.',
   },
 } satisfies DashboardTranslations;
 
@@ -487,6 +523,20 @@ const zhCN = {
     builtInThousand: '1,000 次付费旋转冒烟测试',
     builtInMillion: '1,000,000 次付费旋转管理运行',
     uploadedSuffix: '已上传',
+    simulationCheckpoints: '模拟检查点',
+    numberOfBets: '投注次数',
+    simulatedRtp: '模拟 RTP',
+    theoreticalRtp: '理论 RTP',
+    rtpDeviation: 'RTP 偏差',
+    bonusFrequency: '免费旋转触发频率',
+    maxWin: '最高派彩',
+    confidenceInterval95: '95% 置信区间',
+    cumulativeSimulation: '累计模拟',
+    maximumSimulatedBets: '最大模拟投注次数',
+    checkpointCompatibilityWarning:
+      '兼容性警告：此报告不包含完整的七个标准模拟检查点。系统仅显示现有检查点，不推断缺失数值。',
+    convergenceInterpretation:
+      '100 次和 1,000 次投注的结果通常会有较大波动。10,000 次和 100,000 次检查点提供中期收敛视图；250,000 次和 500,000 次有助于观察 RTP 是否趋于稳定；1,000,000 次是本报告中最有力的默认收敛指标。小样本偏差本身并不表示数学模型存在缺陷。模拟提供经验验证和收敛证据，但不能替代精确数学验证。',
   },
   status: { PASS: '通过', WARN: '警告', FAIL: '未通过', INFO: '信息' },
   metrics: {
@@ -542,6 +592,7 @@ const zhCN = {
     featureLengthPercentiles: '免费旋转局数百分位数',
     confidenceInterval: '封顶后 RTP 估计值及 95% 置信区间',
     convergence: '封顶后 RTP 收敛',
+    reportRtpComparison: '所选报告 RTP 对比',
     base: '基础游戏',
     feature: '免费旋转',
     scatter: 'Scatter',
@@ -621,6 +672,8 @@ const zhCN = {
     confidenceAria: (estimate, low, high) =>
       `封顶后 RTP 估计值 ${estimate}，95% 置信区间为 ${low} 至 ${high}`,
     convergenceAria: (label, spins, rtp) => `${label}：${spins} 次付费旋转，RTP 为 ${rtp}`,
+    checkpointAria: (bets, simulatedRtp, theoreticalRtp, deviation) =>
+      `${bets} 次累计投注：模拟 RTP ${simulatedRtp}，理论 RTP ${theoreticalRtp}，偏差 ${deviation}`,
     exportFooter: (language, reportId, exportedAt) =>
       `报告语言：${language} · 配置：${reportId} · 导出时间：${exportedAt}`,
   },
@@ -639,6 +692,7 @@ const zhCN = {
     reportIndex: '报告索引格式错误。',
     loadFailed: '无法加载内置报告。',
     exportFailed: '无法创建导出文件，请重试。',
+    invalidCheckpoints: '模拟检查点必须完整并按升序排列。',
   },
 } satisfies DashboardTranslations;
 

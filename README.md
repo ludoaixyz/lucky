@@ -56,6 +56,8 @@ The top-right language selector switches the complete presentation between Engli
 
 The independent simulation management dashboard runs at `http://127.0.0.1:5174/` with `npm run dashboard:dev`. It reads version 1.2.0 deterministic Monte Carlo JSON reports, validates and reconciles them, presents management KPIs and provisional target assessments, and compares compatible runs. Its presentation can be switched between English (`en`), Brazilian Portuguese (`pt-BR`), and Simplified Chinese (`zh-CN`) without rerunning the simulation; the choice persists per user and active report. PDF/print and PNG exports capture an immutable locale snapshot, include the locale in the filename and metadata, and retain the report's language-neutral values. The dashboard does not load Phaser or resolve spins. Built-in fixtures live in `apps/math-dashboard/public/reports`; additional reports can be reviewed locally through JSON upload without modifying the source file.
 
+The default management simulation is one deterministic cumulative run with checkpoints at 100, 1,000, 10,000, 100,000, 250,000, 500,000, and 1,000,000 paid bets. The dashboard and static exports show every checkpoint against the unchanged theoretical RTP reference. Game symbols retain their original glyphs and math IDs while using centrally configured deep-blue, royal-purple, emerald, crimson, turquoise, burnt-orange, and magenta presentation families for faster visual recognition.
+
 For repeatable local presentation checks, append an integer `?seed=` query (for example, `?seed=13`). This is a development-only deterministic RNG control, not production randomness.
 
 ## Commands

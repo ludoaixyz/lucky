@@ -2,6 +2,8 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_SIMULATION_CHECKPOINTS } from '@lucky/shared-types';
+import { renderCheckpointConvergenceChart } from '../src/charts.js';
 import { createExportOptions, createExportSnapshot, exportFilename } from '../src/export.js';
 import {
   DASHBOARD_LOCALES,
@@ -22,6 +24,10 @@ import {
   reconcileReport,
   riskFlags,
 } from '../src/reports/analysis.js';
+import {
+  createCheckpointViewModel,
+  normalizeSimulationCheckpoints,
+} from '../src/reports/checkpoints.js';
 import { parseSimulationReport, validateSimulationReport } from '../src/reports/validation.js';
 import type { LoadedReport, SimulationReport } from '../src/types/simulation-report.js';
 
@@ -89,6 +95,72 @@ describe('simulation report validation', () => {
 });
 
 describe('language-neutral management calculations', () => {
+  it('loads all seven canonical cumulative checkpoints without changing final values', () => {
+    expect(million.simulationCheckpoints?.map((checkpoint) => checkpoint.bets)).toEqual(
+      DEFAULT_SIMULATION_CHECKPOINTS,
+    );
+    expect(million.simulationCheckpoints).toHaveLength(7);
+    expect(million.simulationCheckpoints?.at(-1)?.simulatedRtp).toBe(million.creditedTotalRtp);
+    expect(million.simulationCheckpoints?.at(-1)?.totalWageredCredits).toBe(
+      million.totalWageredCredits,
+    );
+  });
+
+  it('normalizes the report checkpoint series and builds the full chart and table models', () => {
+    const normalized = normalizeSimulationCheckpoints(
+      [...(million.simulationCheckpoints ?? [])].reverse(),
+    );
+    expect(normalized.map((checkpoint) => checkpoint.bets)).toEqual([
+      100, 1_000, 10_000, 100_000, 250_000, 500_000, 1_000_000,
+    ]);
+    const model = createCheckpointViewModel({ ...million, simulationCheckpoints: normalized });
+    expect(model.labels).toEqual(['100', '1K', '10K', '100K', '250K', '500K', '1M']);
+    expect(model.simulatedRtp).toHaveLength(7);
+    expect(model.theoreticalRtp).toHaveLength(7);
+    expect(model.tableRows).toHaveLength(7);
+    expect(model.isCanonical).toBe(true);
+  });
+
+  it('preserves and sorts checkpoints while parsing instead of reconstructing endpoint summaries', () => {
+    const parsed = parseSimulationReport(
+      JSON.stringify({
+        ...million,
+        simulationCheckpoints: [...(million.simulationCheckpoints ?? [])].reverse(),
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok)
+      expect(parsed.report.simulationCheckpoints?.map((checkpoint) => checkpoint.bets)).toEqual([
+        100, 1_000, 10_000, 100_000, 250_000, 500_000, 1_000_000,
+      ]);
+  });
+
+  it('keeps legacy reports loadable while marking their missing checkpoint series incompatible', () => {
+    const model = createCheckpointViewModel(thousand);
+    expect(model.checkpoints).toEqual([]);
+    expect(model.isCanonical).toBe(false);
+  });
+
+  it('renders every checkpoint marker and a theoretical reference line', () => {
+    const container = document.createElement('div');
+    const checkpoints = million.simulationCheckpoints ?? [];
+    renderCheckpointConvergenceChart(
+      container,
+      checkpoints.map((checkpoint) => ({
+        bets: checkpoint.bets,
+        simulatedRtp: checkpoint.simulatedRtp,
+        theoreticalRtp: checkpoint.theoreticalRtp,
+        axisLabel: String(checkpoint.bets),
+        rtpDisplay: String(checkpoint.simulatedRtp),
+        tooltip: String(checkpoint.bets),
+      })),
+      'Theoretical RTP',
+    );
+    expect(container.querySelectorAll('.checkpoint-point')).toHaveLength(7);
+    expect(container.querySelector('.theoretical-line')).not.toBeNull();
+    expect(container.textContent).toContain('250000');
+    expect(container.textContent).toContain('500000');
+  });
   it('reconciles RTP, payouts, and bucket totals', () => {
     expect(reconcileReport(million).every((check) => check.status === 'PASS')).toBe(true);
   });
@@ -311,6 +383,27 @@ describe('localized export and print behavior', () => {
     expect(snapshot.element.querySelector('.language-selector')).toBeNull();
     expect(snapshot.element.dataset.exportLocale).toBe('zh-CN');
     expect(exportFilename(options)).toContain('zh-CN');
+  });
+
+  it('preserves all seven checkpoint values in every localized export snapshot', () => {
+    for (const locale of DASHBOARD_LOCALES) {
+      const source = document.createElement('div');
+      source.innerHTML = `<main>${DEFAULT_SIMULATION_CHECKPOINTS.map(
+        (bets) => `<span data-checkpoint-bets="${bets}">${formatInteger(bets, locale)}</span>`,
+      ).join('')}</main>`;
+      const snapshot = createExportSnapshot(
+        source,
+        createExportOptions(locale, million.configurationId, 'png'),
+        TRANSLATIONS[locale].languageName,
+        TRANSLATIONS[locale].dashboard.simulationCheckpoints,
+        '2026-08-06T14:35:00.000Z',
+      );
+      expect(
+        [...snapshot.element.querySelectorAll<HTMLElement>('[data-checkpoint-bets]')].map(
+          (element) => Number(element.dataset.checkpointBets),
+        ),
+      ).toEqual([...DEFAULT_SIMULATION_CHECKPOINTS]);
+    }
   });
 
   it('keeps export secondary typography at a readable print size', () => {

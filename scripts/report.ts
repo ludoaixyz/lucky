@@ -1,6 +1,6 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
+import { runSimulationCheckpoints, SeededRandom, validateConfig } from '@lucky/math-engine';
 import type { ExactMathReport } from '@lucky/shared-types';
 import { formatPercentRatio } from '@lucky/shared-types';
 import { loadSourceConfig } from './lib/source-loader.js';
@@ -33,16 +33,30 @@ const issues = validateConfig(config, 'math/source');
 if (issues.length > 0)
   throw new Error(`Report generation stopped: ${issues.length} math validation issue(s)`);
 
-const simulation = runSimulation(
-  config,
-  { spins, seed, betCredits: config.totalBetCredits },
-  new SeededRandom(seed),
-);
 const reportsDirectory = resolve(process.cwd(), 'math/reports');
 const exact = await optionalExact(
   resolve(reportsDirectory, `${config.configurationId}-exact.json`),
 );
-const report = buildDurableReport(config, sourceHash, simulation, exact);
+if (!exact) throw new Error('Default checkpoint reporting requires the exact math report');
+const checkpoints = spins === 1_000_000 ? undefined : [spins];
+const series = runSimulationCheckpoints(
+  config,
+  { seed, betCredits: config.totalBetCredits, ...(checkpoints ? { checkpoints } : {}) },
+  new SeededRandom(seed),
+  exact.uncappedTotalRtp,
+  (checkpoint, progress) =>
+    console.log(
+      `Checkpoint completed: ${checkpoint.bets.toLocaleString()} bets (${(progress * 100).toFixed(2)}%).`,
+    ),
+);
+const report = buildDurableReport(
+  config,
+  sourceHash,
+  series.finalReport,
+  exact,
+  series.checkpoints,
+  series.theoreticalRtp,
+);
 const basename = `${config.configurationId}-simulation`;
 await mkdir(reportsDirectory, { recursive: true });
 await Promise.all([

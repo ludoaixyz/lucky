@@ -1,4 +1,9 @@
-import type { ExactMathReport, RuntimeGameConfig, SimulationReport } from '@lucky/shared-types';
+import type {
+  ExactMathReport,
+  RuntimeGameConfig,
+  SimulationCheckpoint,
+  SimulationReport,
+} from '@lucky/shared-types';
 import { formatPercentRatio } from '@lucky/shared-types';
 
 export const RECONCILIATION_TOLERANCE = 1e-12;
@@ -26,6 +31,10 @@ export interface DurableSimulationReport extends SimulationReport {
   readonly exactEnumeration: ExactMathReport | null;
   readonly reconciliations: readonly ReconciliationCheck[];
   readonly targetComparisons: readonly TargetComparison[];
+  readonly theoreticalRtp: number;
+  readonly maxSimulatedBets: number;
+  readonly cumulativeSimulation: true;
+  readonly simulationCheckpoints: readonly SimulationCheckpoint[];
 }
 
 function check(
@@ -128,6 +137,8 @@ export function buildDurableReport(
   sourceHash: string,
   simulation: SimulationReport,
   exactEnumeration: ExactMathReport | null,
+  simulationCheckpoints: readonly SimulationCheckpoint[] = [],
+  theoreticalRtp = exactEnumeration?.uncappedTotalRtp ?? simulation.creditedTotalRtp,
 ): DurableSimulationReport {
   const reconciliations = reconcileSimulation(simulation, game.totalBetCredits);
   const failed = reconciliations.filter((candidate) => !candidate.passed);
@@ -144,6 +155,10 @@ export function buildDurableReport(
     exactEnumeration,
     reconciliations,
     targetComparisons: compareTargets(simulation),
+    theoreticalRtp,
+    maxSimulatedBets: simulation.paidSpins,
+    cumulativeSimulation: true,
+    simulationCheckpoints,
   };
 }
 
@@ -152,6 +167,12 @@ function number(value: number, decimals = 6): string {
 }
 
 export function renderSimulationMarkdown(report: DurableSimulationReport): string {
+  const checkpoints = report.simulationCheckpoints
+    .map(
+      (checkpoint) =>
+        `| ${checkpoint.bets.toLocaleString('en-US')} | ${formatPercentRatio(checkpoint.simulatedRtp, 4)} | ${formatPercentRatio(checkpoint.theoreticalRtp, 4)} | ${(checkpoint.rtpDeviation * 100).toFixed(4)} pp | ${formatPercentRatio(checkpoint.hitFrequency, 4)} | ${formatPercentRatio(checkpoint.bonusFrequency, 4)} | ${checkpoint.maximumWinCredits.toLocaleString('en-US')} |`,
+    )
+    .join('\n');
   const distribution = report.payoutDistribution
     .map(
       (bucket) =>
@@ -197,6 +218,16 @@ export function renderSimulationMarkdown(report: DurableSimulationReport): strin
 - Paid spins: ${report.paidSpins.toLocaleString('en-US')}
 - Bet: ${report.totalWageredCredits / report.paidSpins} credits
 - Total wagered: ${report.totalWageredCredits.toLocaleString('en-US')} credits
+
+## Cumulative RTP convergence
+
+All checkpoints are immutable snapshots from one seeded cumulative simulation run. The theoretical reference is ${formatPercentRatio(report.theoreticalRtp, 6)}.
+
+| Bets | Simulated RTP | Theoretical RTP | Deviation | Hit frequency | Bonus frequency | Max win |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+${checkpoints}
+
+Results at 100 and 1,000 bets are expected to fluctuate significantly. The 10,000 and 100,000 checkpoints provide an intermediate convergence view; 250,000 and 500,000 help reveal stabilization; and 1,000,000 is the strongest default indicator in this report. A small-sample deviation does not by itself indicate a mathematical defect. The simulation provides empirical validation and convergence evidence, but does not replace exact mathematical verification.
 
 ## RTP and frequencies
 

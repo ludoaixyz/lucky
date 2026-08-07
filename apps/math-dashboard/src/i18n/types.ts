@@ -63,6 +63,18 @@ export interface DashboardTranslations {
     readonly builtInThousand: string;
     readonly builtInMillion: string;
     readonly uploadedSuffix: string;
+    readonly simulationCheckpoints: string;
+    readonly numberOfBets: string;
+    readonly simulatedRtp: string;
+    readonly theoreticalRtp: string;
+    readonly rtpDeviation: string;
+    readonly bonusFrequency: string;
+    readonly maxWin: string;
+    readonly confidenceInterval95: string;
+    readonly cumulativeSimulation: string;
+    readonly maximumSimulatedBets: string;
+    readonly checkpointCompatibilityWarning: string;
+    readonly convergenceInterpretation: string;
   };
   readonly status: {
     readonly PASS: string;
@@ -123,6 +135,7 @@ export interface DashboardTranslations {
     readonly featureLengthPercentiles: string;
     readonly confidenceInterval: string;
     readonly convergence: string;
+    readonly reportRtpComparison: string;
     readonly base: string;
     readonly feature: string;
     readonly scatter: string;
@@ -185,6 +198,12 @@ export interface DashboardTranslations {
     readonly capApplicationsRisk: (count: string) => string;
     readonly confidenceAria: (estimate: string, low: string, high: string) => string;
     readonly convergenceAria: (label: string, spins: string, rtp: string) => string;
+    readonly checkpointAria: (
+      bets: string,
+      simulatedRtp: string,
+      theoreticalRtp: string,
+      deviation: string,
+    ) => string;
     readonly exportFooter: (language: string, reportId: string, exportedAt: string) => string;
   };
   readonly errors: {
@@ -202,5 +221,6 @@ export interface DashboardTranslations {
     readonly reportIndex: string;
     readonly loadFailed: string;
     readonly exportFailed: string;
+    readonly invalidCheckpoints: string;
   };
 }

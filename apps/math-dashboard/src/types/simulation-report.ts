@@ -1,4 +1,5 @@
 import type { DashboardLocale } from '../i18n/types.js';
+import type { SimulationCheckpoint } from '@lucky/shared-types';
 
 export interface PayoutBucket {
   readonly label: string;
@@ -56,6 +57,10 @@ export interface SimulationReport {
   readonly payoutDistribution: readonly PayoutBucket[];
   readonly baseBetCredits?: number;
   readonly dashboardLocale?: DashboardLocale;
+  readonly theoreticalRtp?: number;
+  readonly maxSimulatedBets?: number;
+  readonly cumulativeSimulation?: true;
+  readonly simulationCheckpoints?: readonly SimulationCheckpoint[];
 }
 
 export interface ReportIndexEntry {

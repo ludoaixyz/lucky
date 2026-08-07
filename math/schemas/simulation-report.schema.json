@@ -27,6 +27,53 @@
   "properties": {
     "methodology": { "const": "deterministic-monte-carlo" },
     "paidSpins": { "type": "integer", "minimum": 1 },
+    "theoreticalRtp": { "type": "number", "minimum": 0 },
+    "maxSimulatedBets": { "type": "integer", "minimum": 1 },
+    "cumulativeSimulation": { "const": true },
+    "simulationCheckpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "bets",
+          "totalWageredCredits",
+          "totalReturnedCredits",
+          "simulatedRtp",
+          "theoreticalRtp",
+          "rtpDeviation",
+          "totalWins",
+          "hitFrequency",
+          "bonusTriggers",
+          "bonusFrequency",
+          "maximumWinCredits",
+          "maximumWinMultiplier",
+          "standardDeviation",
+          "confidenceInterval95"
+        ],
+        "properties": {
+          "bets": { "type": "integer", "minimum": 1 },
+          "totalWageredCredits": { "type": "integer", "minimum": 0 },
+          "totalReturnedCredits": { "type": "integer", "minimum": 0 },
+          "simulatedRtp": { "type": "number", "minimum": 0 },
+          "theoreticalRtp": { "type": "number", "minimum": 0 },
+          "rtpDeviation": { "type": "number" },
+          "totalWins": { "type": "integer", "minimum": 0 },
+          "hitFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
+          "bonusTriggers": { "type": "integer", "minimum": 0 },
+          "bonusFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
+          "maximumWinCredits": { "type": "integer", "minimum": 0 },
+          "maximumWinMultiplier": { "type": "number", "minimum": 0 },
+          "standardDeviation": { "type": "number", "minimum": 0 },
+          "confidenceInterval95": {
+            "type": "array",
+            "prefixItems": [{ "type": "number" }, { "type": "number" }],
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "totalWageredCredits": { "type": "integer", "minimum": 0 },
     "uncappedTotalPayoutCredits": { "type": "integer", "minimum": 0 },
     "creditedTotalPayoutCredits": { "type": "integer", "minimum": 0 },

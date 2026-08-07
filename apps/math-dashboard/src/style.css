@@ -509,6 +509,20 @@ tbody tr:last-child > * {
   stroke: #79bed9;
   stroke-width: 3;
 }
+.theoretical-line {
+  stroke: #f1c761;
+  stroke-width: 2;
+  stroke-dasharray: 9 6;
+}
+.theoretical-label {
+  fill: #f5df9f;
+  font-size: 11px;
+  font-weight: 800;
+  text-anchor: end;
+}
+.checkpoint-point {
+  cursor: help;
+}
 
 .review-grid {
   display: grid;

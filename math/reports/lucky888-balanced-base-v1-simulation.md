@@ -15,6 +15,22 @@
 - Bet: 5 credits
 - Total wagered: 5,000,000 credits
 
+## Cumulative RTP convergence
+
+All checkpoints are immutable snapshots from one seeded cumulative simulation run. The theoretical reference is 95.098414%.
+
+| Bets | Simulated RTP | Theoretical RTP | Deviation | Hit frequency | Bonus frequency | Max win |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 100 | 100.0000% | 95.0984% | 4.9016 pp | 23.0000% | 1.0000% | 103 |
+| 1,000 | 89.9400% | 95.0984% | -5.1584 pp | 32.7000% | 0.9000% | 103 |
+| 10,000 | 97.0020% | 95.0984% | 1.9036 pp | 33.4600% | 0.9700% | 217 |
+| 100,000 | 95.4280% | 95.0984% | 0.3296 pp | 33.5870% | 0.8440% | 252 |
+| 250,000 | 95.7386% | 95.0984% | 0.6402 pp | 33.6488% | 0.8508% | 387 |
+| 500,000 | 95.6980% | 95.0984% | 0.5996 pp | 33.5720% | 0.8728% | 387 |
+| 1,000,000 | 95.3724% | 95.0984% | 0.2739 pp | 33.4967% | 0.8649% | 387 |
+
+Results at 100 and 1,000 bets are expected to fluctuate significantly. The 10,000 and 100,000 checkpoints provide an intermediate convergence view; 250,000 and 500,000 help reveal stabilization; and 1,000,000 is the strongest default indicator in this report. A small-sample deviation does not by itself indicate a mathematical defect. The simulation provides empirical validation and convergence evidence, but does not replace exact mathematical verification.
+
 ## RTP and frequencies
 
 | Measure | Result |

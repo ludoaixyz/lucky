@@ -19,6 +19,7 @@ export type { ValidationIssue } from './validation/config.js';
 export {
   SimulationAccumulator,
   runSimulation,
+  runSimulationCheckpoints,
   assertFiniteReport,
 } from './simulation/accumulator.js';
 export { enumerateExact } from './enumeration/exact.js';

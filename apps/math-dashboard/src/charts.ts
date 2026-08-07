@@ -181,3 +181,78 @@ export function renderConvergenceChart(
   }
   container.append(svg);
 }
+
+export function renderCheckpointConvergenceChart(
+  container: HTMLElement,
+  points: readonly {
+    readonly bets: number;
+    readonly simulatedRtp: number;
+    readonly theoreticalRtp: number;
+    readonly axisLabel: string;
+    readonly rtpDisplay: string;
+    readonly tooltip: string;
+  }[],
+  theoreticalLabel: string,
+): void {
+  container.replaceChildren();
+  if (points.length === 0) return;
+  const width = 760;
+  const height = 285;
+  const margin = { top: 34, right: 34, bottom: 58, left: 58 };
+  const values = points.flatMap((point) => [point.simulatedRtp, point.theoreticalRtp]);
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  const padding = Math.max(0.01, (maximum - minimum) * 0.18);
+  const yMinimum = minimum - padding;
+  const yMaximum = maximum + padding;
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const x = (index: number): number =>
+    margin.left + (index / Math.max(1, points.length - 1)) * plotWidth;
+  const y = (value: number): number =>
+    margin.top + ((yMaximum - value) / (yMaximum - yMinimum)) * plotHeight;
+  const theoretical = points[0]?.theoreticalRtp ?? 0;
+  const svg = svgElement('svg', {
+    viewBox: `0 0 ${width} ${height}`,
+    role: 'img',
+    'aria-label': points.map((point) => point.tooltip).join(', '),
+  });
+  svg.append(
+    svgElement('line', {
+      x1: margin.left,
+      y1: height - margin.bottom,
+      x2: width - margin.right,
+      y2: height - margin.bottom,
+      class: 'axis',
+    }),
+    svgElement('line', {
+      x1: margin.left,
+      y1: y(theoretical),
+      x2: width - margin.right,
+      y2: y(theoretical),
+      class: 'theoretical-line',
+    }),
+    textNode(theoreticalLabel, width - margin.right, 18, 'theoretical-label'),
+  );
+  const path = points
+    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${x(index)} ${y(point.simulatedRtp)}`)
+    .join(' ');
+  svg.append(svgElement('path', { d: path, class: 'convergence-line' }));
+  points.forEach((point, index) => {
+    const marker = svgElement('circle', {
+      cx: x(index),
+      cy: y(point.simulatedRtp),
+      r: 7,
+      class: 'estimate-point checkpoint-point',
+    });
+    const title = svgElement('title');
+    title.textContent = point.tooltip;
+    marker.append(title);
+    svg.append(
+      marker,
+      textNode(point.rtpDisplay, x(index), y(point.simulatedRtp) - 13, 'value-label'),
+      textNode(point.axisLabel, x(index), height - 24, 'axis-label'),
+    );
+  });
+  container.append(svg);
+}

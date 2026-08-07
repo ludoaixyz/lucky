@@ -174,6 +174,36 @@ export interface SimulationConfig {
   readonly betCredits: BetCredits;
 }
 
+export const DEFAULT_SIMULATION_CHECKPOINTS = [
+  100, 1_000, 10_000, 100_000, 250_000, 500_000, 1_000_000,
+] as const;
+
+export interface SimulationCheckpoint {
+  readonly bets: number;
+  readonly totalWageredCredits: Credits;
+  readonly totalReturnedCredits: Credits;
+  readonly simulatedRtp: number;
+  readonly theoreticalRtp: number;
+  readonly rtpDeviation: number;
+  readonly totalWins: number;
+  readonly hitFrequency: number;
+  readonly bonusTriggers: number;
+  readonly bonusFrequency: number;
+  readonly maximumWinCredits: Credits;
+  readonly maximumWinMultiplier: number;
+  readonly standardDeviation: number;
+  readonly confidenceInterval95: readonly [number, number];
+}
+
+export interface SimulationCheckpointSeries {
+  readonly seed: number;
+  readonly maxBets: number;
+  readonly betCredits: BetCredits;
+  readonly theoreticalRtp: number;
+  readonly checkpoints: readonly SimulationCheckpoint[];
+  readonly finalReport: SimulationReport;
+}
+
 export interface DistributionBucket {
   readonly label: string;
   readonly minimumMultiple: number;

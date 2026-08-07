@@ -1,4 +1,6 @@
 import type { PayoutBucket, SimulationReport } from '../types/simulation-report.js';
+import type { SimulationCheckpoint } from '@lucky/shared-types';
+import { normalizeSimulationCheckpoints } from './checkpoints.js';
 
 export type ValidationIssueKey =
   | 'malformedJson'
@@ -10,7 +12,8 @@ export type ValidationIssueKey =
   | 'positiveSpins'
   | 'invalidNestedMetric'
   | 'confidenceInterval'
-  | 'payoutDistribution';
+  | 'payoutDistribution'
+  | 'invalidCheckpoints';
 
 export interface ValidationIssue {
   readonly key: ValidationIssueKey;
@@ -79,6 +82,44 @@ function validateBucket(
   return true;
 }
 
+function validateCheckpoint(
+  value: unknown,
+  index: number,
+  errors: ValidationIssue[],
+): value is SimulationCheckpoint {
+  const prefix = `simulationCheckpoints[${index}]`;
+  if (!isRecord(value)) {
+    errors.push({ key: 'invalidCheckpoints', field: prefix });
+    return false;
+  }
+  for (const field of [
+    'bets',
+    'totalWageredCredits',
+    'totalReturnedCredits',
+    'simulatedRtp',
+    'theoreticalRtp',
+    'rtpDeviation',
+    'totalWins',
+    'hitFrequency',
+    'bonusTriggers',
+    'bonusFrequency',
+    'maximumWinCredits',
+    'maximumWinMultiplier',
+    'standardDeviation',
+  ] as const)
+    if (typeof value[field] !== 'number' || !Number.isFinite(value[field]))
+      errors.push({ key: 'invalidCheckpoints', field: `${prefix}.${field}` });
+  if (typeof value.bets !== 'number' || !Number.isSafeInteger(value.bets) || value.bets <= 0)
+    errors.push({ key: 'invalidCheckpoints', field: `${prefix}.bets` });
+  if (
+    !Array.isArray(value.confidenceInterval95) ||
+    value.confidenceInterval95.length !== 2 ||
+    value.confidenceInterval95.some((entry) => typeof entry !== 'number' || !Number.isFinite(entry))
+  )
+    errors.push({ key: 'invalidCheckpoints', field: `${prefix}.confidenceInterval95` });
+  return true;
+}
+
 export function validateSimulationReport(value: unknown): ValidationResult {
   if (!isRecord(value)) return { ok: false, errors: [{ key: 'rootObject' }] };
   const errors: ValidationIssue[] = [];
@@ -129,9 +170,32 @@ export function validateSimulationReport(value: unknown): ValidationResult {
   if (!Array.isArray(value.payoutDistribution) || value.payoutDistribution.length === 0)
     errors.push({ key: 'payoutDistribution', field: 'payoutDistribution' });
   else value.payoutDistribution.forEach((bucket, index) => validateBucket(bucket, index, errors));
-  return errors.length > 0
-    ? { ok: false, errors }
-    : { ok: true, report: value as unknown as SimulationReport };
+  if (value.simulationCheckpoints !== undefined) {
+    if (!Array.isArray(value.simulationCheckpoints) || value.simulationCheckpoints.length === 0)
+      errors.push({ key: 'invalidCheckpoints', field: 'simulationCheckpoints' });
+    else {
+      value.simulationCheckpoints.forEach((checkpoint, index) =>
+        validateCheckpoint(checkpoint, index, errors),
+      );
+      const bets = value.simulationCheckpoints.map((checkpoint) =>
+        isRecord(checkpoint) && typeof checkpoint.bets === 'number' ? checkpoint.bets : 0,
+      );
+      if (new Set(bets).size !== bets.length)
+        errors.push({ key: 'invalidCheckpoints', field: 'simulationCheckpoints' });
+    }
+  }
+  if (errors.length > 0) return { ok: false, errors };
+  const report = value as unknown as SimulationReport;
+  return {
+    ok: true,
+    report:
+      report.simulationCheckpoints === undefined
+        ? report
+        : {
+            ...report,
+            simulationCheckpoints: normalizeSimulationCheckpoints(report.simulationCheckpoints),
+          },
+  };
 }
 
 export function parseSimulationReport(json: string): ValidationResult {

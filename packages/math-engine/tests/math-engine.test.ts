@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { RuntimeGameConfig, SpinResult } from '@lucky/shared-types';
+import {
+  DEFAULT_SIMULATION_CHECKPOINTS,
+  type RuntimeGameConfig,
+  type SpinResult,
+} from '@lucky/shared-types';
 import type { RandomSource } from '../src/index.js';
 import {
   assertFiniteReport,
@@ -14,6 +18,7 @@ import {
   resolveFreeSpinFeature,
   resolveRetriggerAward,
   resolveSpin,
+  runSimulationCheckpoints,
   SeededRandom,
   SimulationAccumulator,
   validateConfig,
@@ -35,6 +40,50 @@ class SequenceRandom implements RandomSource {
     return this.nextUint32() % exclusiveMaximum;
   }
 }
+
+describe('cumulative simulation checkpoints', () => {
+  it('uses the exact canonical seven default checkpoints', () => {
+    expect(DEFAULT_SIMULATION_CHECKPOINTS).toEqual([
+      100, 1_000, 10_000, 100_000, 250_000, 500_000, 1_000_000,
+    ]);
+  });
+
+  it('returns ordered immutable cumulative snapshots and a matching final report', () => {
+    const config = fixtureConfig();
+    const series = runSimulationCheckpoints(
+      config,
+      { seed: 77, betCredits: config.totalBetCredits, checkpoints: [2, 5, 10] },
+      new SeededRandom(77),
+      0.95,
+    );
+    expect(series.checkpoints.map((checkpoint) => checkpoint.bets)).toEqual([2, 5, 10]);
+    expect(series.checkpoints.map((checkpoint) => checkpoint.totalWageredCredits)).toEqual([
+      2, 5, 10,
+    ]);
+    expect(series.checkpoints.every(Object.isFrozen)).toBe(true);
+    expect(Object.isFrozen(series.checkpoints)).toBe(true);
+    expect(series.checkpoints.at(-1)?.simulatedRtp).toBe(series.finalReport.creditedTotalRtp);
+    expect(series.checkpoints.at(-1)?.totalReturnedCredits).toBe(
+      series.finalReport.creditedTotalPayoutCredits,
+    );
+    expect(series.checkpoints.every((checkpoint) => checkpoint.theoreticalRtp === 0.95)).toBe(true);
+  });
+
+  it('is reproducible from the same seed and leaves earlier snapshots unchanged', () => {
+    const config = fixtureConfig();
+    const run = () =>
+      runSimulationCheckpoints(
+        config,
+        { seed: 19, betCredits: config.totalBetCredits, checkpoints: [1, 4, 12] },
+        new SeededRandom(19),
+        0.95,
+      );
+    const first = run();
+    const firstSnapshot = JSON.stringify(first.checkpoints[0]);
+    expect(run().checkpoints).toEqual(first.checkpoints);
+    expect(JSON.stringify(first.checkpoints[0])).toBe(firstSnapshot);
+  });
+});
 
 describe('deterministic random source', () => {
   it('repeats complete feature results for the same seed', () => {

@@ -3,7 +3,7 @@
   "methodology": "deterministic-monte-carlo",
   "gameVersion": "0.3.0",
   "configurationId": "lucky888-balanced-base-v1",
-  "generatedAt": "2026-08-06T12:49:29.857Z",
+  "generatedAt": "2026-08-07T02:32:43.713Z",
   "seed": 2026,
   "paidSpins": 1000000,
   "totalWageredCredits": 5000000,
@@ -81,6 +81,273 @@
       "maximumMultiple": null,
       "count": 1340,
       "probability": 0.00134
+    }
+  ],
+  "gameId": "lucky888",
+  "gameName": "LUCKY888",
+  "sourceHash": "5c4cb470e9ca5ac3d610d80d883f92cc26e9ff1f88775da47e542bf52ab15f96",
+  "exactEnumeration": {
+    "schemaVersion": "1.2.0",
+    "methodology": "hybrid",
+    "gameVersion": "0.3.0",
+    "configurationId": "lucky888-balanced-base-v1",
+    "generatedAt": "2026-08-06T10:41:47.155Z",
+    "sourceHash": "5c4cb470e9ca5ac3d610d80d883f92cc26e9ff1f88775da47e542bf52ab15f96",
+    "totalPaidSpinCombinations": 24300000,
+    "probabilityReconciliation": 1.0000000000000024,
+    "uncappedBaseLineRtp": 0.8810187242798365,
+    "uncappedBaseScatterRtp": 0,
+    "uncappedFeatureRtp": 0.0699654155236996,
+    "uncappedTotalRtp": 0.9509841398035359,
+    "triggerFrequency": 0.008560000000000007,
+    "triggerFrequencyByScatterCount": {
+      "3": 0.008100000000000007,
+      "4": 0.00045,
+      "5": 0.000009999999999999999
+    },
+    "expectedInitiallyAwardedFreeSpins": 0.07798000000000002,
+    "expectedTotalFreeSpinsPerPaidSpin": 0.07941422082815619,
+    "expectedTotalFreeSpinsPerTrigger": 9.277362246279921,
+    "expectedRetriggerCountPerTrigger": 0.07941422082815627,
+    "baseHitFrequency": 0.32699588477366315,
+    "featureInclusiveHitFrequency": 0.33442970578536907,
+    "variance": 5.591980952118661,
+    "standardDeviation": 2.3647369731364756,
+    "payoutDistribution": [
+      {
+        "label": "0x",
+        "minimumMultiple": 0,
+        "maximumMultiple": 0,
+        "probability": 0.6655702942146315,
+        "count": 16173358.149415547
+      },
+      {
+        "label": "(0,1)x",
+        "minimumMultiple": 2.220446049250313e-16,
+        "maximumMultiple": 1,
+        "probability": 0.056422622964039104,
+        "count": 1371069.7380261503
+      },
+      {
+        "label": "[1,5)x",
+        "minimumMultiple": 1,
+        "maximumMultiple": 5,
+        "probability": 0.23558164780745672,
+        "count": 5724634.041721198
+      },
+      {
+        "label": "[5,20)x",
+        "minimumMultiple": 5,
+        "maximumMultiple": 20,
+        "probability": 0.04108155022771509,
+        "count": 998281.6705334767
+      },
+      {
+        "label": "20x+",
+        "minimumMultiple": 20,
+        "maximumMultiple": null,
+        "probability": 0.0013438847861575454,
+        "count": 32656.400303628354
+      }
+    ],
+    "maximumReachableBaseWinCredits": 543,
+    "maximumReachableUncappedWinCredits": 49051,
+    "maximumReachableCreditedWinCredits": 5000,
+    "maximumWinCapCredits": 5000,
+    "maximumWinCapReducesRtp": true,
+    "creditedTotalRtp": 0.9537236,
+    "creditedTotalRtpMethodology": "monte-carlo-estimate",
+    "estimatedCapReductionRtp": 0
+  },
+  "reconciliations": [
+    {
+      "id": "total-wager",
+      "actual": 5000000,
+      "expected": 5000000,
+      "difference": 0,
+      "tolerance": 0,
+      "passed": true
+    },
+    {
+      "id": "uncapped-components",
+      "actual": 4768618,
+      "expected": 4768618,
+      "difference": 0,
+      "tolerance": 0,
+      "passed": true
+    },
+    {
+      "id": "credited-plus-cap-reduction",
+      "actual": 4768618,
+      "expected": 4768618,
+      "difference": 0,
+      "tolerance": 0,
+      "passed": true
+    },
+    {
+      "id": "payout-bucket-probabilities",
+      "actual": 1,
+      "expected": 1,
+      "difference": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "id": "scatter-trigger-frequencies",
+      "actual": 0.008649,
+      "expected": 0.008649,
+      "difference": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    }
+  ],
+  "targetComparisons": [
+    {
+      "measure": "Credited RTP",
+      "result": 0.9537236,
+      "target": "94%–97%",
+      "status": "PASS"
+    },
+    {
+      "measure": "Feature frequency (paid spins per trigger)",
+      "result": 115.62030292519366,
+      "target": "80–150",
+      "status": "PASS"
+    },
+    {
+      "measure": "Average feature length",
+      "result": 9.28673835125448,
+      "target": "9–14",
+      "status": "PASS"
+    },
+    {
+      "measure": "p95 feature length",
+      "result": 11,
+      "target": "<30",
+      "status": "PASS"
+    },
+    {
+      "measure": "Feature-cap hit frequency",
+      "result": 0,
+      "target": "effectively zero",
+      "status": "PASS"
+    }
+  ],
+  "theoreticalRtp": 0.9509841398035359,
+  "maxSimulatedBets": 1000000,
+  "cumulativeSimulation": true,
+  "simulationCheckpoints": [
+    {
+      "bets": 100,
+      "totalWageredCredits": 500,
+      "totalReturnedCredits": 500,
+      "simulatedRtp": 1,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": 0.04901586019646409,
+      "totalWins": 23,
+      "hitFrequency": 0.23,
+      "bonusTriggers": 1,
+      "bonusFrequency": 0.01,
+      "maximumWinCredits": 103,
+      "maximumWinMultiplier": 20.6,
+      "standardDeviation": 3.039342034059346,
+      "confidenceInterval95": [0.4042889613243684, 1.5957110386756321]
+    },
+    {
+      "bets": 1000,
+      "totalWageredCredits": 5000,
+      "totalReturnedCredits": 4497,
+      "simulatedRtp": 0.8994,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": -0.05158413980353593,
+      "totalWins": 327,
+      "hitFrequency": 0.327,
+      "bonusTriggers": 9,
+      "bonusFrequency": 0.009,
+      "maximumWinCredits": 103,
+      "maximumWinMultiplier": 20.6,
+      "standardDeviation": 2.0669009748897036,
+      "confidenceInterval95": [0.7712921503379898, 1.0275078496620087]
+    },
+    {
+      "bets": 10000,
+      "totalWageredCredits": 50000,
+      "totalReturnedCredits": 48501,
+      "simulatedRtp": 0.97002,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": 0.019035860196464083,
+      "totalWins": 3346,
+      "hitFrequency": 0.3346,
+      "bonusTriggers": 97,
+      "bonusFrequency": 0.0097,
+      "maximumWinCredits": 217,
+      "maximumWinMultiplier": 43.4,
+      "standardDeviation": 2.4679354123639463,
+      "confidenceInterval95": [0.9216484659176606, 1.0183915340823273]
+    },
+    {
+      "bets": 100000,
+      "totalWageredCredits": 500000,
+      "totalReturnedCredits": 477140,
+      "simulatedRtp": 0.95428,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": 0.0032958601964641066,
+      "totalWins": 33587,
+      "hitFrequency": 0.33587,
+      "bonusTriggers": 844,
+      "bonusFrequency": 0.00844,
+      "maximumWinCredits": 252,
+      "maximumWinMultiplier": 50.4,
+      "standardDeviation": 2.3823576728946434,
+      "confidenceInterval95": [0.9395139941628484, 0.9690460058371483]
+    },
+    {
+      "bets": 250000,
+      "totalWageredCredits": 1250000,
+      "totalReturnedCredits": 1196733,
+      "simulatedRtp": 0.9573864,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": 0.00640226019646406,
+      "totalWins": 84122,
+      "hitFrequency": 0.336488,
+      "bonusTriggers": 2127,
+      "bonusFrequency": 0.008508,
+      "maximumWinCredits": 387,
+      "maximumWinMultiplier": 77.4,
+      "standardDeviation": 2.3766582087231085,
+      "confidenceInterval95": [0.9480698998215721, 0.9667029001779613]
+    },
+    {
+      "bets": 500000,
+      "totalWageredCredits": 2500000,
+      "totalReturnedCredits": 2392450,
+      "simulatedRtp": 0.95698,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": 0.005995860196464142,
+      "totalWins": 167860,
+      "hitFrequency": 0.33572,
+      "bonusTriggers": 4364,
+      "bonusFrequency": 0.008728,
+      "maximumWinCredits": 387,
+      "maximumWinMultiplier": 77.4,
+      "standardDeviation": 2.378565248126925,
+      "confidenceInterval95": [0.9503869535036753, 0.9635730464966057]
+    },
+    {
+      "bets": 1000000,
+      "totalWageredCredits": 5000000,
+      "totalReturnedCredits": 4768618,
+      "simulatedRtp": 0.9537236,
+      "theoreticalRtp": 0.9509841398035359,
+      "rtpDeviation": 0.002739460196464094,
+      "totalWins": 334967,
+      "hitFrequency": 0.334967,
+      "bonusTriggers": 8649,
+      "bonusFrequency": 0.008649,
+      "maximumWinCredits": 387,
+      "maximumWinMultiplier": 77.4,
+      "standardDeviation": 2.3772887276899697,
+      "confidenceInterval95": [0.9490641140946684, 0.958383085907213]
     }
   ]
 }

@@ -3,9 +3,12 @@ import type {
   FeatureLengthPercentiles,
   RuntimeGameConfig,
   SimulationConfig,
+  SimulationCheckpoint,
+  SimulationCheckpointSeries,
   SimulationReport,
   SpinResult,
 } from '@lucky/shared-types';
+import { DEFAULT_SIMULATION_CHECKPOINTS } from '@lucky/shared-types';
 import type { RandomSource } from '../rng/random-source.js';
 import { resolveSpin } from '../evaluation/spin.js';
 
@@ -177,6 +180,72 @@ export function runSimulation(
   const accumulator = new SimulationAccumulator(config);
   for (let spin = 0; spin < config.spins; spin += 1) accumulator.record(resolveSpin(game, rng));
   return accumulator.report(game);
+}
+
+export function runSimulationCheckpoints(
+  game: RuntimeGameConfig,
+  config: Omit<SimulationConfig, 'spins'> & { readonly checkpoints?: readonly number[] },
+  rng: RandomSource,
+  theoreticalRtp: number,
+  onCheckpoint?: (checkpoint: SimulationCheckpoint, progress: number) => void,
+): SimulationCheckpointSeries {
+  const checkpoints = [...(config.checkpoints ?? DEFAULT_SIMULATION_CHECKPOINTS)];
+  if (
+    checkpoints.length === 0 ||
+    checkpoints.some((value) => !Number.isSafeInteger(value) || value <= 0) ||
+    checkpoints.some((value, index) => index > 0 && value <= (checkpoints[index - 1] ?? 0))
+  )
+    throw new RangeError('checkpoints must be unique positive safe integers in ascending order');
+  if (!Number.isSafeInteger(config.betCredits) || config.betCredits <= 0)
+    throw new RangeError('betCredits must be a positive safe integer');
+  if (!Number.isFinite(theoreticalRtp) || theoreticalRtp < 0)
+    throw new RangeError('theoreticalRtp must be finite and non-negative');
+  const maximum = checkpoints.at(-1) ?? 0;
+  const checkpointSet = new Set(checkpoints);
+  const accumulator = new SimulationAccumulator({
+    spins: maximum,
+    seed: config.seed,
+    betCredits: config.betCredits,
+  });
+  const snapshots: SimulationCheckpoint[] = [];
+  let finalReport: SimulationReport | undefined;
+  for (let bet = 1; bet <= maximum; bet += 1) {
+    accumulator.record(resolveSpin(game, rng));
+    if (!checkpointSet.has(bet)) continue;
+    const report = accumulator.report(game);
+    finalReport = report;
+    const confidenceInterval95: readonly [number, number] = Object.freeze([
+      report.confidenceInterval95[0],
+      report.confidenceInterval95[1],
+    ]);
+    const checkpoint: SimulationCheckpoint = Object.freeze({
+      bets: bet,
+      totalWageredCredits: report.totalWageredCredits,
+      totalReturnedCredits: report.creditedTotalPayoutCredits,
+      simulatedRtp: report.creditedTotalRtp,
+      theoreticalRtp,
+      rtpDeviation: report.creditedTotalRtp - theoreticalRtp,
+      totalWins: Math.round(report.featureInclusiveHitFrequency * bet),
+      hitFrequency: report.featureInclusiveHitFrequency,
+      bonusTriggers: Math.round(report.featureTriggerFrequency * bet),
+      bonusFrequency: report.featureTriggerFrequency,
+      maximumWinCredits: report.maximumObservedWinCredits,
+      maximumWinMultiplier: report.maximumObservedWinCredits / config.betCredits,
+      standardDeviation: report.standardDeviation,
+      confidenceInterval95,
+    });
+    snapshots.push(checkpoint);
+    onCheckpoint?.(checkpoint, bet / maximum);
+  }
+  if (!finalReport) throw new Error('Final checkpoint report was not produced');
+  return Object.freeze({
+    seed: config.seed,
+    maxBets: maximum,
+    betCredits: config.betCredits,
+    theoreticalRtp,
+    checkpoints: Object.freeze(snapshots),
+    finalReport,
+  });
 }
 
 export function assertFiniteReport(report: SimulationReport): void {

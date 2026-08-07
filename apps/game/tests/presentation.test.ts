@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { matchedPaylineCenters, paylineColor } from '../src/game/payline-presentation.js';
+import { SYMBOL_VISUALS, symbolVisual } from '../src/game/symbol-visuals.js';
 import {
   MINIMUM_VISIBLE_DURATION_MS,
   PRESENTATION_SPEED_OPTIONS,
@@ -43,5 +46,32 @@ describe('payline presentation geometry', () => {
   it('selects readable colors deterministically by payline id', () => {
     expect(paylineColor('L4')).toBe(paylineColor('L4'));
     expect(paylineColor('L4')).not.toBe(paylineColor('L5'));
+  });
+});
+
+describe('symbol visual differentiation', () => {
+  const artifact = JSON.parse(
+    readFileSync(resolve(process.cwd(), 'apps/game/public/data/runtime-config.json'), 'utf8'),
+  ) as { config: { symbols: { id: string; category: string; display: string }[] } };
+
+  it('provides a distinct visual family for every configured stable symbol id', () => {
+    const symbols = artifact.config.symbols;
+    expect(Object.keys(SYMBOL_VISUALS).sort()).toEqual(symbols.map((symbol) => symbol.id).sort());
+    expect(new Set(symbols.map((symbol) => symbolVisual(symbol.id).family)).size).toBe(
+      symbols.length,
+    );
+    expect(new Set(symbols.map((symbol) => symbolVisual(symbol.id).mid)).size).toBe(symbols.length);
+  });
+
+  it('retains iconography and wild/scatter mathematical identities', () => {
+    expect(artifact.config.symbols.find((symbol) => symbol.id === 'WILD')).toMatchObject({
+      category: 'wild',
+      display: '★',
+    });
+    expect(artifact.config.symbols.find((symbol) => symbol.id === 'SCATTER')).toMatchObject({
+      category: 'scatter',
+      display: '●',
+    });
+    expect(symbolVisual('WILD').family).not.toBe(symbolVisual('SCATTER').family);
   });
 });

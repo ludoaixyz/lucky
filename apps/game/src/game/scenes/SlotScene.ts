@@ -9,6 +9,7 @@ import type {
 import { presentationTiming } from '../presentation-timing.js';
 import { matchedPaylineCenters, paylineColor } from '../payline-presentation.js';
 import { formatNumber, type Localization } from '../../i18n/index.js';
+import { symbolTextureKey, symbolVisual } from '../symbol-visuals.js';
 
 interface SceneLifecycle {
   readonly ready: () => void;
@@ -17,8 +18,14 @@ interface SceneLifecycle {
 
 interface ReelView {
   readonly container: Phaser.GameObjects.Container;
-  readonly symbols: readonly Phaser.GameObjects.Text[];
+  readonly symbols: readonly SymbolView[];
   readonly maskShape: Phaser.GameObjects.Graphics;
+}
+
+interface SymbolView {
+  readonly container: Phaser.GameObjects.Container;
+  readonly frame: Phaser.GameObjects.Image;
+  readonly label: Phaser.GameObjects.Text;
 }
 
 interface PresentationToken {
@@ -57,6 +64,7 @@ export class SlotScene extends Phaser.Scene {
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
       this.currentStops = this.gameConfig.reelStrips.map(() => 0);
       this.createReelBackgrounds();
+      this.createSymbolTextures();
       this.reelViews = this.gameConfig.reelStrips.map((_, reel) => this.createReelView(reel));
       this.currentStops.forEach((stop, reel) => this.setReelAtStop(reel, stop));
       this.lineOverlay = this.add.graphics().setDepth(20);
@@ -171,18 +179,92 @@ export class SlotScene extends Phaser.Scene {
     const maskShape = this.make.graphics({ x: 0, y: 0 });
     maskShape.fillStyle(0xffffff).fillRect(reel * width + 4, 0, width - 8, CANVAS_HEIGHT);
     const container = this.add.container(0, 0);
-    const symbols = Array.from({ length: this.gameConfig.visibleRows + 1 }, (_, index) =>
-      this.add
-        .text(centerX, (index - 1) * height + height / 2, '', {
+    const defaultSymbol = this.gameConfig.symbols[0];
+    if (!defaultSymbol) throw new Error('At least one symbol is required');
+    const symbols = Array.from({ length: this.gameConfig.visibleRows + 1 }, (_, index) => {
+      const cell = this.add.container(centerX, (index - 1) * height + height / 2);
+      const frame = this.add
+        .image(0, 0, symbolTextureKey(defaultSymbol.id))
+        .setDisplaySize(width - 14, height - 14);
+      const label = this.add
+        .text(0, 0, '', {
           fontFamily: 'system-ui',
           fontSize: '54px',
           color: '#ffd66b',
           fontStyle: 'bold',
+          stroke: '#251300',
+          strokeThickness: 5,
+          shadow: { offsetX: 0, offsetY: 4, color: '#000000', blur: 8, fill: true },
         })
-        .setOrigin(0.5),
-    );
-    container.add(symbols).setMask(maskShape.createGeometryMask());
+        .setOrigin(0.5);
+      cell.add([frame, label]);
+      return { container: cell, frame, label };
+    });
+    container
+      .add(symbols.map((symbol) => symbol.container))
+      .setMask(maskShape.createGeometryMask());
     return { container, symbols, maskShape };
+  }
+
+  private createSymbolTextures(): void {
+    const width = CANVAS_WIDTH / this.gameConfig.reelCount - 14;
+    const height = CANVAS_HEIGHT / this.gameConfig.visibleRows - 14;
+    for (const symbol of this.gameConfig.symbols) {
+      const key = symbolTextureKey(symbol.id);
+      if (this.textures.exists(key)) continue;
+      const visual = symbolVisual(symbol.id);
+      const texture = this.textures.createCanvas(key, width, height);
+      if (!texture) throw new Error(`Unable to create visual texture for symbol '${symbol.id}'`);
+      const context = texture.getContext();
+      const radius = 17;
+      context.save();
+      context.beginPath();
+      context.roundRect(2, 2, width - 4, height - 4, radius);
+      context.clip();
+      const gradient = context.createRadialGradient(
+        width * 0.34,
+        height * 0.22,
+        3,
+        width * 0.52,
+        height * 0.58,
+        Math.max(width, height) * 0.72,
+      );
+      gradient.addColorStop(0, visual.highlight);
+      gradient.addColorStop(0.46, visual.mid);
+      gradient.addColorStop(1, visual.shadow);
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, width, height);
+      const glow = context.createRadialGradient(
+        width * 0.5,
+        height * 0.42,
+        0,
+        width * 0.5,
+        height * 0.42,
+        width * 0.42,
+      );
+      glow.addColorStop(0, `${visual.glow}55`);
+      glow.addColorStop(1, `${visual.glow}00`);
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
+      context.restore();
+      context.beginPath();
+      context.roundRect(2, 2, width - 4, height - 4, radius);
+      context.lineWidth = 5;
+      context.strokeStyle = '#101820';
+      context.stroke();
+      context.beginPath();
+      context.roundRect(6, 6, width - 12, height - 12, radius - 4);
+      context.lineWidth = 2;
+      context.strokeStyle = '#d5a94f';
+      context.stroke();
+      context.beginPath();
+      context.moveTo(18, 10);
+      context.lineTo(width - 18, 10);
+      context.lineWidth = 2;
+      context.strokeStyle = `${visual.accent}aa`;
+      context.stroke();
+      texture.refresh();
+    }
   }
 
   private animateReel(
@@ -231,7 +313,7 @@ export class SlotScene extends Phaser.Scene {
           }
           this.snapToResolvedWindow(reel, finalStop, finalWindow, strips);
           this.tweens.add({
-            targets: view.symbols.slice(1),
+            targets: view.symbols.slice(1).map((symbol) => symbol.container),
             scaleX: 1.08,
             scaleY: 1.08,
             yoyo: true,
@@ -283,9 +365,10 @@ export class SlotScene extends Phaser.Scene {
       const row = payline.rows[reel];
       const symbol = row === undefined ? undefined : this.reelViews[reel]?.symbols[row + 1];
       if (!symbol) return;
-      symbol.setTint(color);
+      symbol.frame.setTint(color);
+      symbol.label.setTint(color);
       this.tweens.add({
-        targets: symbol,
+        targets: symbol.container,
         scaleX: 1.18,
         scaleY: 1.18,
         alpha: 0.72,
@@ -318,8 +401,10 @@ export class SlotScene extends Phaser.Scene {
     this.winLabel?.setVisible(false).setText('');
     for (const view of this.reelViews) {
       for (const symbol of view.symbols) {
-        this.tweens.killTweensOf(symbol);
-        symbol.clearTint().setAlpha(1).setScale(1);
+        this.tweens.killTweensOf(symbol.container);
+        symbol.frame.clearTint();
+        symbol.label.clearTint();
+        symbol.container.setAlpha(1).setScale(1);
       }
     }
   }
@@ -339,11 +424,11 @@ export class SlotScene extends Phaser.Scene {
     const strip = strips[reel];
     const view = this.reelViews[reel];
     if (!strip || strip.length === 0 || !view) throw new Error(`Cannot display reel ${reel + 1}`);
-    view.symbols.forEach((text, index) => {
+    view.symbols.forEach((symbol, index) => {
       const stripIndex = (stop + index - 1 + strip.length) % strip.length;
       const symbolId = strip[stripIndex];
       if (symbolId === undefined) throw new Error(`Reel ${reel + 1} is missing stop ${stripIndex}`);
-      text.setText(this.displaySymbol(symbolId));
+      this.setSymbol(symbol, symbolId);
     });
   }
 
@@ -359,11 +444,12 @@ export class SlotScene extends Phaser.Scene {
     view.container.y = 0;
     const preceding = strip[(finalStop - 1 + strip.length) % strip.length];
     if (preceding === undefined) throw new Error(`Reel ${reel + 1} has no preceding symbol`);
-    view.symbols[0]?.setText(this.displaySymbol(preceding));
+    const precedingView = view.symbols[0];
+    if (precedingView) this.setSymbol(precedingView, preceding);
     finalWindow.forEach((symbol, row) => {
-      const text = view.symbols[row + 1];
-      if (!text) throw new Error(`Reel ${reel + 1} is missing display row ${row + 1}`);
-      text.setText(this.displaySymbol(symbol));
+      const symbolView = view.symbols[row + 1];
+      if (!symbolView) throw new Error(`Reel ${reel + 1} is missing display row ${row + 1}`);
+      this.setSymbol(symbolView, symbol);
     });
     this.currentStops[reel] = finalStop;
   }
@@ -407,6 +493,11 @@ export class SlotScene extends Phaser.Scene {
     const symbol = this.gameConfig.symbols.find((candidate) => candidate.id === symbolId);
     if (!symbol) throw new Error(`Spin window references unknown symbol '${symbolId}'`);
     return symbol.display;
+  }
+
+  private setSymbol(view: SymbolView, symbolId: SymbolId): void {
+    view.frame.setTexture(symbolTextureKey(symbolId));
+    view.label.setText(this.displaySymbol(symbolId));
   }
 
   private readonly handleShutdown = (): void => {
