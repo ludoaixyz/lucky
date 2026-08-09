@@ -27,6 +27,8 @@ interface GameSource {
   maximumWinScope: 'paid-spin-including-feature';
   cascades?: RuntimeGameConfig['cascades'];
   rtpBudgets: RuntimeGameConfig['rtpBudgets'];
+  volatilityTarget?: RuntimeGameConfig['volatilityTarget'];
+  featureFrequencyTarget?: RuntimeGameConfig['featureFrequencyTarget'];
 }
 
 const SOURCE = resolve(process.cwd(), 'math/source');
@@ -120,7 +122,7 @@ export async function loadSourceConfig(): Promise<{
   const reelRows = csv('reel-strips.csv', contents['reel-strips.csv']);
   const freeSpinReelRows = csv('free-spin-reel-strips.csv', contents['free-spin-reel-strips.csv']);
   const lineRows = csv('paylines.csv', contents['paylines.csv']);
-  const { cascades, ...gameWithoutCascades } = game;
+  const { cascades, volatilityTarget, featureFrequencyTarget, ...requiredGame } = game;
   const symbols: SymbolDefinition[] = symbolRows.map((row) => ({
     id: row.symbol_id as SymbolId,
     name: row.name ?? '',
@@ -199,8 +201,10 @@ export async function loadSourceConfig(): Promise<{
     .digest('hex');
   return {
     config: {
-      ...gameWithoutCascades,
+      ...requiredGame,
       ...(cascades === undefined ? {} : { cascades }),
+      ...(volatilityTarget === undefined ? {} : { volatilityTarget }),
+      ...(featureFrequencyTarget === undefined ? {} : { featureFrequencyTarget }),
       symbols,
       paytable,
       reelStrips,

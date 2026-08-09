@@ -7,7 +7,11 @@ import type {
   SymbolId,
 } from '@lucky/shared-types';
 import { presentationTiming } from '../presentation-timing.js';
-import { matchedPaylineCenters, paylineColor } from '../payline-presentation.js';
+import {
+  matchedPaylineCenters,
+  paylineColor,
+  RetainedPaylinePresentation,
+} from '../payline-presentation.js';
 import { formatNumber, type Localization } from '../../i18n/index.js';
 import { symbolTextureKey, symbolVisual } from '../symbol-visuals.js';
 import { initialReelWindow } from '../initial-window.js';
@@ -49,6 +53,7 @@ export class SlotScene extends Phaser.Scene {
   private winLabel: Phaser.GameObjects.Text | undefined;
   private presentationSpeed = 1;
   private winLabelState: WinLabelState | undefined;
+  private readonly retainedPaylines = new RetainedPaylinePresentation();
   private disposeLocalization: (() => void) | undefined;
   private created = false;
 
@@ -111,7 +116,7 @@ export class SlotScene extends Phaser.Scene {
     const strips =
       reelSet === 'free-spin' ? this.gameConfig.freeSpinReelStrips : this.gameConfig.reelStrips;
     this.validateResult(result, strips);
-    this.clearWinPresentation();
+    this.beginSpinPresentation();
     const timing = presentationTiming(this.presentationSpeed);
 
     return new Promise((resolve) => {
@@ -129,19 +134,22 @@ export class SlotScene extends Phaser.Scene {
       this.presentationToken = token;
 
       const reelsFinished = async (): Promise<void> => {
+        this.rememberWinningStage(0, result.window, result.lineWins);
         await this.presentLineWins(result.lineWins, token);
         const cascadeStages = result.cascades?.slice(1) ?? [];
         for (const stage of cascadeStages) {
           if (token.cancelled) break;
-          this.clearWinPresentation();
+          this.clearTransientWinPresentation();
           stage.window.forEach((column, reel) => {
             this.snapToResolvedWindow(reel, result.stops[reel] ?? 0, column, strips);
           });
           await new Promise<void>((stageReady) => {
             this.time.delayedCall(timing.symbolLanding, stageReady);
           });
+          this.rememberWinningStage(stage.index, stage.window, stage.lineWins);
           await this.presentLineWins(stage.lineWins, token);
         }
+        if (!token.cancelled) this.renderRetainedWinningStage(result.stops, strips);
         finish();
       };
       this.reelViews.forEach((_, reel) => {
@@ -170,6 +178,39 @@ export class SlotScene extends Phaser.Scene {
         });
       });
     });
+  }
+
+  /** The sole normal-play boundary that retires a resolved spin's retained paylines. */
+  beginSpinPresentation(): void {
+    this.retainedPaylines.beginSpin();
+    this.clearTransientWinPresentation();
+  }
+
+  visibleWinningPaylineIds(): readonly string[] {
+    return this.retainedPaylines.current()?.lineWins.map((win) => win.paylineId) ?? [];
+  }
+
+  private rememberWinningStage(
+    stageIndex: number,
+    window: readonly (readonly SymbolId[])[],
+    lineWins: readonly LineWin[],
+  ): void {
+    this.retainedPaylines.rememberWinningStage({ stageIndex, window, lineWins });
+  }
+
+  private renderRetainedWinningStage(
+    stops: readonly ReelStop[],
+    strips: readonly (readonly SymbolId[])[],
+  ): void {
+    const stage = this.retainedPaylines.current();
+    if (!stage) return;
+    this.clearTransientWinPresentation();
+    stage.window.forEach((column, reel) => {
+      this.snapToResolvedWindow(reel, stops[reel] ?? 0, column, strips);
+    });
+    for (const win of stage.lineWins) this.drawLineWin(win, false, false);
+    this.winLabelState = { kind: 'all', count: stage.lineWins.length };
+    this.renderWinLabel();
   }
 
   private createReelBackgrounds(): void {
@@ -356,15 +397,15 @@ export class SlotScene extends Phaser.Scene {
       await this.wait(timing.paylineDisplay, token);
     }
     if (token.cancelled) return;
-    this.clearWinPresentation();
+    this.clearTransientWinPresentation();
     for (const win of lineWins) this.drawLineWin(win, false);
     this.winLabelState = { kind: 'all', count: lineWins.length };
     this.renderWinLabel();
     await this.wait(timing.allPaylinesDisplay, token);
   }
 
-  private drawLineWin(win: LineWin, clear: boolean): void {
-    if (clear) this.clearWinPresentation();
+  private drawLineWin(win: LineWin, clear: boolean, animate = true): void {
+    if (clear) this.clearTransientWinPresentation();
     const payline = this.gameConfig.paylines.find((candidate) => candidate.id === win.paylineId);
     if (!payline) throw new Error(`Resolved win references unknown payline '${win.paylineId}'`);
     const color = paylineColor(win.paylineId);
@@ -385,18 +426,19 @@ export class SlotScene extends Phaser.Scene {
       if (!symbol) return;
       symbol.frame.setTint(color);
       symbol.label.setTint(color);
-      this.tweens.add({
-        targets: symbol.container,
-        scaleX: 1.18,
-        scaleY: 1.18,
-        alpha: 0.72,
-        yoyo: true,
-        repeat: 1,
-        duration: Math.max(
-          24,
-          Math.floor(presentationTiming(this.presentationSpeed).paylineDisplay / 4),
-        ),
-      });
+      if (animate)
+        this.tweens.add({
+          targets: symbol.container,
+          scaleX: 1.18,
+          scaleY: 1.18,
+          alpha: 0.72,
+          yoyo: true,
+          repeat: 1,
+          duration: Math.max(
+            24,
+            Math.floor(presentationTiming(this.presentationSpeed).paylineDisplay / 4),
+          ),
+        });
     });
     if (clear) {
       this.winLabelState = { kind: 'single', win };
@@ -413,7 +455,7 @@ export class SlotScene extends Phaser.Scene {
     this.winLabel?.setText(text).setVisible(true);
   }
 
-  private clearWinPresentation(): void {
+  private clearTransientWinPresentation(): void {
     this.lineOverlay?.clear();
     this.winLabelState = undefined;
     this.winLabel?.setVisible(false).setText('');
@@ -534,7 +576,8 @@ export class SlotScene extends Phaser.Scene {
     if (this.presentationToken) this.presentationToken.cancelled = true;
     this.disposeLocalization?.();
     this.disposeLocalization = undefined;
-    this.clearWinPresentation();
+    this.retainedPaylines.shutdown();
+    this.clearTransientWinPresentation();
     this.tweens.killTweensOf(this.reelViews.map((view) => view.container));
     if (this.finishPresentation) this.finishPresentation();
     this.finishPresentation = undefined;

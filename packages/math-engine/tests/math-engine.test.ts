@@ -644,6 +644,42 @@ describe('validation', () => {
       ]),
     );
   });
+  it('validates optional volatility classifications and probability envelopes', () => {
+    const valid = {
+      ...fixtureConfig(),
+      volatilityTarget: {
+        classification: 'medium-high' as const,
+        provisional: true as const,
+        standardDeviationMultiple: { minimum: 3, maximum: 5 },
+        tailTargets: {
+          '20xPlusProbability': { minimum: 0.001, maximum: 0.01 },
+          '50xPlusProbability': { minimum: 0, maximum: 0.005 },
+          '100xPlusProbability': { minimum: 0, maximum: 0.001 },
+          '250xPlusProbability': { minimum: 0, maximum: 0.0001 },
+        },
+      },
+    };
+    expect(validateConfig(valid)).toEqual([]);
+    const invalid = structuredClone(valid) as unknown as RuntimeGameConfig & {
+      volatilityTarget: NonNullable<RuntimeGameConfig['volatilityTarget']>;
+    };
+    Object.assign(invalid.volatilityTarget, { classification: 'extreme' });
+    Object.assign(invalid.volatilityTarget.tailTargets['20xPlusProbability'], {
+      minimum: -0.1,
+      maximum: 1.1,
+    });
+    Object.assign(invalid.volatilityTarget.tailTargets['50xPlusProbability'], {
+      minimum: 0.2,
+      maximum: 0.1,
+    });
+    expect(validateConfig(invalid)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'classification' }),
+        expect.objectContaining({ field: '20xPlusProbability' }),
+        expect.objectContaining({ field: '50xPlusProbability' }),
+      ]),
+    );
+  });
 });
 
 function result(totalWinCredits: number, featureTriggered = false): SpinResult {
@@ -724,6 +760,22 @@ describe('feature-inclusive RTP and simulation accounting', () => {
     expect(report.methodology).toBe('deterministic-monte-carlo');
     expect(report.featureLengthPercentiles.p95).toBeGreaterThanOrEqual(0);
     expect(report.payoutDistribution.reduce((sum, bucket) => sum + bucket.count, 0)).toBe(3);
+  });
+  it('counts cumulative tails on integer-credit boundaries and keeps paid spins as denominator', () => {
+    const accumulator = new SimulationAccumulator({ spins: 4, seed: 1, betCredits: 1_000 });
+    accumulator.record(result(19_999));
+    accumulator.record(result(20_000));
+    accumulator.record(result(50_000, true));
+    accumulator.record(result(100_000));
+    const report = accumulator.report(fixtureConfig());
+    const tail = (threshold: number) =>
+      report.tailMetrics.find((metric) => metric.thresholdMultiple === threshold);
+    expect(tail(20)).toMatchObject({ count: 3, probability: 0.75 });
+    expect(tail(50)).toMatchObject({ count: 2, probability: 0.5 });
+    expect(tail(100)).toMatchObject({ count: 1, probability: 0.25 });
+    expect(tail(250)).toMatchObject({ count: 0, probability: 0 });
+    expect(report.featureTriggerFrequency).toBe(0.25);
+    expect(report.paidSpinsPerFeatureTrigger).toBe(4);
   });
   it('rejects non-finite or negative report rates and orders confidence bounds', () => {
     const accumulator = new SimulationAccumulator({ spins: 1, seed: 1, betCredits: 1 });

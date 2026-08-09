@@ -111,6 +111,61 @@ export function validateConfig(
     )
       issue('rtpBudgets', name, range, 'must define finite non-negative minimum <= maximum');
   }
+  const volatility = config.volatilityTarget;
+  if (productionProfile && volatility === undefined)
+    issue('volatilityTarget', 'presence', volatility, 'is required for the production profile');
+  if (volatility) {
+    if (!(['low', 'medium', 'medium-high', 'high'] as const).includes(volatility.classification))
+      issue(
+        'volatilityTarget',
+        'classification',
+        volatility.classification,
+        'must be low, medium, medium-high, or high',
+      );
+    const ranges = {
+      standardDeviationMultiple: volatility.standardDeviationMultiple,
+      ...volatility.tailTargets,
+    };
+    for (const [name, range] of Object.entries(ranges)) {
+      const probability = name.endsWith('Probability');
+      if (
+        !Number.isFinite(range?.minimum) ||
+        !Number.isFinite(range?.maximum) ||
+        range.minimum < 0 ||
+        range.minimum > range.maximum ||
+        (probability && range.maximum > 1)
+      )
+        issue(
+          'volatilityTarget',
+          name,
+          range,
+          `must define minimum <= maximum${probability ? ' within [0, 1]' : ''}`,
+        );
+    }
+  }
+  const frequency = config.featureFrequencyTarget?.paidSpinsPerTrigger;
+  if (productionProfile && frequency === undefined)
+    issue(
+      'featureFrequencyTarget',
+      'presence',
+      frequency,
+      'is required for the production profile',
+    );
+  if (
+    frequency &&
+    (!Number.isFinite(frequency.minimum) ||
+      !Number.isFinite(frequency.target) ||
+      !Number.isFinite(frequency.maximum) ||
+      frequency.minimum <= 0 ||
+      frequency.minimum > frequency.target ||
+      frequency.target > frequency.maximum)
+  )
+    issue(
+      'featureFrequencyTarget',
+      'paidSpinsPerTrigger',
+      frequency,
+      'must define 0 < minimum <= target <= maximum',
+    );
 
   if (config.gameId !== 'lucky888') issue('game', 'gameId', config.gameId, "must be 'lucky888'");
   if (config.gameName !== 'LUCKY888')

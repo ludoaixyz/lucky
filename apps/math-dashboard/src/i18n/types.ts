@@ -109,6 +109,17 @@ export interface DashboardTranslations {
     readonly baseGameCascadeRate: string;
     readonly freeSpinCascadeRate: string;
     readonly cascadePayout: string;
+    readonly volatilityAndTail: string;
+    readonly volatilityTarget: string;
+    readonly observedVolatility: string;
+    readonly frequency20x: string;
+    readonly frequency50x: string;
+    readonly frequency100x: string;
+    readonly frequency250x: string;
+    readonly classificationLow: string;
+    readonly classificationMedium: string;
+    readonly classificationMediumHigh: string;
+    readonly classificationHigh: string;
   };
   readonly metricDescriptions: {
     readonly creditedRtp: string;

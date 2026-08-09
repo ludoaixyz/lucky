@@ -96,6 +96,32 @@ export interface RtpBudgets {
   readonly notes?: string;
 }
 
+export type VolatilityClassification = 'low' | 'medium' | 'medium-high' | 'high';
+
+export type ProbabilityTargetRange = RtpBudgetRange;
+
+export interface VolatilityTarget {
+  readonly classification: VolatilityClassification;
+  readonly provisional: true;
+  readonly standardDeviationMultiple: RtpBudgetRange;
+  readonly tailTargets: Readonly<
+    Record<
+      '20xPlusProbability' | '50xPlusProbability' | '100xPlusProbability' | '250xPlusProbability',
+      ProbabilityTargetRange
+    >
+  >;
+  readonly notes?: string;
+}
+
+export interface FeatureFrequencyTarget {
+  readonly paidSpinsPerTrigger: {
+    readonly target: number;
+    readonly minimum: number;
+    readonly maximum: number;
+  };
+  readonly provisional: true;
+}
+
 export interface BonusAward {
   readonly count: number;
   readonly freeSpins: number;
@@ -143,6 +169,8 @@ export interface RuntimeGameConfig {
   readonly rules: RulesConfig;
   readonly cascades?: CascadeConfig;
   readonly rtpBudgets: RtpBudgets;
+  readonly volatilityTarget?: VolatilityTarget;
+  readonly featureFrequencyTarget?: FeatureFrequencyTarget;
 }
 
 export interface LineWin {
@@ -264,6 +292,29 @@ export interface FeatureLengthPercentiles {
   readonly p99: number;
 }
 
+export interface OutcomePercentiles {
+  readonly p90: number;
+  readonly p95: number;
+  readonly p99: number;
+  readonly p995: number;
+  readonly p999: number;
+  readonly p9999: number;
+}
+
+export interface TailMetric {
+  readonly thresholdMultiple: number;
+  readonly count: number;
+  readonly probability: number;
+  readonly rtpContribution: number;
+}
+
+export interface EngineeringTargetAssessment {
+  readonly status: 'PASS' | 'FAIL';
+  readonly configuredClassification: VolatilityClassification;
+  readonly observedClassification: VolatilityClassification | null;
+  readonly criteria: Readonly<Record<string, 'PASS' | 'FAIL'>>;
+}
+
 export interface SimulationReport {
   readonly schemaVersion: ConfigVersion;
   readonly methodology: 'deterministic-monte-carlo';
@@ -307,6 +358,14 @@ export interface SimulationReport {
   readonly capApplications: number;
   readonly capApplicationFrequency: number;
   readonly payoutDistribution: readonly DistributionBucket[];
+  readonly zeroReturnProbability: number;
+  readonly subBetReturnProbability: number;
+  readonly tailMetrics: readonly TailMetric[];
+  readonly outcomePercentiles: OutcomePercentiles;
+  readonly volatilityTarget?: VolatilityTarget;
+  readonly volatilityAssessment?: EngineeringTargetAssessment;
+  readonly featureFrequencyTarget?: FeatureFrequencyTarget;
+  readonly paidSpinsPerFeatureTrigger: number | null;
   readonly cascadeEnabled: boolean;
   readonly spinsWithCascade: number;
   readonly eligibleCascadeSpins: number;

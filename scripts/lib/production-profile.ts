@@ -2,7 +2,8 @@ import { isDeepStrictEqual } from 'node:util';
 import type { RuntimeGameConfig } from '@lucky/shared-types';
 
 export const PRODUCTION_CONFIGURATION_ID = 'lucky888-production-20line-v1';
-export const PRODUCTION_REEL_LENGTHS = [48, 52, 56, 52, 48] as const;
+export const PRODUCTION_REEL_LENGTHS = [52, 52, 57, 52, 58] as const;
+export const PRODUCTION_FREE_SPIN_REEL_LENGTHS = [48, 52, 56, 52, 48] as const;
 
 function invariant(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`Production profile assertion failed: ${message}`);
@@ -49,9 +50,9 @@ export function assertProductionProfile(config: RuntimeGameConfig): void {
   invariant(
     isDeepStrictEqual(
       config.freeSpinReelStrips.map((strip) => strip.length),
-      PRODUCTION_REEL_LENGTHS,
+      PRODUCTION_FREE_SPIN_REEL_LENGTHS,
     ),
-    `free-spin reel lengths must be ${PRODUCTION_REEL_LENGTHS.join('/')}`,
+    `free-spin reel lengths must be ${PRODUCTION_FREE_SPIN_REEL_LENGTHS.join('/')}`,
   );
   invariant(
     !isDeepStrictEqual(config.reelStrips, config.freeSpinReelStrips),

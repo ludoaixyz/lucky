@@ -15,7 +15,7 @@ describe('durable simulation report', () => {
     expect(config.symbols.filter((symbol) => symbol.category === 'scatter')).toHaveLength(1);
     expect(config.paylines).toHaveLength(20);
     expect(new Set(config.paylines.map((line) => line.rows.join(','))).size).toBe(20);
-    expect(config.reelStrips.map((strip) => strip.length)).toEqual([48, 52, 56, 52, 48]);
+    expect(config.reelStrips.map((strip) => strip.length)).toEqual([52, 52, 57, 52, 58]);
     expect(config.freeSpinReelStrips.map((strip) => strip.length)).toEqual([48, 52, 56, 52, 48]);
     expect(config.freeSpinReelStrips).not.toEqual(config.reelStrips);
     expect(

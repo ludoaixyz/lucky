@@ -120,12 +120,16 @@ export function reconcileSimulation(
   ];
 }
 
-export function compareTargets(report: SimulationReport): readonly TargetComparison[] {
+export function compareTargets(
+  report: SimulationReport,
+  game?: RuntimeGameConfig,
+): readonly TargetComparison[] {
   const frequencyDenominator =
     report.featureTriggerFrequency === 0
       ? Number.POSITIVE_INFINITY
       : 1 / report.featureTriggerFrequency;
-  return [
+  const frequencyTarget = game?.featureFrequencyTarget?.paidSpinsPerTrigger;
+  const comparisons: TargetComparison[] = [
     {
       measure: 'Credited RTP',
       result: report.creditedTotalRtp,
@@ -136,7 +140,11 @@ export function compareTargets(report: SimulationReport): readonly TargetCompari
       measure: 'Feature frequency (paid spins per trigger)',
       result: frequencyDenominator,
       target: '100–140',
-      status: frequencyDenominator >= 100 && frequencyDenominator <= 140 ? 'PASS' : 'FAIL',
+      status:
+        frequencyDenominator >= (frequencyTarget?.minimum ?? 100) &&
+        frequencyDenominator <= (frequencyTarget?.maximum ?? 140)
+          ? 'PASS'
+          : 'FAIL',
     },
     {
       measure: 'Average feature length',
@@ -202,6 +210,19 @@ export function compareTargets(report: SimulationReport): readonly TargetCompari
             : 'FAIL',
     },
   ];
+  if (frequencyTarget)
+    comparisons[1] = {
+      ...comparisons[1]!,
+      target: `${frequencyTarget.minimum}-${frequencyTarget.maximum} (target ${frequencyTarget.target})`,
+    };
+  if (report.volatilityTarget)
+    comparisons.push({
+      measure: 'Provisional volatility target',
+      result: report.standardDeviation,
+      target: report.volatilityTarget.classification,
+      status: report.volatilityAssessment?.status ?? 'FAIL',
+    });
+  return comparisons;
 }
 
 export function buildDurableReport(
@@ -230,7 +251,7 @@ export function buildDurableReport(
     payoutHash,
     exactEnumeration,
     reconciliations,
-    targetComparisons: compareTargets(simulation),
+    targetComparisons: compareTargets(simulation, game),
     theoreticalRtp,
     maxSimulatedBets: simulation.paidSpins,
     cumulativeSimulation: true,
@@ -256,6 +277,12 @@ export function renderSimulationMarkdown(report: DurableSimulationReport): strin
     .map(
       (bucket) =>
         `| ${bucket.label} | ${bucket.count.toLocaleString('en-US')} | ${formatPercentRatio(bucket.probability, 6)} |`,
+    )
+    .join('\n');
+  const tails = report.tailMetrics
+    .map(
+      (metric) =>
+        `| ${metric.thresholdMultiple}x+ | ${metric.count.toLocaleString('en-US')} | ${formatPercentRatio(metric.probability, 6)} | ${formatPercentRatio(metric.rtpContribution, 6)} |`,
     )
     .join('\n');
   const scatterFrequencies = ['3', '4', '5']
@@ -371,12 +398,28 @@ ${cascadeSection}
 
 The return random variable is credited payout from one paid spin and its complete feature, divided by the paid wager.
 
+Configured target: **${report.volatilityTarget?.classification ?? 'not configured'}** (provisional engineering target). Assessment: **${report.volatilityAssessment?.status ?? 'not assessed'}**.
+
 | Measure | Result |
 | --- | ---: |
 | Variance | ${number(report.variance)} |
 | Standard deviation | ${number(report.standardDeviation)} |
 | Standard error | ${number(report.standardError)} |
 | Maximum observed payout | ${report.maximumObservedWinCredits.toLocaleString('en-US')} credits |
+| Zero-return probability | ${formatPercentRatio(report.zeroReturnProbability, 6)} |
+| Sub-bet return probability | ${formatPercentRatio(report.subBetReturnProbability, 6)} |
+
+### Cumulative paid-spin outcome tails
+
+| Threshold | Count | Probability | RTP contribution |
+| ---: | ---: | ---: | ---: |
+${tails}
+
+### Paid-spin outcome percentiles (bet multiples)
+
+| P90 | P95 | P99 | P99.5 | P99.9 | P99.99 |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| ${number(report.outcomePercentiles.p90, 3)} | ${number(report.outcomePercentiles.p95, 3)} | ${number(report.outcomePercentiles.p99, 3)} | ${number(report.outcomePercentiles.p995, 3)} | ${number(report.outcomePercentiles.p999, 3)} | ${number(report.outcomePercentiles.p9999, 3)} |
 
 ## Payout distribution
 

@@ -1,7 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { matchedPaylineCenters, paylineColor } from '../src/game/payline-presentation.js';
+import {
+  matchedPaylineCenters,
+  paylineColor,
+  RetainedPaylinePresentation,
+} from '../src/game/payline-presentation.js';
 import { SYMBOL_VISUALS, symbolVisual } from '../src/game/symbol-visuals.js';
 import {
   MINIMUM_VISIBLE_DURATION_MS,
@@ -46,6 +50,81 @@ describe('payline presentation geometry', () => {
   it('selects readable colors deterministically by payline id', () => {
     expect(paylineColor('L4')).toBe(paylineColor('L4'));
     expect(paylineColor('L4')).not.toBe(paylineColor('L5'));
+  });
+});
+
+describe('retained payline lifecycle', () => {
+  const win = (paylineId: string) => ({ paylineId, symbolId: 'A', count: 3, awardCredits: 5 });
+  const window = (symbol: string) => [[symbol], [symbol], [symbol]];
+  const remember = (
+    state: RetainedPaylinePresentation,
+    stageIndex: number,
+    symbol: string,
+    paylineIds: readonly string[],
+  ) =>
+    state.rememberWinningStage({
+      stageIndex,
+      window: window(symbol),
+      lineWins: paylineIds.map(win),
+    });
+
+  it('retains an ordinary multi-line win through every timer interval', () => {
+    vi.useFakeTimers();
+    const state = new RetainedPaylinePresentation();
+    remember(state, 0, 'A', ['L1', 'L2']);
+    for (const milliseconds of [1_000, 10_000, 60_000]) {
+      vi.advanceTimersByTime(milliseconds);
+      expect(state.current()?.lineWins.map(({ paylineId }) => paylineId)).toEqual(['L1', 'L2']);
+    }
+    vi.useRealTimers();
+  });
+
+  it('clears only when the next accepted spin begins', () => {
+    const state = new RetainedPaylinePresentation();
+    remember(state, 0, 'A', ['L1']);
+    state.beginSpin();
+    expect(state.current()).toBeUndefined();
+  });
+
+  it('keeps the latest winning cascade when a terminal cascade has no wins', () => {
+    const state = new RetainedPaylinePresentation();
+    remember(state, 0, 'INITIAL', ['L1']);
+    remember(state, 1, 'CASCADE_1', ['L4', 'L7']);
+    remember(state, 2, 'TERMINAL', []);
+    expect(state.current()).toMatchObject({
+      stageIndex: 1,
+      window: window('CASCADE_1'),
+      lineWins: [
+        expect.objectContaining({ paylineId: 'L4' }),
+        expect.objectContaining({ paylineId: 'L7' }),
+      ],
+    });
+  });
+
+  it('retains the complete final winning set across multiple winning cascades', () => {
+    const state = new RetainedPaylinePresentation();
+    remember(state, 0, 'INITIAL', ['L1']);
+    remember(state, 1, 'CASCADE_1', ['L3']);
+    remember(state, 2, 'CASCADE_2', ['L8', 'L9']);
+    remember(state, 3, 'TERMINAL', []);
+    expect(state.current()?.stageIndex).toBe(2);
+    expect(state.current()?.window).toEqual(window('CASCADE_2'));
+    expect(state.current()?.lineWins.map(({ paylineId }) => paylineId)).toEqual(['L8', 'L9']);
+  });
+
+  it('leaves a no-win spin empty and never resurrects a prior losing-spin win', () => {
+    const state = new RetainedPaylinePresentation();
+    remember(state, 0, 'WIN', ['L1']);
+    state.beginSpin();
+    remember(state, 0, 'LOSS', []);
+    expect(state.current()).toBeUndefined();
+  });
+
+  it('clears retained state safely on shutdown', () => {
+    const state = new RetainedPaylinePresentation();
+    remember(state, 0, 'WIN', ['L1']);
+    state.shutdown();
+    expect(state.current()).toBeUndefined();
   });
 });
 

@@ -26,7 +26,10 @@
     "standardDeviation",
     "standardError",
     "confidenceInterval95",
-    "capApplications"
+    "capApplications",
+    "tailMetrics",
+    "outcomePercentiles",
+    "paidSpinsPerFeatureTrigger"
   ],
   "properties": {
     "methodology": { "const": "deterministic-monte-carlo" },
@@ -92,6 +95,20 @@
     "freeSpinFeatureNonCascadeRtp": { "type": "number", "minimum": 0 },
     "creditedTotalRtp": { "type": "number", "minimum": 0 },
     "featureTriggerFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
+    "paidSpinsPerFeatureTrigger": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+    "zeroReturnProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "subBetReturnProbability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "tailMetrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["thresholdMultiple", "count", "probability", "rtpContribution"]
+      }
+    },
+    "outcomePercentiles": {
+      "type": "object",
+      "required": ["p90", "p95", "p99", "p995", "p999", "p9999"]
+    },
     "cascadeEnabled": { "type": "boolean" },
     "spinsWithCascade": { "type": "integer", "minimum": 0 },
     "eligibleCascadeSpins": { "type": "integer", "minimum": 1 },

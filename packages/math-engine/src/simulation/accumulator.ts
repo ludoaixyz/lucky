@@ -19,6 +19,7 @@ const BUCKETS = [
   { label: '[5,20)x', minimumMultiple: 5, maximumMultiple: 20 },
   { label: '20x+', minimumMultiple: 20, maximumMultiple: null },
 ] as const;
+const TAIL_THRESHOLDS = [1, 5, 10, 20, 50, 100, 250, 500, 1000] as const;
 
 function percentile(sorted: readonly number[], probability: number): number {
   if (sorted.length === 0) return 0;
@@ -50,6 +51,11 @@ export class SimulationAccumulator {
   private readonly triggerCounts = new Map<number, number>();
   private readonly featureLengths: number[] = [];
   private readonly bucketCounts = Array<number>(BUCKETS.length).fill(0);
+  private readonly outcomeMultiples: number[] = [];
+  private readonly tailCounts = Array<number>(TAIL_THRESHOLDS.length).fill(0);
+  private readonly tailPayoutCredits = Array<number>(TAIL_THRESHOLDS.length).fill(0);
+  private zeroReturnCount = 0;
+  private subBetReturnCount = 0;
   private baseGameSpinsWithCascade = 0;
   private baseGameCascadeSteps = 0;
   private baseGameCascadePayout = 0;
@@ -105,6 +111,15 @@ export class SimulationAccumulator {
     if (result.maximumWinApplied) this.capApplications += 1;
     this.maximumObservedWin = Math.max(this.maximumObservedWin, result.totalWinCredits);
     const multiple = result.totalWinCredits / this.config.betCredits;
+    this.outcomeMultiples.push(multiple);
+    if (result.totalWinCredits === 0) this.zeroReturnCount += 1;
+    else if (result.totalWinCredits < this.config.betCredits) this.subBetReturnCount += 1;
+    TAIL_THRESHOLDS.forEach((threshold, tailIndex) => {
+      if (result.totalWinCredits < threshold * this.config.betCredits) return;
+      this.tailCounts[tailIndex] = (this.tailCounts[tailIndex] ?? 0) + 1;
+      this.tailPayoutCredits[tailIndex] =
+        (this.tailPayoutCredits[tailIndex] ?? 0) + result.totalWinCredits;
+    });
     this.returnSum += multiple;
     this.returnSquaredSum += multiple ** 2;
     const index = BUCKETS.findIndex((bucket) => {
@@ -126,6 +141,7 @@ export class SimulationAccumulator {
     const standardError = standardDeviation / Math.sqrt(this.paidSpins);
     const margin = 1.96 * standardError;
     const sortedFeatureLengths = [...this.featureLengths].sort((left, right) => left - right);
+    const sortedOutcomeMultiples = [...this.outcomeMultiples].sort((left, right) => left - right);
     const featureLengthPercentiles: FeatureLengthPercentiles = {
       median: percentile(sortedFeatureLengths, 0.5),
       p75: percentile(sortedFeatureLengths, 0.75),
@@ -143,6 +159,41 @@ export class SimulationAccumulator {
     const totalCascadeSteps = this.baseGameCascadeSteps + this.freeSpinCascadeSteps;
     const cascadePayoutCredits = this.baseGameCascadePayout + this.freeSpinCascadePayout;
     const freeSpinFeatureNonCascadePayout = this.uncappedFeaturePayout - this.freeSpinCascadePayout;
+    const tailMetrics = TAIL_THRESHOLDS.map((thresholdMultiple, index) => ({
+      thresholdMultiple,
+      count: this.tailCounts[index] ?? 0,
+      probability: (this.tailCounts[index] ?? 0) / this.paidSpins,
+      rtpContribution: (this.tailPayoutCredits[index] ?? 0) / totalWageredCredits,
+    }));
+    const outcomePercentiles = {
+      p90: percentile(sortedOutcomeMultiples, 0.9),
+      p95: percentile(sortedOutcomeMultiples, 0.95),
+      p99: percentile(sortedOutcomeMultiples, 0.99),
+      p995: percentile(sortedOutcomeMultiples, 0.995),
+      p999: percentile(sortedOutcomeMultiples, 0.999),
+      p9999: percentile(sortedOutcomeMultiples, 0.9999),
+    };
+    const volatilityTarget = game.volatilityTarget;
+    const criteria: Record<string, 'PASS' | 'FAIL'> = {};
+    if (volatilityTarget) {
+      const inRange = (value: number, range: { minimum: number; maximum: number }) =>
+        value >= range.minimum && value <= range.maximum ? 'PASS' : 'FAIL';
+      criteria.standardDeviationMultiple = inRange(
+        standardDeviation,
+        volatilityTarget.standardDeviationMultiple,
+      );
+      const targetThresholds = [
+        [20, '20xPlusProbability'],
+        [50, '50xPlusProbability'],
+        [100, '100xPlusProbability'],
+        [250, '250xPlusProbability'],
+      ] as const;
+      for (const [threshold, key] of targetThresholds) {
+        const metric = tailMetrics.find((candidate) => candidate.thresholdMultiple === threshold);
+        criteria[key] = inRange(metric?.probability ?? 0, volatilityTarget.tailTargets[key]);
+      }
+    }
+    const volatilityPassed = Object.values(criteria).every((status) => status === 'PASS');
     const report: SimulationReport = {
       schemaVersion: '1.2.0',
       methodology: 'deterministic-monte-carlo',
@@ -195,6 +246,26 @@ export class SimulationAccumulator {
       capApplications: this.capApplications,
       capApplicationFrequency: this.capApplications / this.paidSpins,
       payoutDistribution,
+      zeroReturnProbability: this.zeroReturnCount / this.paidSpins,
+      subBetReturnProbability: this.subBetReturnCount / this.paidSpins,
+      tailMetrics,
+      outcomePercentiles,
+      ...(volatilityTarget
+        ? {
+            volatilityTarget,
+            volatilityAssessment: {
+              status: volatilityPassed ? ('PASS' as const) : ('FAIL' as const),
+              configuredClassification: volatilityTarget.classification,
+              observedClassification: volatilityPassed ? volatilityTarget.classification : null,
+              criteria,
+            },
+          }
+        : {}),
+      ...(game.featureFrequencyTarget
+        ? { featureFrequencyTarget: game.featureFrequencyTarget }
+        : {}),
+      paidSpinsPerFeatureTrigger:
+        this.featureTriggers === 0 ? null : this.paidSpins / this.featureTriggers,
       cascadeEnabled: game.cascades?.enabled === true,
       spinsWithCascade,
       eligibleCascadeSpins,
@@ -332,6 +403,15 @@ export function assertFiniteReport(report: SimulationReport): void {
     report.standardError,
     ...report.confidenceInterval95,
     ...report.payoutDistribution.map((bucket) => bucket.probability),
+    report.zeroReturnProbability,
+    report.subBetReturnProbability,
+    ...report.tailMetrics.flatMap((metric) => [metric.probability, metric.rtpContribution]),
+    report.outcomePercentiles.p90,
+    report.outcomePercentiles.p95,
+    report.outcomePercentiles.p99,
+    report.outcomePercentiles.p995,
+    report.outcomePercentiles.p999,
+    report.outcomePercentiles.p9999,
   ];
   if (rates.some((value) => !Number.isFinite(value) || value < 0))
     throw new RangeError('Report contains a non-finite or negative rate');

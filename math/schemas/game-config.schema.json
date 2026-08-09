@@ -63,6 +63,51 @@
         "maximumCascadesPerSpin": { "type": "integer", "minimum": 1 }
       },
       "additionalProperties": false
+    },
+    "volatilityTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "provisional", "standardDeviationMultiple", "tailTargets"],
+      "properties": {
+        "classification": { "enum": ["low", "medium", "medium-high", "high"] },
+        "provisional": { "const": true },
+        "standardDeviationMultiple": { "$ref": "#/$defs/range" },
+        "tailTargets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "20xPlusProbability",
+            "50xPlusProbability",
+            "100xPlusProbability",
+            "250xPlusProbability"
+          ],
+          "properties": {
+            "20xPlusProbability": { "$ref": "#/$defs/probabilityRange" },
+            "50xPlusProbability": { "$ref": "#/$defs/probabilityRange" },
+            "100xPlusProbability": { "$ref": "#/$defs/probabilityRange" },
+            "250xPlusProbability": { "$ref": "#/$defs/probabilityRange" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "featureFrequencyTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["paidSpinsPerTrigger", "provisional"],
+      "properties": {
+        "provisional": { "const": true },
+        "paidSpinsPerTrigger": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target", "minimum", "maximum"],
+          "properties": {
+            "target": { "type": "number", "exclusiveMinimum": 0 },
+            "minimum": { "type": "number", "exclusiveMinimum": 0 },
+            "maximum": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      }
     }
   },
   "additionalProperties": true,
@@ -75,6 +120,15 @@
         "maximum": { "type": "number", "minimum": 0 }
       },
       "additionalProperties": false
+    },
+    "probabilityRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maximum": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
     }
   }
 }

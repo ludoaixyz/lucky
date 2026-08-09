@@ -476,6 +476,56 @@ function renderDashboard(): void {
           ],
         ]
       : [];
+  const tailProbability = (threshold: number): number =>
+    report.tailMetrics?.find((metric) => metric.thresholdMultiple === threshold)?.probability ?? 0;
+  const tailDetail = (probability: number): string =>
+    probability > 0
+      ? translations.templates.ratio(formatDecimal(1 / probability, currentLocale, 0))
+      : translations.dashboard.notAvailable;
+  const volatilityClassification = (
+    classification: 'low' | 'medium' | 'medium-high' | 'high',
+  ): string =>
+    ({
+      low: translations.metrics.classificationLow,
+      medium: translations.metrics.classificationMedium,
+      'medium-high': translations.metrics.classificationMediumHigh,
+      high: translations.metrics.classificationHigh,
+    })[classification];
+  const volatilityKpis: readonly [string, string, string][] = report.volatilityTarget
+    ? [
+        [
+          translations.metrics.volatilityTarget,
+          volatilityClassification(report.volatilityTarget.classification),
+          report.volatilityAssessment?.status ?? translations.dashboard.notAvailable,
+        ],
+        [
+          translations.metrics.observedVolatility,
+          report.volatilityAssessment?.observedClassification
+            ? volatilityClassification(report.volatilityAssessment.observedClassification)
+            : translations.dashboard.notAvailable,
+          report.volatilityAssessment?.status ?? translations.dashboard.notAvailable,
+        ],
+        [
+          translations.metrics.standardDeviation,
+          `${formatDecimal(report.standardDeviation, currentLocale, 3)}x`,
+          '',
+        ],
+        ...([20, 50, 100, 250] as const).map((threshold) => {
+          const probability = tailProbability(threshold);
+          const label = translations.metrics[`frequency${threshold}x` as 'frequency20x'];
+          return [label, formatPercent(probability, currentLocale, 4), tailDetail(probability)] as [
+            string,
+            string,
+            string,
+          ];
+        }),
+        [
+          translations.metrics.maximumObservedWin,
+          `${formatDecimal(report.maximumObservedWinCredits / baseBetCredits(report), currentLocale, 1)}x`,
+          `${formatInteger(report.maximumObservedWinCredits, currentLocale)} ${translations.dashboard.credits}`,
+        ],
+      ]
+    : [];
   app.innerHTML = `
     <header class="dashboard-header">
       <div><p class="eyebrow">${escapeHtml(translations.dashboard.simulationManagement)}</p><h1>LUCKY888 <span>— ${escapeHtml(t(currentLocale, 'dashboard.title'))}</span></h1></div>
@@ -511,6 +561,7 @@ function renderDashboard(): void {
         <div class="kpi-grid">${kpis.map(([label, value, detail]) => `<article class="kpi-card"><h3>${escapeHtml(label)}</h3><strong>${escapeHtml(value)}</strong><p>${escapeHtml(detail)}</p></article>`).join('')}</div>
       </section>
       ${cascadeKpis.length === 0 ? '' : `<section aria-labelledby="cascade-heading"><div class="section-heading"><h2 id="cascade-heading">${escapeHtml(translations.metrics.cascades)}</h2></div><div class="kpi-grid">${cascadeKpis.map(([label, value, detail]) => `<article class="kpi-card"><h3>${escapeHtml(label)}</h3><strong>${escapeHtml(value)}</strong><p>${escapeHtml(detail)}</p></article>`).join('')}</div></section>`}
+      ${volatilityKpis.length === 0 ? '' : `<section aria-labelledby="volatility-heading"><div class="section-heading"><h2 id="volatility-heading">${escapeHtml(translations.metrics.volatilityAndTail)}</h2></div><div class="kpi-grid">${volatilityKpis.map(([label, value, detail]) => `<article class="kpi-card"><h3>${escapeHtml(label)}</h3><strong>${escapeHtml(value)}</strong><p>${escapeHtml(detail)}</p></article>`).join('')}</div></section>`}
       <section class="summary-card"><p class="eyebrow">${escapeHtml(translations.dashboard.plainLanguageSummary)}</p><p>${escapeHtml(summary)}</p></section>
       <section aria-labelledby="targets-heading"><div class="section-heading"><p class="eyebrow">${escapeHtml(translations.dashboard.provisionalTargets)}</p><h2 id="targets-heading">${escapeHtml(translations.dashboard.managementTargetAssessment)}</h2><p>${escapeHtml(translations.dashboard.complianceNote)}</p></div>
         <div class="table-scroll"><table><thead><tr><th>${escapeHtml(translations.dashboard.metric)}</th><th>${escapeHtml(translations.dashboard.result)}</th><th>${escapeHtml(translations.dashboard.target)}</th><th>${escapeHtml(translations.dashboard.status)}</th><th>${escapeHtml(translations.dashboard.interpretation)}</th></tr></thead><tbody>${targetRows(targets, currentLocale, translations)}</tbody></table></div>

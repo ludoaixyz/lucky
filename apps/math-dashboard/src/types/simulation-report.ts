@@ -60,6 +60,24 @@ export interface SimulationReport {
   readonly capApplications: number;
   readonly capApplicationFrequency: number;
   readonly payoutDistribution: readonly PayoutBucket[];
+  readonly zeroReturnProbability?: number;
+  readonly subBetReturnProbability?: number;
+  readonly tailMetrics?: readonly {
+    readonly thresholdMultiple: number;
+    readonly count: number;
+    readonly probability: number;
+    readonly rtpContribution: number;
+  }[];
+  readonly outcomePercentiles?: Readonly<Record<string, number>>;
+  readonly volatilityTarget?: {
+    readonly classification: 'low' | 'medium' | 'medium-high' | 'high';
+    readonly standardDeviationMultiple: { readonly minimum: number; readonly maximum: number };
+  };
+  readonly volatilityAssessment?: {
+    readonly status: 'PASS' | 'FAIL';
+    readonly observedClassification: 'low' | 'medium' | 'medium-high' | 'high' | null;
+  };
+  readonly paidSpinsPerFeatureTrigger?: number | null;
   readonly baseBetCredits?: number;
   readonly dashboardLocale?: DashboardLocale;
   readonly theoreticalRtp?: number;

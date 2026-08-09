@@ -1,6 +1,38 @@
-import type { Payline } from '@lucky/shared-types';
+import type { LineWin, Payline, SymbolId } from '@lucky/shared-types';
 
 const LINE_COLORS = [0x7de7d1, 0xffd66b, 0xff8ab3, 0x8eb8ff, 0xd19cff] as const;
+
+export interface RetainedWinningStage {
+  readonly window: readonly (readonly SymbolId[])[];
+  readonly lineWins: readonly LineWin[];
+  readonly stageIndex: number;
+}
+
+/** Lifecycle state: only a spin boundary or shutdown retires the last winning stage. */
+export class RetainedPaylinePresentation {
+  private retained: RetainedWinningStage | undefined;
+
+  beginSpin(): void {
+    this.retained = undefined;
+  }
+
+  rememberWinningStage(stage: RetainedWinningStage): void {
+    if (stage.lineWins.length === 0) return;
+    this.retained = {
+      stageIndex: stage.stageIndex,
+      window: stage.window.map((column) => [...column]),
+      lineWins: [...stage.lineWins],
+    };
+  }
+
+  shutdown(): void {
+    this.retained = undefined;
+  }
+
+  current(): RetainedWinningStage | undefined {
+    return this.retained;
+  }
+}
 
 export interface CellCenter {
   readonly x: number;
