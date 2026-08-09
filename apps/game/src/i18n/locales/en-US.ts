@@ -36,7 +36,9 @@ export const enUS = {
   },
   controls: {
     spin: 'SPIN',
+    stop: 'STOP',
     spinAria: (count) => `Start ${spinCount(count)}`,
+    stopAria: 'Stop after the current spin and feature',
     speedValue: (speed) => `${formatNumber(locale, speed)}× speed`,
     betValue: (amount) => `${formatNumber(locale, amount)} credits`,
     spinsValue: spinCount,

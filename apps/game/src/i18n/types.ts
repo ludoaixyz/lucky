@@ -72,7 +72,9 @@ export interface TranslationDictionary {
   };
   readonly controls: {
     readonly spin: 'SPIN';
+    readonly stop: 'STOP';
     readonly spinAria: (count: number) => string;
+    readonly stopAria: string;
     readonly speedValue: (speed: number) => string;
     readonly betValue: (amount: number) => string;
     readonly spinsValue: (count: number) => string;

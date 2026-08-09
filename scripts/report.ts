@@ -17,27 +17,64 @@ function option(name: string, fallback: number): number {
   return value;
 }
 
-async function optionalExact(path: string): Promise<ExactMathReport | null> {
+async function optionalExact(
+  path: string,
+  expected: { sourceHash: string; structuralHash: string; payoutHash: string },
+): Promise<ExactMathReport | null> {
   try {
     await access(path);
   } catch {
     return null;
   }
-  return JSON.parse(await readFile(path, 'utf8')) as ExactMathReport;
+  const report = JSON.parse(await readFile(path, 'utf8')) as ExactMathReport;
+  if (
+    report.sourceHash !== expected.sourceHash ||
+    (report.structuralHash !== undefined && report.structuralHash !== expected.structuralHash) ||
+    (report.payoutHash !== undefined && report.payoutHash !== expected.payoutHash)
+  )
+    throw new Error(`Stale exact/hybrid report rejected: ${path}`);
+  return report;
+}
+
+interface HybridEnumeration {
+  readonly sourceHash: string;
+  readonly structuralHash: string;
+  readonly payoutHash: string;
+  readonly exactInitialBoardBaseLineRtp: number;
+  readonly exactFeatureTriggerFrequency: number;
+  readonly timing: Readonly<Record<string, number | string>>;
+}
+
+async function requiredHybrid(
+  path: string,
+  expected: { sourceHash: string; structuralHash: string; payoutHash: string },
+): Promise<HybridEnumeration> {
+  const report = JSON.parse(await readFile(path, 'utf8')) as HybridEnumeration;
+  if (
+    report.sourceHash !== expected.sourceHash ||
+    report.structuralHash !== expected.structuralHash ||
+    report.payoutHash !== expected.payoutHash
+  )
+    throw new Error(`Stale exact/hybrid report rejected: ${path}`);
+  return report;
 }
 
 const spins = option('spins', 1_000_000);
 const seed = option('seed', 2026);
-const { config, sourceHash } = await loadSourceConfig();
+const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig();
 const issues = validateConfig(config, 'math/source');
 if (issues.length > 0)
   throw new Error(`Report generation stopped: ${issues.length} math validation issue(s)`);
 
 const reportsDirectory = resolve(process.cwd(), 'math/reports');
 const cascadesEnabled = config.cascades?.enabled === true;
+const hashes = { sourceHash, structuralHash, payoutHash };
+const hybridEnumeration = cascadesEnabled
+  ? await requiredHybrid(resolve(reportsDirectory, `${config.configurationId}-hybrid.json`), hashes)
+  : null;
 const exact = cascadesEnabled
   ? null
-  : await optionalExact(resolve(reportsDirectory, `${config.configurationId}-exact.json`));
+  : await optionalExact(resolve(reportsDirectory, `${config.configurationId}-exact.json`), hashes);
 if (!cascadesEnabled && !exact)
   throw new Error('Default checkpoint reporting requires the exact math report');
 if (cascadesEnabled)
@@ -63,14 +100,17 @@ const reportCheckpoints = exact
       theoreticalRtp,
       rtpDeviation: checkpoint.simulatedRtp - theoreticalRtp,
     }));
-const report = buildDurableReport(
+const durableReport = buildDurableReport(
   config,
   sourceHash,
+  structuralHash,
+  payoutHash,
   series.finalReport,
   exact,
   reportCheckpoints,
   theoreticalRtp,
 );
+const report = { ...durableReport, hybridEnumeration };
 const basename = `${config.configurationId}-simulation`;
 await mkdir(reportsDirectory, { recursive: true });
 await Promise.all([

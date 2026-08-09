@@ -36,7 +36,9 @@ export const ptBR = {
   },
   controls: {
     spin: 'SPIN',
+    stop: 'STOP',
     spinAria: (count) => `Iniciar ${spinCount(count)}`,
+    stopAria: 'Parar após o giro e o recurso atuais',
     speedValue: (speed) => `Velocidade ${formatNumber(locale, speed)}×`,
     betValue: (amount) => `${formatNumber(locale, amount)} créditos`,
     spinsValue: spinCount,

@@ -1,8 +1,11 @@
 symbol_id,name,category,display
-A,Ace,regular,A
-K,King,regular,K
-Q,Queen,regular,Q
 J,Jack,regular,J
+Q,Queen,regular,Q
+K,King,regular,K
+A,Ace,regular,A
+COIN,Coin,regular,◉
 GEM,Gem,regular,◆
+DRAGON,Dragon,regular,龙
+EIGHT,Lucky Eight,regular,8
 WILD,Wild,wild,★
 SCATTER,Scatter,scatter,●

@@ -251,7 +251,12 @@ export function comparisonRows(a: SimulationReport, b: SimulationReport): readon
   const metrics: readonly [ComparisonMetricKey, number, number, ComparisonRow['format']][] = [
     ['creditedRtp', a.creditedTotalRtp, b.creditedTotalRtp, 'percent'],
     ['baseRtp', a.uncappedBaseLineRtp, b.uncappedBaseLineRtp, 'percent'],
-    ['featureRtp', a.uncappedFeatureRtp, b.uncappedFeatureRtp, 'percent'],
+    [
+      'featureRtp',
+      a.freeSpinFeatureNonCascadeRtp ?? a.uncappedFeatureRtp,
+      b.freeSpinFeatureNonCascadeRtp ?? b.uncappedFeatureRtp,
+      'percent',
+    ],
     ['hitFrequency', a.featureInclusiveHitFrequency, b.featureInclusiveHitFrequency, 'percent'],
     ['featureFrequency', a.featureTriggerFrequency, b.featureTriggerFrequency, 'percent'],
     [

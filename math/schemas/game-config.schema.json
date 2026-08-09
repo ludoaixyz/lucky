@@ -16,7 +16,8 @@
     "lineBetCredits",
     "totalBetCredits",
     "maximumWinCredits",
-    "maximumWinScope"
+    "maximumWinScope",
+    "rtpBudgets"
   ],
   "properties": {
     "schemaVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
@@ -24,14 +25,35 @@
     "gameName": { "const": "LUCKY888" },
     "gameVersion": { "type": "string", "minLength": 1 },
     "configurationId": { "type": "string", "minLength": 1 },
-    "selectedRtpProfile": { "const": "lucky888-balanced-base-v1" },
+    "selectedRtpProfile": { "const": "lucky888-production-20line-v1" },
     "payModel": { "const": "fixed-paylines-left-to-right" },
     "reelCount": { "type": "integer", "minimum": 1 },
     "visibleRows": { "type": "integer", "minimum": 1 },
-    "lineBetCredits": { "type": "integer", "minimum": 1 },
+    "lineBetCredits": { "type": "number", "exclusiveMinimum": 0 },
     "totalBetCredits": { "type": "integer", "minimum": 1 },
     "maximumWinCredits": { "type": "integer", "minimum": 1 },
     "maximumWinScope": { "const": "paid-spin-including-feature" },
+    "rtpBudgets": {
+      "type": "object",
+      "required": [
+        "provisional",
+        "initialBoardBaseLine",
+        "cascadeStages",
+        "freeSpinFeature",
+        "scatterDirectPay",
+        "creditedTotal"
+      ],
+      "properties": {
+        "provisional": { "const": true },
+        "initialBoardBaseLine": { "$ref": "#/$defs/range" },
+        "cascadeStages": { "$ref": "#/$defs/range" },
+        "freeSpinFeature": { "$ref": "#/$defs/range" },
+        "scatterDirectPay": { "$ref": "#/$defs/range" },
+        "creditedTotal": { "$ref": "#/$defs/range" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
     "cascades": {
       "type": "object",
       "required": ["enabled"],
@@ -43,5 +65,16 @@
       "additionalProperties": false
     }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "$defs": {
+    "range": {
+      "type": "object",
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  }
 }

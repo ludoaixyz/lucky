@@ -1,8 +1,10 @@
 # LUCKY888 data contracts
 
-`game-config.json` schema 1.2.0 fixes the active identity (`lucky888`, `LUCKY888`, version 0.3.0, configuration `lucky888-balanced-base-v1`) and defines the aggregate paid-spin maximum. `rules-config.json` explicitly defines Wild substitution, line evaluation, and Scatter behavior. `bonus-config.json` defines initial/retrigger awards, finite limits, and alternate free-spin strip identity.
+`game-config.json` schema 1.2.0 fixes the active identity (`lucky888`, `LUCKY888`, version 0.4.0, configuration `lucky888-production-20line-v1`), defines the aggregate paid-spin maximum, and carries provisional additive RTP component budgets. `rules-config.json` explicitly defines Wild substitution, normalized 0.25-credit line evaluation across 20 fixed paylines, and Scatter behavior. `bonus-config.json` defines initial/retrigger awards, finite limits, and alternate free-spin strip identity.
 
 `reel-strips.csv` and `free-spin-reel-strips.csv` are separate human-edited authorities. Compilation reads them but never rewrites them. Runtime data embeds both validated strip sets, complete rules, source SHA-256, versions, identity, and generation time.
+
+`game-config.json` contains profile identity, dimensions, wager/cap settings, cascade settings, simulation metadata, and provisional RTP budgets. It does not duplicate payline paths or reel-strip stops. `paylines.csv`, `reel-strips.csv`, and `free-spin-reel-strips.csv` remain their separate canonical authorities; their values are embedded only in `math/generated/runtime-config.json` and the game runtime mirror during `npm run math:build`.
 
 `SpinResult` preserves uncapped base line/Scatter/base/feature/total credits, credited total, cap reduction, cap status, and full feature detail. Simulation reports use explicit uncapped component names and aggregate credited names. Exact reports declare `exact-uncapped`, `exact-capped`, or `hybrid`; an estimated credited field declares `monte-carlo-estimate`.
 

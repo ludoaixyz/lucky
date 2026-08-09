@@ -47,7 +47,7 @@
       "properties": {
         "direction": { "const": "left-to-right" },
         "activePaylines": { "type": "integer", "minimum": 1 },
-        "lineBetCredits": { "type": "integer", "minimum": 1 },
+        "lineBetCredits": { "type": "number", "exclusiveMinimum": 0 },
         "totalBetCredits": { "type": "integer", "minimum": 1 },
         "awardScaling": { "const": "award-credits-per-line-bet" },
         "matchRule": { "const": "consecutive-from-leftmost-reel" },

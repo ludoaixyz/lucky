@@ -2,20 +2,29 @@
   "schemaVersion": "1.2.0",
   "gameId": "lucky888",
   "gameName": "LUCKY888",
-  "gameVersion": "0.3.0",
-  "configurationId": "lucky888-balanced-base-v1",
+  "gameVersion": "0.4.0",
+  "configurationId": "lucky888-production-20line-v1",
   "reelCount": 5,
   "visibleRows": 3,
   "payModel": "fixed-paylines-left-to-right",
-  "lineBetCredits": 1,
+  "lineBetCredits": 0.25,
   "totalBetCredits": 5,
   "maximumWinCredits": 5000,
   "maximumWinScope": "paid-spin-including-feature",
-  "selectedRtpProfile": "lucky888-balanced-base-v1",
+  "selectedRtpProfile": "lucky888-production-20line-v1",
   "cascades": {
     "enabled": true,
     "scatterEvaluation": "initial-grid-only",
     "maximumCascadesPerSpin": 100
+  },
+  "rtpBudgets": {
+    "provisional": true,
+    "initialBoardBaseLine": { "minimum": 0.66, "maximum": 0.7 },
+    "cascadeStages": { "minimum": 0.15, "maximum": 0.18 },
+    "freeSpinFeature": { "minimum": 0.08, "maximum": 0.11 },
+    "scatterDirectPay": { "minimum": 0, "maximum": 0.02 },
+    "creditedTotal": { "minimum": 0.94, "maximum": 0.97 },
+    "notes": "Provisional balancing guidance; component RTP values sum to total RTP and are not certification limits."
   },
   "simulationMetadata": { "defaultSpins": 1000000, "defaultSeed": 2026 },
   "notes": "Provisional balanced engineering profile; not a certification claim."

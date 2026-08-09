@@ -12,7 +12,7 @@ The following are deliberately invariant:
 
 - the `LUCKY888` product name;
 - reel symbols, symbol IDs, payline IDs, configuration IDs, and diagnostic machine fields;
-- the visible `SPIN` button label;
+- the visible `SPIN` and `STOP` primary-action labels;
 - diagnostic CSV filename and English headers.
 
 The flag icons are local SVG assets under `apps/game/public/assets/flags`. HTML references them through Vite's `%BASE_URL%` placeholder so production builds work under the GitHub Pages `/lucky/` base path. The shared language selector is marked `no-export`; adding the Philippines flag does not change the rule that interactive language controls are omitted anywhere the existing controls are excluded from exports.

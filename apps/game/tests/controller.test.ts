@@ -31,6 +31,14 @@ class SequenceRandom implements RandomSource {
 }
 
 const config: RuntimeGameConfig = {
+  rtpBudgets: {
+    provisional: true,
+    initialBoardBaseLine: { minimum: 0, maximum: 1 },
+    cascadeStages: { minimum: 0, maximum: 1 },
+    freeSpinFeature: { minimum: 0, maximum: 1 },
+    scatterDirectPay: { minimum: 0, maximum: 1 },
+    creditedTotal: { minimum: 0, maximum: 1 },
+  },
   schemaVersion: '1.0.0',
   gameId: 'lucky888',
   gameName: 'LUCKY888',
@@ -224,7 +232,12 @@ describe('paid-spin controller boundary', () => {
     document.querySelector<HTMLButtonElement>('#spin')?.click();
     await settle();
     expect(document.querySelector('#credits')?.textContent).toBe('995');
-    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(true);
+    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(false);
+    expect(document.querySelector('#spin')?.textContent).toBe('STOP');
+    expect(document.querySelector('#spin')?.classList.contains('spin-button--stop')).toBe(true);
+    expect(document.querySelector('#spin')?.getAttribute('aria-label')).toBe(
+      'Stop after the current spin and feature',
+    );
     document.querySelector<HTMLButtonElement>('#spin')?.click();
     expect(present).toHaveBeenCalledTimes(1);
 
@@ -379,19 +392,168 @@ describe('paid-spin controller boundary', () => {
     expect(document.querySelector('#message')?.textContent).toBe('Spin 1 sa 5.');
     expect(document.querySelector('#credits')?.textContent).toBe('995');
     expect(spinsControl.value).toBe('2');
-    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(true);
+    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(false);
+    expect(document.querySelector('#spin')?.textContent).toBe('STOP');
     expect(present).toHaveBeenCalledOnce();
 
     localization.setLocale('zh-CN');
     expect(document.querySelector('#message')?.textContent).toBe('第 1/5 次旋转。');
     expect(document.querySelector('#credits')?.textContent).toBe('995');
     expect(spinsControl.value).toBe('2');
-    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(true);
+    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(false);
+    expect(document.querySelector('#spin')?.textContent).toBe('STOP');
     expect(present).toHaveBeenCalledOnce();
 
     dispose();
     releasePresentation();
     await settle();
+  });
+
+  it('stops after the active paid spin without debiting queued spins and can start again', async () => {
+    const releases: Array<() => void> = [];
+    const present = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releases.push(resolve);
+        }),
+    );
+    const recordCompletedSpin = vi.fn<SpinDiagnosticsRecorder['recordCompletedSpin']>();
+    const dispose = attachController(
+      config,
+      { present, setPresentationSpeed: vi.fn() },
+      new SequenceRandom(Array<number>(18).fill(0)),
+      { recordCompletedSpin },
+      new Localization('en-US'),
+      () => Promise.resolve(),
+    );
+    const spinsControl = document.querySelector<HTMLInputElement>('#spins-control');
+    if (!spinsControl) throw new Error('Missing spins control');
+    spinsControl.value = '2';
+    spinsControl.dispatchEvent(new Event('input'));
+
+    const spinButton = document.querySelector<HTMLButtonElement>('#spin');
+    spinButton?.click();
+    await settle();
+    expect(present).toHaveBeenCalledOnce();
+    expect(document.querySelector('#credits')?.textContent).toBe('995');
+
+    spinButton?.click();
+    spinButton?.click();
+    spinButton?.click();
+    releases.shift()?.();
+    await settle();
+
+    expect(present).toHaveBeenCalledOnce();
+    expect(recordCompletedSpin).toHaveBeenCalledOnce();
+    expect(document.querySelector('#credits')?.textContent).toBe('1,005');
+    expect(document.querySelector('#message')?.textContent).toBe(
+      'Sequence stopped after 1/5 spins.',
+    );
+    expect(spinButton?.textContent).toBe('SPIN');
+    expect(spinButton?.classList.contains('spin-button--stop')).toBe(false);
+
+    spinsControl.value = '0';
+    spinsControl.dispatchEvent(new Event('input'));
+    spinButton?.click();
+    await settle();
+    expect(present).toHaveBeenCalledTimes(2);
+    releases.shift()?.();
+    await settle();
+    expect(recordCompletedSpin).toHaveBeenCalledTimes(2);
+    expect(document.querySelector('#credits')?.textContent).toBe('1,010');
+    expect(spinButton?.textContent).toBe('SPIN');
+    dispose();
+  });
+
+  it('finishes the active feature before honoring a stop request', async () => {
+    const releases: Array<() => void> = [];
+    const present = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releases.push(resolve);
+        }),
+    );
+    const recordCompletedSpin = vi.fn<SpinDiagnosticsRecorder['recordCompletedSpin']>();
+    const dispose = attachController(
+      config,
+      { present, setPresentationSpeed: vi.fn() },
+      new SequenceRandom([1, 1, 1, 0, 0, 0, 0, 0, 0]),
+      { recordCompletedSpin },
+      new Localization('en-US'),
+      () => Promise.resolve(),
+    );
+    const spinsControl = document.querySelector<HTMLInputElement>('#spins-control');
+    if (!spinsControl) throw new Error('Missing spins control');
+    spinsControl.value = '1';
+    spinsControl.dispatchEvent(new Event('input'));
+
+    const spinButton = document.querySelector<HTMLButtonElement>('#spin');
+    spinButton?.click();
+    await settle();
+    spinButton?.click();
+    releases.shift()?.();
+    await settle();
+    expect(present).toHaveBeenCalledTimes(2);
+    expect(spinButton?.textContent).toBe('STOP');
+    releases.shift()?.();
+    await settle();
+    expect(present).toHaveBeenCalledTimes(3);
+    expect(spinButton?.textContent).toBe('STOP');
+    releases.shift()?.();
+    await settle();
+
+    expect(present).toHaveBeenCalledTimes(3);
+    expect(recordCompletedSpin).toHaveBeenCalledOnce();
+    expect(recordCompletedSpin).toHaveBeenCalledWith(
+      expect.objectContaining({ totalFreeSpinsPlayed: 2, creditedTotalWinCredits: 20 }),
+    );
+    expect(document.querySelector('#credits')?.textContent).toBe('1,015');
+    expect(document.querySelector('#message')?.textContent).toBe(
+      'Sequence stopped after 1/2 spins.',
+    );
+    expect(spinButton?.textContent).toBe('SPIN');
+    dispose();
+  });
+
+  it('allows the final active spin to complete when stop is pressed', async () => {
+    const releases: Array<() => void> = [];
+    const present = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releases.push(resolve);
+        }),
+    );
+    const recordCompletedSpin = vi.fn<SpinDiagnosticsRecorder['recordCompletedSpin']>();
+    const dispose = attachController(
+      config,
+      { present, setPresentationSpeed: vi.fn() },
+      new SequenceRandom(Array<number>(6).fill(0)),
+      { recordCompletedSpin },
+      new Localization('en-US'),
+      () => Promise.resolve(),
+    );
+    const spinsControl = document.querySelector<HTMLInputElement>('#spins-control');
+    if (!spinsControl) throw new Error('Missing spins control');
+    spinsControl.value = '1';
+    spinsControl.dispatchEvent(new Event('input'));
+
+    const spinButton = document.querySelector<HTMLButtonElement>('#spin');
+    spinButton?.click();
+    await settle();
+    releases.shift()?.();
+    await settle();
+    expect(present).toHaveBeenCalledTimes(2);
+    spinButton?.click();
+    releases.shift()?.();
+    await settle();
+
+    expect(recordCompletedSpin).toHaveBeenCalledTimes(2);
+    expect(document.querySelector('#credits')?.textContent).toBe('1,010');
+    expect(document.querySelector('#message')?.textContent).toBe(
+      'Sequence stopped after 2/2 spins.',
+    );
+    expect(spinButton?.textContent).toBe('SPIN');
+    dispose();
   });
 
   it('applies selectable presentation speed and scales the cap with the bet', () => {

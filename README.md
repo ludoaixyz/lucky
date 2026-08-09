@@ -10,7 +10,7 @@ The game runs a complete Scatter-anywhere free-spin flow with bounded retriggers
 
 ## Architecture
 
-`math/source` is the human-edited source of truth. Root scripts validate and compile it into ignored runtime artifacts. `@lucky/math-engine` owns RNG, reel selection, evaluation, caps, and simulation. The Phaser client consumes resolved `SpinResult` objects and never calculates awards in animation code.
+`math/source` is the human-edited source of truth. Its compiler manifest contains exactly `symbols.csv`, `paytable.csv`, `paylines.csv`, `reel-strips.csv`, `free-spin-reel-strips.csv`, `game-config.json`, `rules-config.json`, and `bonus-config.json`. Root scripts validate and compile only those files into ignored runtime artifacts. The legacy `math-engine.xlsx` workbook is reference material and is never read, hashed, or compiled. `@lucky/math-engine` owns RNG, reel selection, evaluation, caps, and simulation. The Phaser client consumes resolved `SpinResult` objects and never calculates awards in animation code.
 
 ```text
 math/source -> validation/compiler -> math/generated -> game runtime
@@ -88,9 +88,10 @@ The production output is static and uses a GitHub Pages-compatible `/lucky/` bas
 1. Edit only files in `math/source/`, retaining headers and stable IDs.
 2. Run `npm run math:validate`; errors name the file, record/row, field, value, and rule.
 3. Run `npm run math:build` to write fingerprinted runtime data. This never rewrites sources.
-4. Run `npm run math:enumerate` for exact finite-state feature expectations and the configuration PAR.
-5. Test or simulate: `npm run math:simulate -- --spins=10000 --seed=42`.
-6. Review ignored bulk output in `math/reports/`; the named configuration PAR is intentionally tracked.
+4. Run `npm run math:inspect` to print the canonical production-profile summary.
+5. Run `npm run math:enumerate` for exact finite-state feature expectations and the configuration PAR.
+6. Test or simulate: `npm run math:simulate -- --spins=10000 --seed=42`.
+7. Review ignored bulk output in `math/reports/`; the named configuration PAR is intentionally tracked.
 
 CSV files can be edited in Excel, LibreOffice, or Google Sheets. Import and export as UTF-8 comma-separated values; keep the first row, column order, exact IDs, integer credit fields, and leading text unchanged. Disable automatic date conversion where possible. JSON percentages/rates are decimal ratios (`0.96` means 96%), never ambiguous whole percentages.
 

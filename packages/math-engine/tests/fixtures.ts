@@ -2,6 +2,14 @@ import type { RuntimeGameConfig } from '@lucky/shared-types';
 
 export function fixtureConfig(): RuntimeGameConfig {
   return {
+    rtpBudgets: {
+      provisional: true,
+      initialBoardBaseLine: { minimum: 0, maximum: 1 },
+      cascadeStages: { minimum: 0, maximum: 1 },
+      freeSpinFeature: { minimum: 0, maximum: 1 },
+      scatterDirectPay: { minimum: 0, maximum: 1 },
+      creditedTotal: { minimum: 0, maximum: 1 },
+    },
     schemaVersion: '1.0.0',
     gameId: 'lucky888',
     gameName: 'LUCKY888',

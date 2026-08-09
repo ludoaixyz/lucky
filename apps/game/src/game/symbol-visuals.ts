@@ -50,6 +50,30 @@ export const SYMBOL_VISUALS = {
     accent: '#7ff4ed',
     glow: '#31dcd7',
   },
+  COIN: {
+    family: 'antique-gold',
+    highlight: '#f6c85f',
+    mid: '#b67819',
+    shadow: '#4b2805',
+    accent: '#fff0a3',
+    glow: '#ffc83d',
+  },
+  DRAGON: {
+    family: 'jade-dragon',
+    highlight: '#55c77a',
+    mid: '#217143',
+    shadow: '#092d1f',
+    accent: '#b5ffbe',
+    glow: '#65e58a',
+  },
+  EIGHT: {
+    family: 'imperial-red',
+    highlight: '#ef5b4e',
+    mid: '#a51f26',
+    shadow: '#450914',
+    accent: '#ffd16d',
+    glow: '#ff493d',
+  },
   WILD: {
     family: 'burnt-orange',
     highlight: '#c96932',
@@ -70,13 +94,29 @@ export const SYMBOL_VISUALS = {
 
 export type ConfiguredSymbolId = keyof typeof SYMBOL_VISUALS;
 
+const FALLBACK_SYMBOL_VISUAL: SymbolVisual = {
+  family: 'unmapped-development-fallback',
+  highlight: '#ff4d6d',
+  mid: '#8f1838',
+  shadow: '#2b0714',
+  accent: '#fff2a8',
+  glow: '#ff335f',
+};
+const reportedMissingSymbols = new Set<SymbolId>();
+
+export function hasSymbolVisual(symbolId: SymbolId): symbolId is ConfiguredSymbolId {
+  return Object.hasOwn(SYMBOL_VISUALS, symbolId);
+}
+
 export function symbolVisual(symbolId: SymbolId): SymbolVisual {
-  const visual = SYMBOL_VISUALS[symbolId as ConfiguredSymbolId];
-  if (!visual) throw new Error(`Symbol '${symbolId}' has no visual configuration`);
-  return visual;
+  if (hasSymbolVisual(symbolId)) return SYMBOL_VISUALS[symbolId];
+  if (!reportedMissingSymbols.has(symbolId)) {
+    reportedMissingSymbols.add(symbolId);
+    console.error(`Unable to render symbol: missing presentation mapping for ${symbolId}`);
+  }
+  return FALLBACK_SYMBOL_VISUAL;
 }
 
 export function symbolTextureKey(symbolId: SymbolId): string {
-  symbolVisual(symbolId);
   return `symbol-frame-${symbolId}`;
 }

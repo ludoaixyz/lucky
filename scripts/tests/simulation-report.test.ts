@@ -8,10 +8,33 @@ import {
 } from '../lib/simulation-report.js';
 
 describe('durable simulation report', () => {
+  it('loads the complete production 20-line math profile', async () => {
+    const { config, structuralHash, payoutHash } = await loadSourceConfig();
+    expect(config.symbols.filter((symbol) => symbol.category === 'regular')).toHaveLength(8);
+    expect(config.symbols.filter((symbol) => symbol.category === 'wild')).toHaveLength(1);
+    expect(config.symbols.filter((symbol) => symbol.category === 'scatter')).toHaveLength(1);
+    expect(config.paylines).toHaveLength(20);
+    expect(new Set(config.paylines.map((line) => line.rows.join(','))).size).toBe(20);
+    expect(config.reelStrips.map((strip) => strip.length)).toEqual([48, 52, 56, 52, 48]);
+    expect(config.freeSpinReelStrips.map((strip) => strip.length)).toEqual([48, 52, 56, 52, 48]);
+    expect(config.freeSpinReelStrips).not.toEqual(config.reelStrips);
+    expect(
+      config.symbols
+        .filter((symbol) => symbol.category === 'regular')
+        .every((symbol) =>
+          [3, 4, 5].every((count) =>
+            config.paytable.some((award) => award.symbolId === symbol.id && award.count === count),
+          ),
+        ),
+    ).toBe(true);
+    expect(structuralHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(payoutHash).toMatch(/^[a-f0-9]{64}$/u);
+  });
+
   it('generates JSON-ready data and all required reconciliation checks', async () => {
     const { config } = await loadSourceConfig();
     expect(config).toMatchObject({
-      configurationId: 'lucky888-balanced-base-v1',
+      configurationId: 'lucky888-production-20line-v1',
       cascades: {
         enabled: true,
         scatterEvaluation: 'initial-grid-only',
@@ -23,9 +46,9 @@ describe('durable simulation report', () => {
       { spins: 250, seed: 2026, betCredits: config.totalBetCredits },
       new SeededRandom(2026),
     );
-    const report = buildDurableReport(config, 'abc123', simulation, null);
+    const report = buildDurableReport(config, 'abc123', 'struct123', 'payout123', simulation, null);
 
-    expect(report.reconciliations).toHaveLength(8);
+    expect(report.reconciliations).toHaveLength(10);
     expect(report.reconciliations.every((check) => check.passed)).toBe(true);
     expect(report).toMatchObject({ cascadeEnabled: true });
     expect(report.spinsWithCascade).toBeGreaterThan(0);
@@ -66,7 +89,7 @@ describe('durable simulation report', () => {
     expect(reconcileSimulation(broken, config.totalBetCredits).some((check) => !check.passed)).toBe(
       true,
     );
-    expect(() => buildDurableReport(config, 'hash', broken, null)).toThrow(
+    expect(() => buildDurableReport(config, 'hash', 'struct', 'payout', broken, null)).toThrow(
       /credited-plus-cap-reduction/u,
     );
   });

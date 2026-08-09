@@ -5,7 +5,11 @@
   },
   {
     "file": "simulation-2026-1000000.json",
-    "label": "1,000,000-spin management run",
+    "label": "Previous 1,000,000-spin profile"
+  },
+  {
+    "file": "lucky888-production-20line-v1-simulation.json",
+    "label": "Production 20-line 1,000,000-spin run",
     "default": true
   }
 ]

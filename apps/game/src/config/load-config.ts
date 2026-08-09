@@ -17,6 +17,11 @@ function integerField(value: unknown, path: string): void {
   if (!Number.isSafeInteger(value)) throw new Error(`${path} must be a safe integer`);
 }
 
+function positiveNumberField(value: unknown, path: string): void {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0)
+    throw new Error(`${path} must be a finite positive number`);
+}
+
 function booleanField(value: unknown, path: string): void {
   if (typeof value !== 'boolean') throw new Error(`${path} must be a boolean`);
 }
@@ -44,12 +49,12 @@ function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
   for (const field of [
     'reelCount',
     'visibleRows',
-    'lineBetCredits',
     'totalBetCredits',
     'maximumWinCredits',
   ] as const) {
     integerField(config[field], `config.${field}`);
   }
+  positiveNumberField(config.lineBetCredits, 'config.lineBetCredits');
   if ((config.reelCount as number) <= 0) throw new Error('config.reelCount must be positive');
   if ((config.visibleRows as number) <= 0) throw new Error('config.visibleRows must be positive');
   if ((config.lineBetCredits as number) <= 0)
@@ -157,8 +162,9 @@ function parseRuntimeConfig(payload: unknown): RuntimeGameConfig {
     'scatterBreaksLineMatch',
   ] as const)
     booleanField(lineRules[field], `config.rules.lineAwardRules.${field}`);
-  for (const field of ['activePaylines', 'lineBetCredits', 'totalBetCredits'] as const)
+  for (const field of ['activePaylines', 'totalBetCredits'] as const)
     integerField(lineRules[field], `config.rules.lineAwardRules.${field}`);
+  positiveNumberField(lineRules.lineBetCredits, 'config.rules.lineAwardRules.lineBetCredits');
   const scatter = record(rules.scatter, 'config.rules.scatter');
   stringField(scatter.symbolId, 'config.rules.scatter.symbolId');
   for (const field of ['evaluation', 'countMode', 'maximumCountMode'] as const)

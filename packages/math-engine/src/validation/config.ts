@@ -34,6 +34,16 @@ export function validateConfig(
     issues.push({ file, record, field, value, rule });
   };
   const symbolIds = new Set(config.symbols.map((symbol) => symbol.id));
+  const productionProfile = config.configurationId === 'lucky888-production-20line-v1';
+  const regularSymbols = config.symbols.filter((symbol) => symbol.category === 'regular');
+  const wildSymbols = config.symbols.filter((symbol) => symbol.category === 'wild');
+  const scatterSymbols = config.symbols.filter((symbol) => symbol.category === 'scatter');
+  if (productionProfile && regularSymbols.length !== 8)
+    issue('symbols', 'regular', regularSymbols.length, 'must contain exactly 8 regular symbols');
+  if (productionProfile && wildSymbols.length !== 1)
+    issue('symbols', 'wild', wildSymbols.length, 'must contain exactly 1 WILD');
+  if (productionProfile && scatterSymbols.length !== 1)
+    issue('symbols', 'scatter', scatterSymbols.length, 'must contain exactly 1 SCATTER');
   const cascades = config.cascades;
   if (cascades !== undefined) {
     if (typeof cascades.enabled !== 'boolean')
@@ -69,6 +79,8 @@ export function validateConfig(
     strips.forEach((reel, index) => {
       if (reel.length === 0)
         issue(`${name} reel ${index + 1}`, 'symbols', reel, 'must not be empty');
+      if (productionProfile && (reel.length < 40 || reel.length > 60))
+        issue(`${name} reel ${index + 1}`, 'length', reel.length, 'must be between 40 and 60');
       reel.forEach((symbol, stop) => {
         if (!symbolIds.has(symbol))
           issue(
@@ -82,6 +94,23 @@ export function validateConfig(
   };
   validateStrips('reelStrips', config.reelStrips);
   validateStrips('freeSpinReelStrips', config.freeSpinReelStrips);
+  if (
+    productionProfile &&
+    JSON.stringify(config.reelStrips) === JSON.stringify(config.freeSpinReelStrips)
+  )
+    issue('freeSpinReelStrips', 'independence', true, 'must differ from base reel strips');
+
+  for (const [name, range] of Object.entries(config.rtpBudgets)) {
+    if (name === 'provisional' || name === 'notes') continue;
+    const candidate = range as { minimum?: number; maximum?: number };
+    if (
+      !Number.isFinite(candidate.minimum) ||
+      !Number.isFinite(candidate.maximum) ||
+      (candidate.minimum ?? 0) < 0 ||
+      (candidate.maximum ?? 0) < (candidate.minimum ?? 0)
+    )
+      issue('rtpBudgets', name, range, 'must define finite non-negative minimum <= maximum');
+  }
 
   if (config.gameId !== 'lucky888') issue('game', 'gameId', config.gameId, "must be 'lucky888'");
   if (config.gameName !== 'LUCKY888')
@@ -118,6 +147,17 @@ export function validateConfig(
         'must be a non-negative safe integer',
       );
   });
+  const payKeys = config.paytable.map((award) => `${award.symbolId}:${award.count}`);
+  if (new Set(payKeys).size !== payKeys.length)
+    issue('paytable', 'rows', payKeys, 'must not contain duplicate symbol/count rows');
+  if (productionProfile) {
+    for (const symbol of regularSymbols) {
+      for (const count of [3, 4, 5]) {
+        if (!config.paytable.some((award) => award.symbolId === symbol.id && award.count === count))
+          issue(`paytable ${symbol.id}`, String(count), null, 'must define a 3/4/5 award');
+      }
+    }
+  }
   config.paylines.forEach((line) => {
     if (line.rows.length !== config.reelCount)
       issue(`payline ${line.id}`, 'rows', line.rows, `must contain ${config.reelCount} rows`);
@@ -126,6 +166,11 @@ export function validateConfig(
         issue(`payline ${line.id}`, `row[${reel}]`, row, `must be 0..${config.visibleRows - 1}`);
     });
   });
+  const linePaths = config.paylines.map((line) => line.rows.join(','));
+  if (new Set(linePaths).size !== linePaths.length)
+    issue('paylines', 'rows', linePaths, 'must contain unique paths');
+  if (productionProfile && config.paylines.length !== 20)
+    issue('paylines', 'count', config.paylines.length, 'must contain exactly 20 paylines');
 
   const lineRules = config.rules.lineAwardRules;
   for (const [field, value, expected] of [

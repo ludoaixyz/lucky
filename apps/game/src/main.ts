@@ -5,6 +5,7 @@ import { createGame } from './game/create-game.js';
 import { attachController } from './ui/controller.js';
 import { attachDiagnostics } from './diagnostics/dom-diagnostics.js';
 import { bindDomLocalization, createBrowserLocalization } from './i18n/index.js';
+import { startupErrorText } from './startup-error.js';
 
 const localization = createBrowserLocalization();
 const disposeDomLocalization = bindDomLocalization(localization);
@@ -18,6 +19,13 @@ if (startupMessage)
 try {
   const config = await loadConfig();
   const { game, scene } = await createGame(config, localization);
+  const gameHost = document.querySelector<HTMLElement>('#game');
+  if (gameHost) {
+    gameHost.dataset.configurationId = config.configurationId;
+    gameHost.dataset.reels = String(config.reelCount);
+    gameHost.dataset.rows = String(config.visibleRows);
+    gameHost.dataset.renderState = 'ready';
+  }
   try {
     const diagnostics = attachDiagnostics(localization);
     const requestedSeed = new URLSearchParams(window.location.search).get('seed');
@@ -42,5 +50,13 @@ try {
 } catch (error: unknown) {
   console.error('LUCKY888 startup failed', error);
   const target = document.querySelector('#message');
-  if (target) target.textContent = localization.renderMessage({ key: 'unableToStart', params: {} });
+  const detail = error instanceof Error ? error.message : String(error);
+  if (target) {
+    target.textContent = startupErrorText(
+      error,
+      import.meta.env.DEV,
+      localization.renderMessage({ key: 'unableToStart', params: {} }),
+    );
+    if (target instanceof HTMLElement) target.dataset.startupError = detail;
+  }
 }

@@ -266,6 +266,16 @@ button {
   background: #ffe59d;
 }
 
+.spin-button.spin-button--stop {
+  color: #fff;
+  background: #d52b2b;
+  box-shadow: 0 0.4rem 0 #7f1515;
+}
+
+.spin-button.spin-button--stop:hover {
+  background: #ed3b3b;
+}
+
 button:focus-visible,
 .download-button:focus-visible {
   outline: 3px solid #7de7d1;

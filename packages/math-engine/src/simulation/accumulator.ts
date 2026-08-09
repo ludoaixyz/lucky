@@ -29,6 +29,7 @@ function percentile(sorted: readonly number[], probability: number): number {
 export class SimulationAccumulator {
   private paidSpins = 0;
   private uncappedBaseLinePayout = 0;
+  private initialBoardBaseLinePayout = 0;
   private uncappedBaseScatterPayout = 0;
   private uncappedFeaturePayout = 0;
   private uncappedTotalPayout = 0;
@@ -63,6 +64,8 @@ export class SimulationAccumulator {
   record(result: SpinResult): void {
     this.paidSpins += 1;
     this.uncappedBaseLinePayout += result.uncappedBaseLineWinCredits;
+    this.initialBoardBaseLinePayout +=
+      result.uncappedBaseLineWinCredits - (result.cascadePayoutCredits ?? 0);
     this.uncappedBaseScatterPayout += result.uncappedBaseScatterWinCredits;
     this.uncappedFeaturePayout += result.uncappedFeatureWinCredits;
     this.uncappedTotalPayout += result.uncappedTotalWinCredits;
@@ -139,6 +142,7 @@ export class SimulationAccumulator {
     const spinsWithCascade = this.baseGameSpinsWithCascade + this.freeSpinSpinsWithCascade;
     const totalCascadeSteps = this.baseGameCascadeSteps + this.freeSpinCascadeSteps;
     const cascadePayoutCredits = this.baseGameCascadePayout + this.freeSpinCascadePayout;
+    const freeSpinFeatureNonCascadePayout = this.uncappedFeaturePayout - this.freeSpinCascadePayout;
     const report: SimulationReport = {
       schemaVersion: '1.2.0',
       methodology: 'deterministic-monte-carlo',
@@ -149,15 +153,19 @@ export class SimulationAccumulator {
       paidSpins: this.paidSpins,
       totalWageredCredits,
       uncappedBaseLinePayoutCredits: this.uncappedBaseLinePayout,
+      initialBoardBaseLinePayoutCredits: this.initialBoardBaseLinePayout,
       uncappedBaseScatterPayoutCredits: this.uncappedBaseScatterPayout,
       uncappedBasePayoutCredits: this.uncappedBaseLinePayout + this.uncappedBaseScatterPayout,
       uncappedFeaturePayoutCredits: this.uncappedFeaturePayout,
+      freeSpinFeatureNonCascadePayoutCredits: freeSpinFeatureNonCascadePayout,
       uncappedTotalPayoutCredits: this.uncappedTotalPayout,
       creditedTotalPayoutCredits: this.creditedTotalPayout,
       capReductionCredits: this.capReduction,
       uncappedBaseLineRtp: this.uncappedBaseLinePayout / totalWageredCredits,
+      initialBoardBaseLineRtp: this.initialBoardBaseLinePayout / totalWageredCredits,
       uncappedBaseScatterRtp: this.uncappedBaseScatterPayout / totalWageredCredits,
       uncappedFeatureRtp: this.uncappedFeaturePayout / totalWageredCredits,
+      freeSpinFeatureNonCascadeRtp: freeSpinFeatureNonCascadePayout / totalWageredCredits,
       uncappedTotalRtp: this.uncappedTotalPayout / totalWageredCredits,
       creditedTotalRtp: this.creditedTotalPayout / totalWageredCredits,
       baseHitFrequency: this.baseWinningSpins / this.paidSpins,
@@ -299,8 +307,10 @@ export function runSimulationCheckpoints(
 export function assertFiniteReport(report: SimulationReport): void {
   const rates = [
     report.uncappedBaseLineRtp,
+    report.initialBoardBaseLineRtp,
     report.uncappedBaseScatterRtp,
     report.uncappedFeatureRtp,
+    report.freeSpinFeatureNonCascadeRtp,
     report.uncappedTotalRtp,
     report.creditedTotalRtp,
     report.baseHitFrequency,

@@ -373,12 +373,15 @@ function renderDashboard(): void {
     ],
     [
       translations.metrics.baseRtp,
-      formatPercent(report.uncappedBaseLineRtp, currentLocale),
+      formatPercent(report.initialBoardBaseLineRtp ?? report.uncappedBaseLineRtp, currentLocale),
       translations.metricDescriptions.baseRtp,
     ],
     [
       translations.metrics.featureRtp,
-      formatPercent(report.uncappedFeatureRtp, currentLocale),
+      formatPercent(
+        report.freeSpinFeatureNonCascadeRtp ?? report.uncappedFeatureRtp,
+        currentLocale,
+      ),
       translations.metricDescriptions.featureRtp,
     ],
     [
@@ -546,13 +549,19 @@ function renderCharts(
     renderBarChart(rtp, [
       {
         label: translations.charts.base,
-        value: report.uncappedBaseLineRtp,
-        displayValue: formatPercent(report.uncappedBaseLineRtp, locale),
+        value: report.initialBoardBaseLineRtp ?? report.uncappedBaseLineRtp,
+        displayValue: formatPercent(
+          report.initialBoardBaseLineRtp ?? report.uncappedBaseLineRtp,
+          locale,
+        ),
       },
       {
         label: translations.charts.feature,
-        value: report.uncappedFeatureRtp,
-        displayValue: formatPercent(report.uncappedFeatureRtp, locale),
+        value: report.freeSpinFeatureNonCascadeRtp ?? report.uncappedFeatureRtp,
+        displayValue: formatPercent(
+          report.freeSpinFeatureNonCascadeRtp ?? report.uncappedFeatureRtp,
+          locale,
+        ),
       },
       {
         label: translations.charts.scatter,

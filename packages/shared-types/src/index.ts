@@ -81,6 +81,21 @@ export interface CascadeConfig {
   readonly maximumCascadesPerSpin?: number;
 }
 
+export interface RtpBudgetRange {
+  readonly minimum: number;
+  readonly maximum: number;
+}
+
+export interface RtpBudgets {
+  readonly provisional: true;
+  readonly initialBoardBaseLine: RtpBudgetRange;
+  readonly cascadeStages: RtpBudgetRange;
+  readonly freeSpinFeature: RtpBudgetRange;
+  readonly scatterDirectPay: RtpBudgetRange;
+  readonly creditedTotal: RtpBudgetRange;
+  readonly notes?: string;
+}
+
 export interface BonusAward {
   readonly count: number;
   readonly freeSpins: number;
@@ -127,6 +142,7 @@ export interface RuntimeGameConfig {
   readonly bonus: BonusConfig;
   readonly rules: RulesConfig;
   readonly cascades?: CascadeConfig;
+  readonly rtpBudgets: RtpBudgets;
 }
 
 export interface LineWin {
@@ -258,15 +274,19 @@ export interface SimulationReport {
   readonly paidSpins: number;
   readonly totalWageredCredits: Credits;
   readonly uncappedBaseLinePayoutCredits: Credits;
+  readonly initialBoardBaseLinePayoutCredits: Credits;
   readonly uncappedBaseScatterPayoutCredits: Credits;
   readonly uncappedBasePayoutCredits: Credits;
   readonly uncappedFeaturePayoutCredits: Credits;
+  readonly freeSpinFeatureNonCascadePayoutCredits: Credits;
   readonly uncappedTotalPayoutCredits: Credits;
   readonly creditedTotalPayoutCredits: Credits;
   readonly capReductionCredits: Credits;
   readonly uncappedBaseLineRtp: number;
+  readonly initialBoardBaseLineRtp: number;
   readonly uncappedBaseScatterRtp: number;
   readonly uncappedFeatureRtp: number;
+  readonly freeSpinFeatureNonCascadeRtp: number;
   readonly uncappedTotalRtp: number;
   readonly creditedTotalRtp: number;
   readonly baseHitFrequency: number;
@@ -315,6 +335,8 @@ export interface ExactMathReport {
   readonly configurationId: string;
   readonly generatedAt: string;
   readonly sourceHash: string;
+  readonly structuralHash?: string;
+  readonly payoutHash?: string;
   readonly totalPaidSpinCombinations: number;
   readonly probabilityReconciliation: number;
   readonly uncappedBaseLineRtp: number;

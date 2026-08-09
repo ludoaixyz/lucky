@@ -11,3 +11,30 @@ Five fixed paylines evaluate consecutive symbols left-to-right from reel 1. Only
 Exact enumeration covers every base stop combination and uses finite memoized state equations for uncapped feature expectation. Because the aggregate payout-tail state is expensive, credited RTP is explicitly a deterministic Monte Carlo estimate. Simulation volatility uses credited paid-spin return multiples, with one wager per complete paid spin and feature.
 
 The provisional profile targets 94%–97% credited RTP, a feature about once per 80–150 spins, 9–14 average feature spins, p95 below 30, 20%–35% base hit rate, and effectively zero normal cap hits. These are engineering bands, not certification.
+
+# Production 20-line profile
+
+The `lucky888-production-20line-v1` profile uses five reels, three visible rows,
+20 fixed left-to-right paylines, eight regular symbols, one Wild, and one Scatter.
+The paid wager remains five credits: each line receives a normalized 0.25-credit
+line bet. Paytable awards are divisible by four, so resolved awards remain integral.
+The playable bet slider selects total wager, not credits per line. Each option scales
+the five-credit base wager and its 0.25-credit line bet by the same whole multiplier;
+the same scaled runtime configuration is used by line evaluation, cascades, free
+spins, maximum-win enforcement, credit deduction, and diagnostics.
+
+Base and free-spin reels are independent asymmetric circular strips between 48 and
+56 stops. CSV remains the runtime authority. The free-spin strips carry additional
+middle-reel Wild exposure and are not aliases or copies of the base strips.
+
+RTP reporting reconciles four non-overlapping components: initial-board line awards,
+later cascade-stage awards, direct Scatter awards (zero in this profile), and all
+free-spin awards. Their sum is uncapped total RTP; cap reduction then reconciles
+uncapped total to credited total RTP.
+
+`npm run math:hybrid` builds or reuses a structural cache keyed only by reel, line,
+visible-row, Wild, Scatter, and cascade structural rules. It exactly prices the
+initial board and exact Scatter trigger frequency. Paytable, feature-award,
+multiplier, and cap changes use a separate payout fingerprint, allowing paytable-only
+repricing without rebuilding the structural cache. Variable-length cascades and free
+spins remain deterministic Monte Carlo components of the hybrid report.

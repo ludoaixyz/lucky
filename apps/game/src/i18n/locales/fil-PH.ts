@@ -36,7 +36,9 @@ export const filPH = {
   },
   controls: {
     spin: 'SPIN',
+    stop: 'STOP',
     spinAria: (count) => `Simulan ang ${spinCount(count)}`,
+    stopAria: 'Huminto pagkatapos ng kasalukuyang spin at feature',
     speedValue: (speed) => `Bilis: ${formatNumber(locale, speed)}×`,
     betValue: (amount) => `${formatNumber(locale, amount)} credits`,
     spinsValue: spinCount,

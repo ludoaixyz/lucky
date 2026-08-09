@@ -28,6 +28,8 @@ export interface DurableSimulationReport extends SimulationReport {
   readonly gameId: string;
   readonly gameName: string;
   readonly sourceHash: string;
+  readonly structuralHash: string;
+  readonly payoutHash: string;
   readonly exactEnumeration: ExactMathReport | null;
   readonly reconciliations: readonly ReconciliationCheck[];
   readonly targetComparisons: readonly TargetComparison[];
@@ -54,6 +56,12 @@ export function reconcileSimulation(
   return [
     check('total-wager', report.totalWageredCredits, report.paidSpins * betCredits, 0),
     check(
+      'initial-plus-cascade-base-lines',
+      report.initialBoardBaseLinePayoutCredits + report.baseGameCascadePayoutCredits,
+      report.uncappedBaseLinePayoutCredits,
+      0,
+    ),
+    check(
       'uncapped-components',
       report.uncappedBaseLinePayoutCredits +
         report.uncappedBaseScatterPayoutCredits +
@@ -66,6 +74,15 @@ export function reconcileSimulation(
       report.creditedTotalPayoutCredits + report.capReductionCredits,
       report.uncappedTotalPayoutCredits,
       0,
+    ),
+    check(
+      'rtp-components',
+      report.initialBoardBaseLineRtp +
+        report.cascadeRtpContribution +
+        report.uncappedBaseScatterRtp +
+        report.freeSpinFeatureNonCascadeRtp,
+      report.uncappedTotalRtp,
+      RECONCILIATION_TOLERANCE,
     ),
     check(
       'payout-bucket-probabilities',
@@ -118,15 +135,15 @@ export function compareTargets(report: SimulationReport): readonly TargetCompari
     {
       measure: 'Feature frequency (paid spins per trigger)',
       result: frequencyDenominator,
-      target: '80–150',
-      status: frequencyDenominator >= 80 && frequencyDenominator <= 150 ? 'PASS' : 'FAIL',
+      target: '100–140',
+      status: frequencyDenominator >= 100 && frequencyDenominator <= 140 ? 'PASS' : 'FAIL',
     },
     {
       measure: 'Average feature length',
       result: report.averageTotalFreeSpinsPerTrigger,
-      target: '9–14',
+      target: '9–12',
       status:
-        report.averageTotalFreeSpinsPerTrigger >= 9 && report.averageTotalFreeSpinsPerTrigger <= 14
+        report.averageTotalFreeSpinsPerTrigger >= 9 && report.averageTotalFreeSpinsPerTrigger <= 12
           ? 'PASS'
           : 'WARN',
     },
@@ -135,6 +152,43 @@ export function compareTargets(report: SimulationReport): readonly TargetCompari
       result: report.featureLengthPercentiles.p95,
       target: '<30',
       status: report.featureLengthPercentiles.p95 < 30 ? 'PASS' : 'WARN',
+    },
+    {
+      measure: 'Award frequency',
+      result: report.featureInclusiveHitFrequency,
+      target: '25%–32%',
+      status:
+        report.featureInclusiveHitFrequency >= 0.25 && report.featureInclusiveHitFrequency <= 0.32
+          ? 'PASS'
+          : 'WARN',
+    },
+    {
+      measure: 'Base cascade rate',
+      result: report.baseGameCascadeSpinRate,
+      target: '25%–30%',
+      status:
+        report.baseGameCascadeSpinRate >= 0.25 && report.baseGameCascadeSpinRate <= 0.3
+          ? 'PASS'
+          : 'WARN',
+    },
+    {
+      measure: 'Free-spin cascade rate',
+      result: report.freeSpinCascadeSpinRate,
+      target: '30%–35%',
+      status:
+        report.freeSpinCascadeSpinRate >= 0.3 && report.freeSpinCascadeSpinRate <= 0.35
+          ? 'PASS'
+          : 'WARN',
+    },
+    {
+      measure: 'Average cascades when triggered',
+      result: report.averageCascadeStepsWhenTriggered,
+      target: '1.2–1.5',
+      status:
+        report.averageCascadeStepsWhenTriggered >= 1.2 &&
+        report.averageCascadeStepsWhenTriggered <= 1.5
+          ? 'PASS'
+          : 'WARN',
     },
     {
       measure: 'Feature-cap hit frequency',
@@ -153,6 +207,8 @@ export function compareTargets(report: SimulationReport): readonly TargetCompari
 export function buildDurableReport(
   game: RuntimeGameConfig,
   sourceHash: string,
+  structuralHash: string,
+  payoutHash: string,
   simulation: SimulationReport,
   exactEnumeration: ExactMathReport | null,
   simulationCheckpoints: readonly SimulationCheckpoint[] = [],
@@ -170,6 +226,8 @@ export function buildDurableReport(
     gameId: game.gameId,
     gameName: game.gameName,
     sourceHash,
+    structuralHash,
+    payoutHash,
     exactEnumeration,
     reconciliations,
     targetComparisons: compareTargets(simulation),
@@ -252,6 +310,8 @@ Approximately ${formatPercentRatio(report.cascadeSpinRate, 4)} of eligible base/
 - Game version: ${report.gameVersion}
 - Configuration ID: \`${report.configurationId}\`
 - Source SHA-256: \`${report.sourceHash}\`
+- Structural SHA-256: \`${report.structuralHash}\`
+- Payout SHA-256: \`${report.payoutHash}\`
 - Methodology: deterministic Monte Carlo
 - Exact enumeration loaded: ${report.exactEnumeration ? 'yes' : 'no'}
 - Seed: ${report.seed}
@@ -273,9 +333,11 @@ Results at 100 and 1,000 bets are expected to fluctuate significantly. The 10,00
 
 | Measure | Result |
 | --- | ---: |
-| Uncapped base line RTP | ${formatPercentRatio(report.uncappedBaseLineRtp, 6)} |
+| Initial-board/base line RTP | ${formatPercentRatio(report.initialBoardBaseLineRtp, 6)} |
+| Cascade-stage RTP | ${formatPercentRatio(report.cascadeRtpContribution, 6)} |
 | Uncapped Scatter RTP | ${formatPercentRatio(report.uncappedBaseScatterRtp, 6)} |
-| Uncapped feature RTP | ${formatPercentRatio(report.uncappedFeatureRtp, 6)} |
+| Free-spin feature RTP (excluding cascade stages) | ${formatPercentRatio(report.freeSpinFeatureNonCascadeRtp, 6)} |
+| Full free-spin RTP (compatibility total) | ${formatPercentRatio(report.uncappedFeatureRtp, 6)} |
 | Uncapped total RTP | ${formatPercentRatio(report.uncappedTotalRtp, 6)} |
 | Credited total RTP | ${formatPercentRatio(report.creditedTotalRtp, 6)} |
 | Cap reduction | ${report.capReductionCredits.toLocaleString('en-US')} credits (${formatPercentRatio(report.uncappedTotalRtp - report.creditedTotalRtp, 6)}) |

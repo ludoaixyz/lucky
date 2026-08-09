@@ -8,5 +8,14 @@
       "@lucky/math-engine": ["../../packages/math-engine/src/index.ts"]
     }
   },
-  "include": ["src/diagnostics", "src/game", "src/ui", "tests", "vitest.config.ts"]
+  "include": [
+    "src/diagnostics",
+    "src/game",
+    "src/ui",
+    "src/config",
+    "src/startup-error.ts",
+    "src/vite-env.d.ts",
+    "tests",
+    "vitest.config.ts"
+  ]
 }

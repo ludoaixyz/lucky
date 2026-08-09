@@ -35,6 +35,8 @@ export const zhCN = {
   },
   controls: {
     spin: 'SPIN',
+    stop: 'STOP',
+    stopAria: '\u5f53\u524d\u65cb\u8f6c\u548c\u529f\u80fd\u5b8c\u6210\u540e\u505c\u6b62',
     spinAria: (count) => `开始${spinCount(count)}`,
     speedValue: (speed) => `${formatNumber(locale, speed)}× 速度`,
     betValue: (amount) => `${formatNumber(locale, amount)} 积分`,

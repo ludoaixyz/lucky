@@ -3,7 +3,7 @@
   "wild": {
     "symbolId": "WILD",
     "enabled": true,
-    "substitutesFor": ["A", "K", "Q", "J", "GEM"],
+    "substitutesFor": ["J", "Q", "K", "A", "COIN", "GEM", "DRAGON", "EIGHT"],
     "substitutesForWild": true,
     "substitutesForScatter": false,
     "hasOwnLinePay": false,
@@ -12,8 +12,8 @@
   },
   "lineAwardRules": {
     "direction": "left-to-right",
-    "activePaylines": 5,
-    "lineBetCredits": 1,
+    "activePaylines": 20,
+    "lineBetCredits": 0.25,
     "totalBetCredits": 5,
     "awardScaling": "award-credits-per-line-bet",
     "matchRule": "consecutive-from-leftmost-reel",

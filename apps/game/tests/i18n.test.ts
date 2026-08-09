@@ -83,6 +83,7 @@ describe('locale contract and resolution', () => {
     for (const locale of SUPPORTED_LOCALES) {
       expect(dictionaryShape(TRANSLATIONS[locale])).toEqual(reference);
       expect(TRANSLATIONS[locale].controls.spin).toBe('SPIN');
+      expect(TRANSLATIONS[locale].controls.stop).toBe('STOP');
     }
   });
 

@@ -10,6 +10,7 @@ import { presentationTiming } from '../presentation-timing.js';
 import { matchedPaylineCenters, paylineColor } from '../payline-presentation.js';
 import { formatNumber, type Localization } from '../../i18n/index.js';
 import { symbolTextureKey, symbolVisual } from '../symbol-visuals.js';
+import { initialReelWindow } from '../initial-window.js';
 
 interface SceneLifecycle {
   readonly ready: () => void;
@@ -63,8 +64,13 @@ export class SlotScene extends Phaser.Scene {
     try {
       this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
       this.currentStops = this.gameConfig.reelStrips.map(() => 0);
+      initialReelWindow(this.gameConfig);
       this.createReelBackgrounds();
       this.createSymbolTextures();
+      for (const symbol of this.gameConfig.symbols) {
+        if (!this.textures.exists(symbolTextureKey(symbol.id)))
+          throw new Error(`Unable to render symbol: texture creation failed for ${symbol.id}`);
+      }
       this.reelViews = this.gameConfig.reelStrips.map((_, reel) => this.createReelView(reel));
       this.currentStops.forEach((stop, reel) => this.setReelAtStop(reel, stop));
       this.lineOverlay = this.add.graphics().setDepth(20);

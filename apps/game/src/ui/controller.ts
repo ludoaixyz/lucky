@@ -80,8 +80,12 @@ export function scaleConfigForBet(
   const scale = totalBetCredits / config.totalBetCredits;
   const lineBetCredits = config.lineBetCredits * scale;
   const maximumWinCredits = config.maximumWinCredits * scale;
-  if (!Number.isSafeInteger(lineBetCredits) || !Number.isSafeInteger(maximumWinCredits))
+  if (!Number.isFinite(lineBetCredits) || lineBetCredits <= 0)
+    throw new RangeError('Scaled line bet must be finite and positive');
+  if (!Number.isSafeInteger(maximumWinCredits))
     throw new RangeError('Scaled bet configuration exceeds safe integer credits');
+  if (config.paytable.some((award) => !Number.isSafeInteger(award.awardCredits * lineBetCredits)))
+    throw new RangeError('Scaled line bet must resolve every configured award to whole credits');
   return {
     ...config,
     lineBetCredits,
@@ -147,6 +151,7 @@ export function attachController(
   let credits = 1000;
   let latestWin = 0;
   let sequenceActive = false;
+  let stopRequested = false;
   let disposed = false;
   let currentMessage: MessageDescriptor = { key: 'ready', params: {} };
 
@@ -192,15 +197,19 @@ export function attachController(
     creditsText.textContent = localizedNumber(credits);
     betText.textContent = localizedNumber(bet);
     winText.textContent = localizedNumber(latestWin);
-    button.textContent = dictionary.controls.spin;
-    button.setAttribute('aria-label', dictionary.controls.spinAria(spins));
-    button.disabled = sequenceActive || credits < bet;
+    button.textContent = sequenceActive ? dictionary.controls.stop : dictionary.controls.spin;
+    button.setAttribute(
+      'aria-label',
+      sequenceActive ? dictionary.controls.stopAria : dictionary.controls.spinAria(spins),
+    );
+    button.classList.toggle('spin-button--stop', sequenceActive);
+    button.disabled = disposed || (!sequenceActive && credits < bet);
     scene.setPresentationSpeed(speed);
   };
 
   const setControlsLocked = (locked: boolean): void => {
     for (const control of controls) control.disabled = locked;
-    button.disabled = locked || credits < selectedBet();
+    refreshControls();
   };
 
   const executeSpin = async (
@@ -347,13 +356,14 @@ export function attachController(
       return;
     }
     const spinConfig = scaleConfigForBet(config, bet);
+    stopRequested = false;
     sequenceActive = true;
     setControlsLocked(true);
     let completedSpins = 0;
     let lastWin = 0;
     try {
       for (let index = 1; index <= requestedSpins; index += 1) {
-        if (disposed) return;
+        if (disposed || stopRequested) break;
         if (credits < bet) {
           setMessage({ key: 'insufficientCredits', params: {} });
           return;
@@ -363,7 +373,12 @@ export function attachController(
         lastWin = execution.winCredits;
         completedSpins += 1;
       }
-      if (requestedSpins > 1) {
+      if (stopRequested) {
+        setMessage({
+          key: 'sequenceStopped',
+          params: { completed: completedSpins, total: requestedSpins },
+        });
+      } else if (requestedSpins > 1) {
         setMessage({
           key: 'sequenceCompleted',
           params: {
@@ -376,17 +391,25 @@ export function attachController(
       }
     } finally {
       sequenceActive = false;
+      stopRequested = false;
       if (!disposed) setControlsLocked(false);
     }
   };
 
-  const clickHandler = (): void => void runSequence();
+  const activatePrimaryAction = (): void => {
+    if (sequenceActive) {
+      stopRequested = true;
+      return;
+    }
+    void runSequence();
+  };
+  const clickHandler = (): void => activatePrimaryAction();
   const keyHandler = (event: KeyboardEvent): void => {
     if (event.code !== 'Space') return;
     const target = event.target;
     if (target instanceof Element && target.closest('button, input, select, textarea, a')) return;
     event.preventDefault();
-    void runSequence();
+    activatePrimaryAction();
   };
   const controlHandler = (): void => refreshControls();
   button.addEventListener('click', clickHandler);
