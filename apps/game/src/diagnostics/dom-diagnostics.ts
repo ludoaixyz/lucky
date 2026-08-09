@@ -9,6 +9,7 @@ import { buildSpinHistoryCsv, spinHistoryFilename } from './csv.js';
 import { formatLineWins, formatVisibleWindow } from './format.js';
 import {
   formatNumber,
+  formatDecimal,
   formatPercent,
   formatTime,
   type Localization,
@@ -160,10 +161,11 @@ export function attachDiagnostics(localization: Localization): DiagnosticsContro
     uncapped.textContent = formatPercent(localization.locale, snapshot.uncappedReturn);
     capReduction.textContent = number(snapshot.totalCapReduction);
     triggerRate.textContent = formatPercent(localization.locale, snapshot.featureTriggerRate);
-    featureLength.textContent = new Intl.NumberFormat(localization.locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(snapshot.averageFeatureLength);
+    featureLength.textContent = formatDecimal(
+      localization.locale,
+      snapshot.averageFeatureLength,
+      2,
+    );
     empty.hidden = snapshot.recentSpins.length > 0;
     history.replaceChildren(
       ...snapshot.recentSpins.map((entry) => renderDiagnosticsEntry(entry, localization)),

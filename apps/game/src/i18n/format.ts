@@ -4,6 +4,13 @@ export function formatNumber(locale: LocaleCode, value: number): string {
   return new Intl.NumberFormat(locale).format(value);
 }
 
+export function formatDecimal(locale: LocaleCode, value: number, fractionDigits: number): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(value);
+}
+
 export function formatCredits(locale: LocaleCode, value: number): string {
   return `$${formatNumber(locale, value)}`;
 }

@@ -8,10 +8,15 @@ import {
   presentationTiming,
   type PresentationSpeed,
 } from '../game/presentation-timing.js';
-import { formatNumber, type Localization, type MessageDescriptor } from '../i18n/index.js';
+import {
+  formatDecimal,
+  formatNumber,
+  type Localization,
+  type MessageDescriptor,
+} from '../i18n/index.js';
 
 export const BET_OPTIONS = [5, 10, 20, 50, 100] as const;
-export const SPIN_COUNT_OPTIONS = [1, 5, 10, 15, 20] as const;
+export const SPIN_COUNT_OPTIONS = [1, 2, 5, 10, 15, 20, 25, 50, 75, 100] as const;
 
 function element<T extends HTMLElement>(id: string): T {
   const found = document.querySelector<T>(`#${id}`);
@@ -28,6 +33,38 @@ function selectedOption<T>(input: HTMLInputElement, options: readonly T[]): T {
   const value = Number.isSafeInteger(index) ? options[index] : undefined;
   if (value === undefined) throw new RangeError(`Control '${input.id}' has invalid index`);
   return value;
+}
+
+export function indexedSliderPosition(index: number, optionCount: number): number {
+  if (!Number.isSafeInteger(optionCount) || optionCount < 2)
+    throw new RangeError('Indexed sliders require at least two options');
+  if (!Number.isSafeInteger(index) || index < 0 || index >= optionCount)
+    throw new RangeError('Slider index is outside the option range');
+  return (index / (optionCount - 1)) * 100;
+}
+
+function configureIndexedSlider(input: HTMLInputElement, options: readonly number[]): void {
+  input.min = '0';
+  input.max = String(options.length - 1);
+  input.step = '1';
+}
+
+function renderSliderPips(
+  container: HTMLElement,
+  options: readonly number[],
+  label: (value: number) => string,
+): void {
+  const pips = options.map((value, index) => {
+    const pip = document.createElement('span');
+    pip.className = 'slider-pip';
+    pip.dataset.index = String(index);
+    pip.dataset.value = String(value);
+    pip.style.setProperty('--pip-position', `${indexedSliderPosition(index, options.length)}%`);
+    pip.textContent = label(value);
+    return pip;
+  });
+  container.setAttribute('aria-hidden', 'true');
+  container.replaceChildren(...pips);
 }
 
 export function scaleConfigForBet(
@@ -99,10 +136,13 @@ export function attachController(
   const message = element<HTMLElement>('message');
   const speedControl = element<HTMLInputElement>('speed-control');
   const speedValue = element<HTMLOutputElement>('speed-value');
+  const speedPips = element<HTMLElement>('speed-pips');
   const betControl = element<HTMLInputElement>('bet-control');
   const betValue = element<HTMLOutputElement>('bet-value');
+  const betPips = element<HTMLElement>('bet-pips');
   const spinsControl = element<HTMLInputElement>('spins-control');
   const spinsValue = element<HTMLOutputElement>('spins-value');
+  const spinsPips = element<HTMLElement>('spins-pips');
   const controls = [speedControl, betControl, spinsControl] as const;
   let credits = 1000;
   let latestWin = 0;
@@ -115,6 +155,20 @@ export function attachController(
   const selectedBet = (): number => selectedOption(betControl, BET_OPTIONS);
   const selectedSpins = (): number => selectedOption(spinsControl, SPIN_COUNT_OPTIONS);
   const localizedNumber = (value: number): string => formatNumber(localization.locale, value);
+
+  configureIndexedSlider(speedControl, PRESENTATION_SPEED_OPTIONS);
+  configureIndexedSlider(betControl, BET_OPTIONS);
+  configureIndexedSlider(spinsControl, SPIN_COUNT_OPTIONS);
+
+  const renderPips = (): void => {
+    renderSliderPips(
+      speedPips,
+      PRESENTATION_SPEED_OPTIONS,
+      (value) => `${localizedNumber(value)}×`,
+    );
+    renderSliderPips(betPips, BET_OPTIONS, localizedNumber);
+    renderSliderPips(spinsPips, SPIN_COUNT_OPTIONS, localizedNumber);
+  };
 
   const renderMessage = (): void => {
     message.textContent = localization.renderMessage(currentMessage);
@@ -129,7 +183,7 @@ export function attachController(
     const speed = selectedSpeed();
     const bet = selectedBet();
     const spins = selectedSpins();
-    speedValue.value = `${speed.toFixed(1)}×`;
+    speedValue.value = `${formatDecimal(localization.locale, speed, 1)}×`;
     betValue.value = formatNumber(localization.locale, bet);
     spinsValue.value = formatNumber(localization.locale, spins);
     speedControl.setAttribute('aria-valuetext', dictionary.controls.speedValue(speed));
@@ -339,10 +393,12 @@ export function attachController(
   window.addEventListener('keydown', keyHandler);
   for (const control of controls) control.addEventListener('input', controlHandler);
   const unsubscribeLocale = localization.subscribe(() => {
+    renderPips();
     refreshControls();
     renderMessage();
   });
 
+  renderPips();
   refreshControls();
   renderMessage();
 

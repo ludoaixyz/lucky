@@ -1,4 +1,5 @@
 import { enUS } from './locales/en-US.js';
+import { filPH } from './locales/fil-PH.js';
 import { ptBR } from './locales/pt-BR.js';
 import { zhCN } from './locales/zh-CN.js';
 import type {
@@ -11,7 +12,7 @@ import { SUPPORTED_LOCALES } from './types.js';
 
 export { SUPPORTED_LOCALES } from './types.js';
 export type { LocaleCode, MessageDescriptor, TranslationDictionary } from './types.js';
-export { formatCredits, formatNumber, formatPercent, formatTime } from './format.js';
+export { formatCredits, formatDecimal, formatNumber, formatPercent, formatTime } from './format.js';
 
 export const DEFAULT_LOCALE: LocaleCode = 'en-US';
 export const LOCALE_STORAGE_KEY = 'lucky888.locale';
@@ -20,6 +21,7 @@ export const TRANSLATIONS = {
   'en-US': enUS,
   'pt-BR': ptBR,
   'zh-CN': zhCN,
+  'fil-PH': filPH,
 } as const satisfies Record<LocaleCode, TranslationDictionary>;
 
 export function isSupportedLocale(value: unknown): value is LocaleCode {
@@ -36,6 +38,13 @@ export function localeFromBrowser(language: string | undefined): LocaleCode {
     normalized.startsWith('zh-hans')
   )
     return 'zh-CN';
+  if (
+    normalized === 'fil' ||
+    normalized.startsWith('fil-') ||
+    normalized === 'tl' ||
+    normalized.startsWith('tl-')
+  )
+    return 'fil-PH';
   return DEFAULT_LOCALE;
 }
 

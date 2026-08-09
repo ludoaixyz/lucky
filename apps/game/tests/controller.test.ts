@@ -7,9 +7,11 @@ import type { SlotScene } from '../src/game/scenes/SlotScene.js';
 import {
   attachController,
   BET_OPTIONS,
+  indexedSliderPosition,
   scaleConfigForBet,
   SPIN_COUNT_OPTIONS,
 } from '../src/ui/controller.js';
+import { PRESENTATION_SPEED_OPTIONS } from '../src/game/presentation-timing.js';
 import { Localization } from '../src/i18n/index.js';
 
 class SequenceRandom implements RandomSource {
@@ -123,14 +125,82 @@ beforeEach(() => {
     <strong id="credits">1000</strong><strong id="bet">5</strong>
     <strong id="win">0</strong><p id="message"></p><button id="spin">Spin</button>
     <input id="speed-control" value="1"><output id="speed-value"></output>
+    <span id="speed-pips"></span>
     <input id="bet-control" value="0"><output id="bet-value"></output>
-    <input id="spins-control" value="0"><output id="spins-value"></output>`;
+    <span id="bet-pips"></span>
+    <input id="spins-control" value="0"><output id="spins-value"></output>
+    <span id="spins-pips"></span>`;
 });
 
 describe('paid-spin controller boundary', () => {
   it('exposes the required bet and sequential-spin selections', () => {
     expect(BET_OPTIONS).toEqual([5, 10, 20, 50, 100]);
-    expect(SPIN_COUNT_OPTIONS).toEqual([1, 5, 10, 15, 20]);
+    expect(SPIN_COUNT_OPTIONS).toEqual([1, 2, 5, 10, 15, 20, 25, 50, 75, 100]);
+  });
+
+  it('positions every slider option at equal index intervals', () => {
+    for (const options of [PRESENTATION_SPEED_OPTIONS, BET_OPTIONS, SPIN_COUNT_OPTIONS]) {
+      const positions = options.map((_value, index) =>
+        indexedSliderPosition(index, options.length),
+      );
+      const interval = 100 / (options.length - 1);
+      expect(positions[0]).toBe(0);
+      expect(positions.at(-1)).toBe(100);
+      positions.forEach((position, index) => expect(position).toBeCloseTo(index * interval, 12));
+    }
+  });
+
+  it('renders fixed pip labels and resolves the selected spin index to its allowed value', () => {
+    const localization = new Localization('en-US');
+    const dispose = attachController(
+      config,
+      { present: vi.fn(() => Promise.resolve()), setPresentationSpeed: vi.fn() },
+      new SequenceRandom([]),
+      { recordCompletedSpin: vi.fn() },
+      localization,
+      () => Promise.resolve(),
+    );
+    const labels = (id: string): string[] =>
+      [...document.querySelectorAll<HTMLElement>(`#${id} .slider-pip`)].map(
+        (pip) => pip.textContent ?? '',
+      );
+    expect(labels('speed-pips')).toEqual(['0.5×', '1×', '2×', '3×']);
+    expect(labels('bet-pips')).toEqual(['5', '10', '20', '50', '100']);
+    expect(labels('spins-pips')).toEqual([
+      '1',
+      '2',
+      '5',
+      '10',
+      '15',
+      '20',
+      '25',
+      '50',
+      '75',
+      '100',
+    ]);
+    const spinPips = [...document.querySelectorAll<HTMLElement>('#spins-pips .slider-pip')];
+    spinPips.forEach((pip, index) => {
+      expect(pip.dataset.index).toBe(String(index));
+      expect(pip.dataset.value).toBe(String(SPIN_COUNT_OPTIONS[index]));
+      expect(Number.parseFloat(pip.style.getPropertyValue('--pip-position'))).toBeCloseTo(
+        indexedSliderPosition(index, SPIN_COUNT_OPTIONS.length),
+        12,
+      );
+    });
+
+    const spinsControl = document.querySelector<HTMLInputElement>('#spins-control');
+    if (!spinsControl) throw new Error('Missing spins control');
+    expect(spinsControl.max).toBe('9');
+    spinsControl.value = '9';
+    spinsControl.dispatchEvent(new Event('input'));
+    expect(document.querySelector('#spins-value')?.textContent).toBe('100');
+    expect(spinsControl.getAttribute('aria-valuetext')).toBe('100 spins');
+    expect(document.querySelector('#spin')?.getAttribute('aria-label')).toBe('Start 100 spins');
+
+    localization.setLocale('pt-BR');
+    expect(labels('speed-pips')).toEqual(['0,5×', '1×', '2×', '3×']);
+    expect(spinsControl.value).toBe('9');
+    dispose();
   });
 
   it('deducts once, stays busy through feature presentation, and credits once', async () => {
@@ -249,7 +319,7 @@ describe('paid-spin controller boundary', () => {
     if (!betControl || !spinsControl) throw new Error('Missing test controls');
     betControl.value = '1';
     betControl.dispatchEvent(new Event('input'));
-    spinsControl.value = '1';
+    spinsControl.value = '2';
     spinsControl.dispatchEvent(new Event('input'));
 
     document.querySelector<HTMLButtonElement>('#spin')?.click();
@@ -274,7 +344,7 @@ describe('paid-spin controller boundary', () => {
     expect(document.querySelector('#credits')?.textContent).toBe('1.050');
     expect(recordCompletedSpin).toHaveBeenCalledTimes(5);
     expect(betControl.value).toBe('1');
-    expect(spinsControl.value).toBe('1');
+    expect(spinsControl.value).toBe('2');
     dispose();
   });
 
@@ -297,7 +367,7 @@ describe('paid-spin controller boundary', () => {
     );
     const spinsControl = document.querySelector<HTMLInputElement>('#spins-control');
     if (!spinsControl) throw new Error('Missing spins control');
-    spinsControl.value = '1';
+    spinsControl.value = '2';
     spinsControl.dispatchEvent(new Event('input'));
 
     document.querySelector<HTMLButtonElement>('#spin')?.click();
@@ -305,10 +375,17 @@ describe('paid-spin controller boundary', () => {
     expect(present).toHaveBeenCalledOnce();
     expect(document.querySelector('#message')?.textContent).toBe('Spin 1 of 5.');
 
+    localization.setLocale('fil-PH');
+    expect(document.querySelector('#message')?.textContent).toBe('Spin 1 sa 5.');
+    expect(document.querySelector('#credits')?.textContent).toBe('995');
+    expect(spinsControl.value).toBe('2');
+    expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(true);
+    expect(present).toHaveBeenCalledOnce();
+
     localization.setLocale('zh-CN');
     expect(document.querySelector('#message')?.textContent).toBe('第 1/5 次旋转。');
     expect(document.querySelector('#credits')?.textContent).toBe('995');
-    expect(spinsControl.value).toBe('1');
+    expect(spinsControl.value).toBe('2');
     expect(document.querySelector<HTMLButtonElement>('#spin')?.disabled).toBe(true);
     expect(present).toHaveBeenCalledOnce();
 
@@ -342,6 +419,9 @@ describe('paid-spin controller boundary', () => {
     speedControl.value = '3';
     speedControl.dispatchEvent(new Event('input'));
     expect(setPresentationSpeed).toHaveBeenLastCalledWith(3);
+    expect(document.querySelector('#speed-value')?.textContent).toBe('3.0×');
+    localization.setLocale('fil-PH');
+    expect(speedControl.getAttribute('aria-valuetext')).toBe('Bilis: 3×');
     expect(document.querySelector('#speed-value')?.textContent).toBe('3.0×');
     localization.setLocale('zh-CN');
     expect(speedControl.getAttribute('aria-valuetext')).toBe('3× 速度');

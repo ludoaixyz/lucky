@@ -1,4 +1,4 @@
-export const SUPPORTED_LOCALES = ['en-US', 'pt-BR', 'zh-CN'] as const;
+export const SUPPORTED_LOCALES = ['en-US', 'pt-BR', 'zh-CN', 'fil-PH'] as const;
 export type LocaleCode = (typeof SUPPORTED_LOCALES)[number];
 
 export interface MessageParameters {

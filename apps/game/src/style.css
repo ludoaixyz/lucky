@@ -195,13 +195,53 @@ button {
 
 .control-field input {
   grid-column: 1 / -1;
+  grid-row: 2;
   width: 100%;
+  margin: 0;
   accent-color: #ffd66b;
 }
 
 .control-field output {
+  grid-column: 2;
+  grid-row: 1;
   color: #ffd66b;
   font-weight: 900;
+}
+
+.slider-pips {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  position: relative;
+  width: calc(100% - 1rem);
+  height: 1.15rem;
+  margin: -0.15rem 0.5rem 0;
+  color: #8faab6;
+  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.slider-pip {
+  position: absolute;
+  left: var(--pip-position);
+  top: 0;
+  min-width: 1.25rem;
+  padding-top: 0.42rem;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.slider-pip::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 0.25rem;
+  background: #557482;
+  content: '';
+  transform: translateX(-50%);
 }
 
 .control-field:has(input:disabled) {

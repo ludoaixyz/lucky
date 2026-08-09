@@ -1,6 +1,6 @@
 # Localization
 
-The game presentation supports exactly `en-US`, `pt-BR`, and `zh-CN`, with `en-US` as the fallback. The browser entry point restores a supported `lucky888.locale` preference, otherwise maps Portuguese and Simplified Chinese browser language tags to their supported locale. All other tags resolve to English.
+The game presentation supports exactly `en-US`, `pt-BR`, `zh-CN`, and `fil-PH`, with `en-US` as the fallback. The four selectors use local United States, Brazil, Mainland China, and Philippines flag assets. The browser entry point restores a supported `lucky888.locale` preference; otherwise it maps Portuguese tags to `pt-BR`, Simplified Chinese tags to `zh-CN`, and both modern Filipino (`fil`, including regional/script variants) and legacy Tagalog (`tl`, including regional variants) tags to `fil-PH`. Unsupported tags resolve to English.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ The following are deliberately invariant:
 - the visible `SPIN` button label;
 - diagnostic CSV filename and English headers.
 
-The flag icons are local SVG assets under `apps/game/public/assets/flags`. HTML references them through Vite's `%BASE_URL%` placeholder so production builds work under the GitHub Pages `/lucky/` base path.
+The flag icons are local SVG assets under `apps/game/public/assets/flags`. HTML references them through Vite's `%BASE_URL%` placeholder so production builds work under the GitHub Pages `/lucky/` base path. The shared language selector is marked `no-export`; adding the Philippines flag does not change the rule that interactive language controls are omitted anywhere the existing controls are excluded from exports.
 
 ## Adding a locale
 
@@ -23,7 +23,7 @@ The flag icons are local SVG assets under `apps/game/public/assets/flags`. HTML 
 2. Create a complete dictionary in `locales` and add it to `TRANSLATIONS` in `index.ts`.
 3. Extend browser-language mapping only when the fallback is unambiguous.
 4. Add a local selector icon and button with an accessible name in the language it represents.
-5. Extend localization, interpolation, pluralization, persistence, accessibility, and live-switch tests.
+5. Extend full dictionary-shape, interpolation, pluralization, persistence/refresh, browser mapping, accessibility, active-sequence, payline/feature messaging, diagnostic-history retranslation, and centralized `Intl` formatting tests.
 6. Run `npm run validate` and manually verify the selector, active sequences, payline highlights, diagnostic history, refresh persistence, and browser console.
 
 Do not store rendered sentences as game or diagnostic state. Add a typed message key and parameters, then render it with the current locale. This keeps existing history and in-progress status re-translatable.
