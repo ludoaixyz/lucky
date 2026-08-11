@@ -89,5 +89,7 @@ export const filPH = {
   },
   presentation: {
     winningPaylines: (count) => `${formatNumber(locale, count)} panalong payline`,
+    cascade: (additionalBoardIndex) => `CASCADE ×${formatNumber(locale, additionalBoardIndex)}`,
+    cascadeWin: (amount) => `PANALO SA CASCADE  ${formatCredits(locale, amount)}`,
   },
 } satisfies TranslationDictionary;

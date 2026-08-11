@@ -89,6 +89,8 @@ export const enUS = {
   },
   presentation: {
     winningPaylines: (count) => `${count} winning ${count === 1 ? 'payline' : 'paylines'}`,
+    cascade: (additionalBoardIndex) => `CASCADE ×${formatNumber(locale, additionalBoardIndex)}`,
+    cascadeWin: (amount) => `CASCADE WIN  ${formatCredits(locale, amount)}`,
   },
 } satisfies TranslationDictionary;
 

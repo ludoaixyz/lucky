@@ -84,5 +84,9 @@ export const zhCN = {
     featureSummary: ({ initial, played, added, retriggers }) =>
       `初始 ${initial}，已玩 ${played}，增加 ${added}，再次触发 ${retriggers} 次`,
   },
-  presentation: { winningPaylines: (count) => `${count} 条中奖线` },
+  presentation: {
+    winningPaylines: (count) => `${count} 条中奖线`,
+    cascade: (additionalBoardIndex) => `连消 ×${formatNumber(locale, additionalBoardIndex)}`,
+    cascadeWin: (amount) => `连消赢分  ${formatCredits(locale, amount)}`,
+  },
 } satisfies TranslationDictionary;

@@ -107,6 +107,8 @@ export interface TranslationDictionary {
   };
   readonly presentation: {
     readonly winningPaylines: (count: number) => string;
+    readonly cascade: (additionalBoardIndex: number) => string;
+    readonly cascadeWin: (amount: number) => string;
   };
 }
 

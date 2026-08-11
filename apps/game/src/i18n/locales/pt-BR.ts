@@ -89,5 +89,7 @@ export const ptBR = {
   },
   presentation: {
     winningPaylines: (count) => `${count} ${count === 1 ? 'linha premiada' : 'linhas premiadas'}`,
+    cascade: (additionalBoardIndex) => `CASCATA ×${formatNumber(locale, additionalBoardIndex)}`,
+    cascadeWin: (amount) => `GANHO DA CASCATA  ${formatCredits(locale, amount)}`,
   },
 } satisfies TranslationDictionary;

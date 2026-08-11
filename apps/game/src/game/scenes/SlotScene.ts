@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type {
+  CascadeStage,
   LineWin,
   ReelOutcome,
   ReelStop,
@@ -12,9 +13,17 @@ import {
   paylineColor,
   RetainedPaylinePresentation,
 } from '../payline-presentation.js';
+import {
+  cascadePresentationTiming,
+  CascadePresentationStateMachine,
+  planCascadeMotion,
+  type CascadeMotionPlan,
+  type CascadePresentationPhase,
+} from '../cascade-presentation.js';
 import { formatNumber, type Localization } from '../../i18n/index.js';
 import { symbolTextureKey, symbolVisual } from '../symbol-visuals.js';
 import { initialReelWindow } from '../initial-window.js';
+import { CascadeAudioGrammar } from '../cascade-audio.js';
 
 interface SceneLifecycle {
   readonly ready: () => void;
@@ -51,6 +60,15 @@ export class SlotScene extends Phaser.Scene {
   private presentationToken: PresentationToken | undefined;
   private lineOverlay: Phaser.GameObjects.Graphics | undefined;
   private winLabel: Phaser.GameObjects.Text | undefined;
+  private cascadeFrame: Phaser.GameObjects.Graphics | undefined;
+  private cascadeCallout: Phaser.GameObjects.Text | undefined;
+  private cascadeWinLabel: Phaser.GameObjects.Text | undefined;
+  private readonly cascadePresentation = new CascadePresentationStateMachine();
+  private cascadeDisplayedWin = 0;
+  private readonly cascadeAudio = new CascadeAudioGrammar({
+    muted: () => this.sound.mute,
+    volume: () => this.sound.volume,
+  });
   private presentationSpeed = 1;
   private winLabelState: WinLabelState | undefined;
   private readonly retainedPaylines = new RetainedPaylinePresentation();
@@ -79,6 +97,32 @@ export class SlotScene extends Phaser.Scene {
       this.reelViews = this.gameConfig.reelStrips.map((_, reel) => this.createReelView(reel));
       this.currentStops.forEach((stop, reel) => this.setReelAtStop(reel, stop));
       this.lineOverlay = this.add.graphics().setDepth(20);
+      this.cascadeFrame = this.add.graphics().setDepth(19).setVisible(false);
+      this.cascadeCallout = this.add
+        .text(CANVAS_WIDTH / 2, 54, '', {
+          fontFamily: 'system-ui',
+          fontSize: '34px',
+          fontStyle: 'bold',
+          color: '#ffd66b',
+          stroke: '#07111f',
+          strokeThickness: 7,
+          shadow: { offsetX: 0, offsetY: 3, color: '#000000', blur: 9, fill: true },
+        })
+        .setOrigin(0.5)
+        .setDepth(30)
+        .setVisible(false);
+      this.cascadeWinLabel = this.add
+        .text(CANVAS_WIDTH / 2, 96, '', {
+          fontFamily: 'system-ui',
+          fontSize: '21px',
+          fontStyle: 'bold',
+          color: '#7de7d1',
+          backgroundColor: '#07111fcc',
+          padding: { x: 10, y: 5 },
+        })
+        .setOrigin(0.5)
+        .setDepth(30)
+        .setVisible(false);
       this.winLabel = this.add
         .text(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 14, '', {
           fontFamily: 'system-ui',
@@ -90,7 +134,10 @@ export class SlotScene extends Phaser.Scene {
         .setOrigin(0.5, 1)
         .setDepth(21)
         .setVisible(false);
-      this.disposeLocalization = this.localization.subscribe(() => this.renderWinLabel());
+      this.disposeLocalization = this.localization.subscribe(() => {
+        this.renderWinLabel();
+        this.renderCascadeLabels();
+      });
       this.created = true;
       this.lifecycle.ready();
     } catch (error: unknown) {
@@ -136,19 +183,18 @@ export class SlotScene extends Phaser.Scene {
       const reelsFinished = async (): Promise<void> => {
         this.rememberWinningStage(0, result.window, result.lineWins);
         await this.presentLineWins(result.lineWins, token);
-        const cascadeStages = result.cascades?.slice(1) ?? [];
-        for (const stage of cascadeStages) {
+        const resolvedStages = result.cascades ?? [];
+        for (let position = 1; position < resolvedStages.length; position += 1) {
           if (token.cancelled) break;
-          this.clearTransientWinPresentation();
-          stage.window.forEach((column, reel) => {
-            this.snapToResolvedWindow(reel, result.stops[reel] ?? 0, column, strips);
-          });
-          await new Promise<void>((stageReady) => {
-            this.time.delayedCall(timing.symbolLanding, stageReady);
-          });
+          const previousStage = resolvedStages[position - 1];
+          const stage = resolvedStages[position];
+          if (!previousStage || !stage) break;
+          await this.presentCascadeTransition(previousStage, stage, token);
+          if (token.cancelled) break;
           this.rememberWinningStage(stage.index, stage.window, stage.lineWins);
           await this.presentLineWins(stage.lineWins, token);
         }
+        this.endCascadePresentation();
         if (!token.cancelled) this.renderRetainedWinningStage(result.stops, strips);
         finish();
       };
@@ -183,6 +229,7 @@ export class SlotScene extends Phaser.Scene {
   /** The sole normal-play boundary that retires a resolved spin's retained paylines. */
   beginSpinPresentation(): void {
     this.retainedPaylines.beginSpin();
+    this.endCascadePresentation();
     this.clearTransientWinPresentation();
   }
 
@@ -211,6 +258,295 @@ export class SlotScene extends Phaser.Scene {
     for (const win of stage.lineWins) this.drawLineWin(win, false, false);
     this.winLabelState = { kind: 'all', count: stage.lineWins.length };
     this.renderWinLabel();
+  }
+
+  private async presentCascadeTransition(
+    winningStage: CascadeStage,
+    nextStage: CascadeStage,
+    token: PresentationToken,
+  ): Promise<void> {
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    const timing = cascadePresentationTiming(
+      this.presentationSpeed,
+      nextStage.index,
+      reducedMotion,
+    );
+    const motion = planCascadeMotion(
+      winningStage.window,
+      nextStage.window,
+      winningStage.removedCoordinates,
+    );
+    this.cascadePresentation.beginStage(nextStage.index);
+    this.updateCascadeSemanticState(false);
+    this.showCascadeFrame(nextStage.index);
+    await Promise.all([
+      this.emphasizeWinningSymbols(motion, timing.winHold, token),
+      this.wait(timing.winHold, token),
+    ]);
+    if (token.cancelled) return;
+
+    this.advanceCascadePhase('CASCADE_CALLOUT');
+    this.renderCascadeLabels();
+    this.updateCascadeSemanticState(true);
+    this.fadeCascadeCallout(timing.callout);
+
+    this.advanceCascadePhase('REMOVE_WINNERS');
+    this.cascadeAudio.play('remove', nextStage.index);
+    await this.removeWinningSymbols(motion, timing.removeWinners, token);
+    if (token.cancelled) return;
+
+    this.advanceCascadePhase('EMPTY_BEAT');
+    await this.wait(timing.emptyBeat, token);
+    if (token.cancelled) return;
+
+    this.advanceCascadePhase('COLLAPSE');
+    this.cascadeAudio.play('fall', nextStage.index);
+    await this.collapseSurvivors(motion, timing.collapse, token);
+    if (token.cancelled) return;
+
+    this.advanceCascadePhase('REFILL');
+    await this.refillResolvedBoard(nextStage.window, motion, timing.refill, token);
+    if (token.cancelled) return;
+
+    this.advanceCascadePhase('LAND');
+    this.cascadeAudio.play('land', nextStage.index);
+    await this.landResolvedBoard(timing.land, token);
+    if (token.cancelled) return;
+
+    this.advanceCascadePhase('EVALUATE_NEXT_STAGE');
+    const cumulative = this.cascadePresentation.creditResolvedStage(nextStage);
+    if (nextStage.lineWins.length > 0) this.cascadeAudio.play('success', nextStage.index);
+    await Promise.all([
+      this.animateCascadeWin(cumulative, timing.preEvaluation, token),
+      this.wait(timing.preEvaluation, token),
+    ]);
+    this.updateCascadeSemanticState(true);
+  }
+
+  private advanceCascadePhase(phase: CascadePresentationPhase): void {
+    this.cascadePresentation.advance(phase);
+    this.updateCascadeSemanticState(false);
+  }
+
+  private updateCascadeSemanticState(announce: boolean): void {
+    const snapshot = this.cascadePresentation.snapshot();
+    const host = document.querySelector<HTMLElement>('#game');
+    const announcement = document.querySelector<HTMLElement>('#cascade-announcement');
+    if (host) {
+      host.dataset.cascadeActive = String(snapshot.active);
+      host.dataset.cascadePhase = snapshot.phase ?? '';
+      host.dataset.cascadeIndex = String(snapshot.additionalBoardIndex);
+      host.dataset.cascadeWinCredits = String(this.cascadeDisplayedWin);
+    }
+    if (announce && announcement) {
+      announcement.textContent = snapshot.active
+        ? `${this.localization.dictionary.presentation.cascade(snapshot.additionalBoardIndex)}. ${this.localization.dictionary.presentation.cascadeWin(this.cascadeDisplayedWin)}.`
+        : '';
+    }
+  }
+
+  private showCascadeFrame(depth: number): void {
+    const alpha = Math.min(0.9, 0.52 + depth * 0.08);
+    this.cascadeFrame
+      ?.clear()
+      .lineStyle(7, 0xffd66b, alpha)
+      .strokeRoundedRect(5, 5, CANVAS_WIDTH - 10, CANVAS_HEIGHT - 10, 18)
+      .lineStyle(3, 0x7de7d1, Math.min(0.7, alpha))
+      .strokeRoundedRect(13, 13, CANVAS_WIDTH - 26, CANVAS_HEIGHT - 26, 14)
+      .setVisible(true);
+  }
+
+  private renderCascadeLabels(): void {
+    const snapshot = this.cascadePresentation.snapshot();
+    if (!snapshot.active) return;
+    this.cascadeCallout
+      ?.setText(this.localization.dictionary.presentation.cascade(snapshot.additionalBoardIndex))
+      .setVisible(true);
+    this.cascadeWinLabel
+      ?.setText(this.localization.dictionary.presentation.cascadeWin(this.cascadeDisplayedWin))
+      .setVisible(true);
+  }
+
+  private fadeCascadeCallout(duration: number): void {
+    if (!this.cascadeCallout) return;
+    this.cascadeCallout.setAlpha(1).setScale(0.92).setVisible(true);
+    this.tweens.add({
+      targets: this.cascadeCallout,
+      scaleX: 1,
+      scaleY: 1,
+      duration,
+      ease: 'Back.Out',
+    });
+  }
+
+  private async emphasizeWinningSymbols(
+    motion: CascadeMotionPlan,
+    duration: number,
+    token: PresentationToken,
+  ): Promise<void> {
+    const symbols = motion.removedCoordinates
+      .map(({ reel, row }) => this.reelViews[reel]?.symbols[row + 1])
+      .filter((symbol): symbol is SymbolView => symbol !== undefined);
+    for (const symbol of symbols) {
+      symbol.frame.setTint(0xffd66b);
+      symbol.label.setTint(0xffd66b);
+    }
+    await this.tween(
+      {
+        targets: symbols.map(({ container }) => container),
+        scaleX: 1.1,
+        scaleY: 1.1,
+        yoyo: true,
+        duration: Math.max(24, Math.floor(duration / 2)),
+        ease: 'Sine.InOut',
+      },
+      duration,
+      token,
+    );
+  }
+
+  private async removeWinningSymbols(
+    motion: CascadeMotionPlan,
+    duration: number,
+    token: PresentationToken,
+  ): Promise<void> {
+    this.lineOverlay?.clear();
+    this.winLabel?.setVisible(false);
+    const symbols = motion.removedCoordinates
+      .map(({ reel, row }) => this.reelViews[reel]?.symbols[row + 1])
+      .filter((symbol): symbol is SymbolView => symbol !== undefined);
+    await this.tween(
+      {
+        targets: symbols.map(({ container }) => container),
+        alpha: 0,
+        scaleX: 1.3,
+        scaleY: 0.55,
+        angle: 7,
+        duration,
+        ease: 'Quad.In',
+      },
+      duration,
+      token,
+    );
+    for (const symbol of symbols) symbol.container.setVisible(false);
+  }
+
+  private async collapseSurvivors(
+    motion: CascadeMotionPlan,
+    duration: number,
+    token: PresentationToken,
+  ): Promise<void> {
+    const height = CANVAS_HEIGHT / this.gameConfig.visibleRows;
+    const promises = motion.survivorMoves.map((move) => {
+      const symbol = this.reelViews[move.reel]?.symbols[move.fromRow + 1];
+      if (!symbol || move.fromRow === move.toRow) return Promise.resolve();
+      return this.tween(
+        {
+          targets: symbol.container,
+          y: move.toRow * height + height / 2,
+          duration,
+          ease: 'Quad.In',
+        },
+        duration,
+        token,
+      );
+    });
+    await Promise.all(promises);
+  }
+
+  private async refillResolvedBoard(
+    window: readonly (readonly SymbolId[])[],
+    motion: CascadeMotionPlan,
+    duration: number,
+    token: PresentationToken,
+  ): Promise<void> {
+    const height = CANVAS_HEIGHT / this.gameConfig.visibleRows;
+    const refillKeys = new Set(motion.refillEntries.map(({ reel, row }) => `${reel}:${row}`));
+    window.forEach((column, reel) => {
+      column.forEach((symbolId, row) => {
+        const symbol = this.reelViews[reel]?.symbols[row + 1];
+        if (!symbol) return;
+        this.setSymbol(symbol, symbolId);
+        symbol.container
+          .setPosition(symbol.container.x, row * height + height / 2)
+          .setAngle(0)
+          .setScale(1)
+          .setAlpha(1)
+          .setVisible(!refillKeys.has(`${reel}:${row}`));
+        symbol.frame.clearTint();
+        symbol.label.clearTint();
+      });
+    });
+    const promises = motion.refillEntries.map((entry, order) => {
+      const symbol = this.reelViews[entry.reel]?.symbols[entry.row + 1];
+      if (!symbol) return Promise.resolve();
+      const targetY = entry.row * height + height / 2;
+      symbol.container.setY(targetY - height * (entry.row + 1)).setVisible(true);
+      return this.tween(
+        {
+          targets: symbol.container,
+          y: targetY,
+          duration: duration + order * 8,
+          ease: 'Quad.In',
+        },
+        duration + order * 8,
+        token,
+      );
+    });
+    await Promise.all(promises);
+  }
+
+  private async landResolvedBoard(duration: number, token: PresentationToken): Promise<void> {
+    const targets = this.reelViews.flatMap((view) =>
+      view.symbols.slice(1).map(({ container }) => container),
+    );
+    await this.tween(
+      {
+        targets,
+        scaleX: 1.04,
+        scaleY: 0.94,
+        yoyo: true,
+        duration,
+        ease: 'Back.Out',
+      },
+      duration * 2,
+      token,
+    );
+  }
+
+  private async animateCascadeWin(
+    target: number,
+    duration: number,
+    token: PresentationToken,
+  ): Promise<void> {
+    const counter = { value: this.cascadeDisplayedWin };
+    await this.tween(
+      {
+        targets: counter,
+        value: target,
+        duration,
+        ease: 'Quad.Out',
+        onUpdate: () => {
+          this.cascadeDisplayedWin = Math.round(counter.value);
+          this.renderCascadeLabels();
+        },
+      },
+      duration,
+      token,
+    );
+    this.cascadeDisplayedWin = target;
+    this.renderCascadeLabels();
+  }
+
+  private endCascadePresentation(): void {
+    this.cascadePresentation.finish();
+    this.cascadeDisplayedWin = 0;
+    this.cascadeFrame?.clear().setVisible(false);
+    this.cascadeCallout?.setVisible(false).setText('').setAlpha(1).setScale(1);
+    this.cascadeWinLabel?.setVisible(false).setText('');
+    this.updateCascadeSemanticState(false);
+    const announcement = document.querySelector<HTMLElement>('#cascade-announcement');
+    if (announcement) announcement.textContent = '';
   }
 
   private createReelBackgrounds(): void {
@@ -476,6 +812,20 @@ export class SlotScene extends Phaser.Scene {
     });
   }
 
+  private tween(
+    config: Phaser.Types.Tweens.TweenBuilderConfig,
+    duration: number,
+    token: PresentationToken,
+  ): Promise<void> {
+    if (token.cancelled || duration <= 0) return Promise.resolve();
+    const targets = Array.isArray(config.targets) ? config.targets : [config.targets];
+    if (targets.length === 0 || targets.every((target) => target === undefined))
+      return Promise.resolve();
+    return new Promise((resolve) => {
+      this.tweens.add({ ...config, onComplete: () => resolve() });
+    });
+  }
+
   private setReelAtStop(
     reel: number,
     stop: ReelStop,
@@ -577,6 +927,8 @@ export class SlotScene extends Phaser.Scene {
     this.disposeLocalization?.();
     this.disposeLocalization = undefined;
     this.retainedPaylines.shutdown();
+    this.endCascadePresentation();
+    this.cascadeAudio.dispose();
     this.clearTransientWinPresentation();
     this.tweens.killTweensOf(this.reelViews.map((view) => view.container));
     if (this.finishPresentation) this.finishPresentation();
