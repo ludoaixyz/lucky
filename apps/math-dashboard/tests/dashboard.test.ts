@@ -14,6 +14,11 @@ import {
   TRANSLATIONS,
 } from '../src/i18n/index.js';
 import { formatDate, formatDecimal, formatInteger, formatPercent } from '../src/i18n/format.js';
+import {
+  bindLanguageButtons,
+  DASHBOARD_LANGUAGE_OPTIONS,
+  languageButtons,
+} from '../src/i18n/language-selector.js';
 import { bindPrintLayout, setPrintLayout } from '../src/print.js';
 import {
   comparisonRows,
@@ -240,6 +245,36 @@ describe('language-neutral management calculations', () => {
     expect(meetsAllTargets(million)).toBe(true);
   });
 
+  it('does not mutate report mathematics while formatting every locale', () => {
+    const original = structuredClone(million);
+    const expectedMetrics = {
+      creditedRtp: million.creditedTotalRtp,
+      featureFrequency: million.featureTriggerFrequency,
+      cascadeRate: million.cascadeSpinRate,
+      standardDeviation: million.standardDeviation,
+      cascadePayout: million.cascadePayoutCredits,
+      targets: evaluateTargets(million),
+    };
+
+    for (const locale of DASHBOARD_LOCALES) {
+      formatPercent(million.creditedTotalRtp, locale);
+      formatPercent(million.featureTriggerFrequency, locale, 3);
+      formatPercent(million.cascadeSpinRate ?? 0, locale);
+      formatDecimal(million.standardDeviation, locale, 3);
+      formatInteger(million.cascadePayoutCredits ?? 0, locale);
+      expect({
+        creditedRtp: million.creditedTotalRtp,
+        featureFrequency: million.featureTriggerFrequency,
+        cascadeRate: million.cascadeSpinRate,
+        standardDeviation: million.standardDeviation,
+        cascadePayout: million.cascadePayoutCredits,
+        targets: evaluateTargets(million),
+      }).toEqual(expectedMetrics);
+    }
+
+    expect(million).toEqual(original);
+  });
+
   it('returns semantic small-sample risk keys', () => {
     expect(riskFlags(thousand).map((flag) => flag.key)).toContain('smokeSample');
     expect(riskFlags({ ...million, paidSpins: 50_000 }).map((flag) => flag.key)).toContain(
@@ -269,11 +304,12 @@ describe('language-neutral management calculations', () => {
 });
 
 describe('dashboard localization', () => {
-  it('provides exactly three structurally complete dictionaries', () => {
-    expect(DASHBOARD_LOCALES).toEqual(['en', 'pt-BR', 'zh-CN']);
+  it('provides exactly four structurally complete dictionaries, including Filipino', () => {
+    expect(DASHBOARD_LOCALES).toEqual(['en', 'pt-BR', 'zh-CN', 'fil-PH']);
     const shape = dictionaryShape(TRANSLATIONS.en);
     for (const locale of DASHBOARD_LOCALES)
       expect(dictionaryShape(TRANSLATIONS[locale])).toEqual(shape);
+    expect(dictionaryShape(TRANSLATIONS['fil-PH'])).toEqual(shape);
   });
 
   it('uses the required professional terminology baseline', () => {
@@ -311,6 +347,56 @@ describe('dashboard localization', () => {
       capHitFrequency: '封顶触发频率',
     });
     expect(TRANSLATIONS.en.status.PASS).toBe('Pass');
+    expect(TRANSLATIONS['fil-PH']).toMatchObject({
+      languageName: 'Filipino',
+      dashboard: {
+        title: 'Dashboard ng Pagganap ng Math',
+        keyPerformanceIndicators: 'Mga Pangunahing Sukatan ng Pagganap',
+        reconciliation: 'Reconciliation',
+      },
+      metrics: {
+        cascades: 'Mga Cascade',
+        cascadeRtpContribution: 'Ambag ng Cascade sa RTP',
+        maximumObservedWin: 'Pinakamataas na Naobserbahang Panalo',
+      },
+    });
+  });
+
+  it('renders four accessible flag buttons with the Philippines flag fourth', () => {
+    expect(DASHBOARD_LANGUAGE_OPTIONS).toEqual([
+      { locale: 'en', flag: 'gb.svg' },
+      { locale: 'pt-BR', flag: 'br.svg' },
+      { locale: 'zh-CN', flag: 'cn.svg' },
+      { locale: 'fil-PH', flag: 'ph.svg' },
+    ]);
+    const nav = document.createElement('nav');
+    nav.innerHTML = languageButtons('fil-PH', '/');
+    const buttons = [...nav.querySelectorAll<HTMLButtonElement>('button')];
+    expect(buttons).toHaveLength(4);
+    expect(buttons.map((button) => button.dataset.locale)).toEqual(DASHBOARD_LOCALES);
+    expect(buttons.at(-1)?.querySelector('img')?.getAttribute('src')).toBe('/flags/ph.svg');
+    expect(buttons.at(-1)?.getAttribute('aria-label')).toBe('Filipino');
+    expect(buttons.at(-1)?.getAttribute('title')).toBe('Filipino');
+    expect(buttons.at(-1)?.getAttribute('aria-pressed')).toBe('true');
+    expect(buttons.at(-1)?.getAttribute('type')).toBe('button');
+  });
+
+  it('selects all locales by click and Filipino by keyboard', () => {
+    const nav = document.createElement('nav');
+    nav.innerHTML = languageButtons('en', '/');
+    const selections: string[] = [];
+    bindLanguageButtons(nav, (locale) => selections.push(locale));
+
+    for (const locale of DASHBOARD_LOCALES)
+      nav.querySelector<HTMLButtonElement>(`[data-locale="${locale}"]`)?.click();
+    nav
+      .querySelector<HTMLButtonElement>('[data-locale="fil-PH"]')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    nav
+      .querySelector<HTMLButtonElement>('[data-locale="fil-PH"]')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+
+    expect(selections).toEqual([...DASHBOARD_LOCALES, 'fil-PH', 'fil-PH']);
   });
 
   it('excludes deprecated literal terminology from visible Chinese metric and chart labels', () => {
@@ -335,6 +421,8 @@ describe('dashboard localization', () => {
     expect(resolveDashboardLocale(null, 'zh-CN', 'pt-PT')).toBe('zh-CN');
     expect(resolveDashboardLocale(null, null, 'pt-PT')).toBe('pt-BR');
     expect(resolveDashboardLocale(null, null, 'zh-Hans-SG')).toBe('zh-CN');
+    expect(resolveDashboardLocale(null, null, 'fil-PH')).toBe('fil-PH');
+    expect(resolveDashboardLocale(null, null, 'tl-PH')).toBe('fil-PH');
     expect(resolveDashboardLocale(null, null, 'fr-FR')).toBe('en');
   });
 
@@ -343,22 +431,24 @@ describe('dashboard localization', () => {
     persistDashboardLocale(storage, 'zh-CN', 'report-a');
     expect(readStoredLocale(storage)).toBe('zh-CN');
     expect(readReportLocale(storage, 'report-a')).toBe('zh-CN');
+    persistDashboardLocale(storage, 'fil-PH', 'report-b');
+    expect(readStoredLocale(storage)).toBe('fil-PH');
+    expect(readReportLocale(storage, 'report-b')).toBe('fil-PH');
   });
 
   it('formats numbers, percentages, decimals, and dates by locale without changing values', () => {
     expect(formatInteger(1_000_000, 'en')).toBe('1,000,000');
     expect(formatInteger(1_000_000, 'pt-BR')).toBe('1.000.000');
     expect(formatInteger(1_000_000, 'zh-CN')).toBe('1,000,000');
+    expect(formatInteger(1_000_000, 'fil-PH')).toBe('1,000,000');
     expect(formatPercent(0.9537, 'pt-BR')).toBe('95,37%');
     expect(formatDecimal(2.377, 'pt-BR', 3)).toBe('2,377');
     expect(formatDate(million.generatedAt, 'en')).not.toBe(
       formatDate(million.generatedAt, 'zh-CN'),
     );
-    expect(DASHBOARD_LOCALES.map(() => million.creditedTotalRtp)).toEqual([
-      million.creditedTotalRtp,
-      million.creditedTotalRtp,
-      million.creditedTotalRtp,
-    ]);
+    expect(formatDate(million.generatedAt, 'fil-PH')).not.toBe(
+      formatDate(million.generatedAt, 'zh-CN'),
+    );
   });
 
   it('renders grammatical dynamic summaries from locale templates', () => {
@@ -372,6 +462,9 @@ describe('dashboard localization', () => {
     };
     expect(TRANSLATIONS.en.templates.summary(values)).toContain('The current profile');
     expect(TRANSLATIONS['pt-BR'].templates.summary(values)).toContain('O perfil atual');
+    expect(TRANSLATIONS['fil-PH'].templates.summary(values)).toContain(
+      'Nagbalik ang kasalukuyang profile',
+    );
     const chinese = TRANSLATIONS['zh-CN'].templates.summary(values);
     expect(chinese).toContain('当前配置在 1,000,000 次付费旋转模拟中的封顶后 RTP 为 95.37%');
     expect(chinese).toContain('平均每 115.6 次付费旋转触发一次免费旋转');
@@ -444,6 +537,35 @@ describe('localized export and print behavior', () => {
       exportedAt: '2026-08-06T14:35:00.000Z',
     });
     expect(snapshot.element.dataset.exportLocale).toBe('pt-BR');
+  });
+
+  it('creates a Filipino export with localized representative sections and metadata', () => {
+    const filipino = TRANSLATIONS['fil-PH'];
+    const source = document.createElement('div');
+    source.innerHTML = `<header><h1>${filipino.dashboard.title}</h1><nav class="language-selector no-export">flags</nav></header><main><h2>${filipino.dashboard.keyPerformanceIndicators}</h2><h3>${filipino.metrics.cascadeRtpContribution}</h3><h3>${filipino.dashboard.managementTargetAssessment}</h3><h3>${filipino.dashboard.reconciliation}</h3><strong>95.37%</strong></main>`;
+    const options = createExportOptions('fil-PH', million.configurationId, 'pdf');
+    const footer = filipino.templates.exportFooter(
+      filipino.languageName,
+      million.configurationId,
+      'Ago 6, 2026, 10:35 PM',
+    );
+    const snapshot = createExportSnapshot(
+      source,
+      options,
+      filipino.languageName,
+      footer,
+      '2026-08-06T14:35:00.000Z',
+    );
+    expect(snapshot.element.textContent).toContain('Dashboard ng Pagganap ng Math');
+    expect(snapshot.element.textContent).toContain('Mga Pangunahing Sukatan ng Pagganap');
+    expect(snapshot.element.textContent).toContain('Ambag ng Cascade sa RTP');
+    expect(snapshot.element.textContent).toContain('Pagtatasa sa mga Target ng Pamamahala');
+    expect(snapshot.element.textContent).toContain('Reconciliation');
+    expect(snapshot.element.textContent).toContain('Wika: Filipino');
+    expect(snapshot.element.textContent).toContain('95.37%');
+    expect(snapshot.element.querySelector('.language-selector')).toBeNull();
+    expect(snapshot.element.dataset.exportLocale).toBe('fil-PH');
+    expect(exportFilename(options)).toBe('lucky888_math-performance_fil-PH.pdf');
   });
 
   it('creates a Chinese export snapshot without interactive flags or mixed-language labels', () => {

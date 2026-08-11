@@ -16,6 +16,7 @@ import {
   resolveDashboardLocale,
   t,
 } from './i18n/index.js';
+import { bindLanguageButtons, languageButtons } from './i18n/language-selector.js';
 import {
   formatCompact,
   formatDate,
@@ -307,20 +308,6 @@ function visibleErrorText(translations: DashboardTranslations): string {
   return translations.errors.loadFailed;
 }
 
-function languageButtons(locale: DashboardLocale): string {
-  const options: readonly [DashboardLocale, string][] = [
-    ['en', 'gb.svg'],
-    ['pt-BR', 'br.svg'],
-    ['zh-CN', 'cn.svg'],
-  ];
-  return options
-    .map(([code, flag]) => {
-      const label = dictionary(code).languageName;
-      return `<button type="button" data-locale="${code}" aria-label="${label}" title="${label}" aria-pressed="${String(code === locale)}"><img src="${import.meta.env.BASE_URL}flags/${flag}" alt=""> <span>${label}</span></button>`;
-    })
-    .join('');
-}
-
 function renderDashboard(): void {
   const translations = dictionary(currentLocale);
   document.documentElement.lang = currentLocale;
@@ -531,7 +518,7 @@ function renderDashboard(): void {
       <div><p class="eyebrow">${escapeHtml(translations.dashboard.simulationManagement)}</p><h1>LUCKY888 <span>— ${escapeHtml(t(currentLocale, 'dashboard.title'))}</span></h1></div>
       <div class="header-actions">
         <div class="header-status"><span>${escapeHtml(translations.dashboard.overallStatus)}</span>${statusBadge(status, translations)}</div>
-        <nav class="language-selector no-export" aria-label="${escapeHtml(translations.dashboard.languageSelector)}">${languageButtons(currentLocale)}</nav>
+        <nav class="language-selector no-export" aria-label="${escapeHtml(translations.dashboard.languageSelector)}">${languageButtons(currentLocale, import.meta.env.BASE_URL)}</nav>
         <div class="export-actions no-export"><button id="export-pdf" class="button button-gold" type="button" ${exportInProgress ? 'disabled' : ''}>${escapeHtml(translations.dashboard.exportPdf)}</button><button id="export-png" class="button" type="button" ${exportInProgress ? 'disabled' : ''}>${escapeHtml(translations.dashboard.exportPng)}</button></div>
       </div>
     </header>
@@ -802,15 +789,11 @@ async function runExport(format: ExportFormat, active: LoadedReport): Promise<vo
 }
 
 function wireInteractions(active: LoadedReport): void {
-  document.querySelectorAll<HTMLButtonElement>('[data-locale]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const locale = button.dataset.locale;
-      if (locale !== 'en' && locale !== 'pt-BR' && locale !== 'zh-CN') return;
-      currentLocale = locale;
-      hasExplicitUserLocale = true;
-      persistDashboardLocale(storage, locale, activeReportId);
-      renderDashboard();
-    });
+  bindLanguageButtons(document, (locale) => {
+    currentLocale = locale;
+    hasExplicitUserLocale = true;
+    persistDashboardLocale(storage, locale, activeReportId);
+    renderDashboard();
   });
   document
     .querySelector<HTMLSelectElement>('#report-select')

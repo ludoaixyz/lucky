@@ -22,6 +22,13 @@ export function browserDashboardLocale(language: string | undefined): DashboardL
   const normalized = language?.toLowerCase() ?? '';
   if (normalized === 'pt' || normalized.startsWith('pt-')) return 'pt-BR';
   if (
+    normalized === 'fil' ||
+    normalized.startsWith('fil-') ||
+    normalized === 'tl' ||
+    normalized.startsWith('tl-')
+  )
+    return 'fil-PH';
+  if (
     normalized === 'zh' ||
     normalized.startsWith('zh-cn') ||
     normalized.startsWith('zh-sg') ||
