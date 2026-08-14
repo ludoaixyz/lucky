@@ -422,3 +422,226 @@ export interface ExactMathReport {
   readonly maximumWinCapCredits: Credits;
   readonly maximumWinCapReducesRtp: boolean;
 }
+
+// Bathala-style Lucky888 active math contract. The older interfaces above are retained only so
+// archived dashboard reports remain readable; the active engine does not consume them.
+export type RegularSymbolId = 'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'H1' | 'H2' | 'H3' | 'H4';
+export type BathalaSymbolId = RegularSymbolId | 'SCATTER' | 'MULTIPLIER';
+export type GameMode = 'base' | 'freegame';
+export interface WeightedSymbol {
+  readonly symbol: BathalaSymbolId;
+  readonly weight: number;
+}
+export interface WeightedMultiplier {
+  readonly value: number;
+  readonly weight: number;
+}
+export interface CountPayAward {
+  readonly symbol: RegularSymbolId;
+  readonly minCount: number;
+  readonly maxCount: number;
+  readonly payout: number;
+}
+export interface SymbolCell {
+  readonly id: string;
+  readonly symbol: BathalaSymbolId;
+  readonly multiplierValue?: number;
+  collectedIntoFreeGamePool?: boolean;
+}
+export type BoardCell = SymbolCell | null;
+export type Board = BoardCell[][];
+export interface Position {
+  readonly column: number;
+  readonly row: number;
+}
+export interface BathalaConfig {
+  readonly enabled: boolean;
+  readonly trigger: 'after_scoring_elimination';
+  readonly eligibleSymbols: readonly RegularSymbolId[];
+  readonly selectionMode: 'random_symbol_type' | 'weighted_symbol_type';
+  readonly selectionWeights?: Readonly<Partial<Record<RegularSymbolId, number>>>;
+  readonly removeMode: 'all_instances' | 'random_count';
+  readonly randomCount?: { readonly minimum: number; readonly maximum: number };
+  readonly allowNoEligibleTarget: boolean;
+  readonly awardsDirectPayout: false;
+}
+export interface ScatterConfig {
+  readonly evaluationTiming: 'final_board';
+  readonly payouts: Readonly<Record<string, number>>;
+  readonly baseGameTrigger: { readonly minimumScatters: number; readonly freeGamesAwarded: number };
+  readonly freeGameRetrigger: {
+    readonly minimumScatters: number;
+    readonly additionalFreeGames: number;
+  };
+}
+export interface ActiveGameConfig {
+  readonly schemaVersion: string;
+  readonly gameId: 'lucky888';
+  readonly gameName: string;
+  readonly gameVersion: string;
+  readonly configurationId: string;
+  readonly model: 'bathala-count-pay-tumble';
+  readonly columns: 6;
+  readonly rows: 5;
+  readonly minimumWinCount: 8;
+  readonly totalBet: 1;
+  readonly maximumTumbleRounds: number;
+  readonly freeGameMultiplierCollectionTrigger: 'winning_round';
+  readonly symbols: readonly BathalaSymbolId[];
+  readonly regularSymbols: readonly RegularSymbolId[];
+  readonly lowSymbols: readonly RegularSymbolId[];
+  readonly baseSymbolWeights: readonly WeightedSymbol[];
+  readonly freegameSymbolWeights: readonly WeightedSymbol[];
+  readonly multiplierValues: readonly WeightedMultiplier[];
+  readonly paytable: readonly CountPayAward[];
+  readonly bathala: BathalaConfig;
+  readonly scatter: ScatterConfig;
+  readonly notes?: readonly string[];
+}
+export interface SymbolWin {
+  readonly symbol: RegularSymbolId;
+  readonly count: number;
+  readonly payout: number;
+  readonly positions: readonly Position[];
+}
+export interface MultiplierOccurrence {
+  readonly id: string;
+  readonly value: number;
+  readonly newlyCollected: boolean;
+}
+export interface BathalaSkillResult {
+  occurred: boolean;
+  readonly targetSymbol?: RegularSymbolId;
+  readonly removedPositions: readonly Position[];
+  resultedInNextWin?: boolean;
+}
+export interface TumbleRound {
+  readonly index: number;
+  readonly winningSymbols: readonly SymbolWin[];
+  readonly baseWin: number;
+  readonly multiplierSymbols: readonly MultiplierOccurrence[];
+  readonly visibleMultiplierSum: number;
+  readonly newlyCollectedMultiplierSum: number;
+  readonly effectiveMultiplier: number;
+  readonly creditedWin: number;
+  readonly removedWinningCells: readonly Position[];
+  readonly bathala?: BathalaSkillResult;
+  readonly boardBefore?: Board;
+  readonly boardAfterRemoval?: Board;
+  readonly boardAfterCollapse?: Board;
+  readonly boardAfterRefill?: Board;
+}
+export interface TumbleChainResult {
+  readonly initialBoard?: Board;
+  readonly finalBoard: Board;
+  readonly rounds: readonly TumbleRound[];
+  readonly totalWin: number;
+  readonly accumulatedMultiplierAfter: number;
+  readonly scatterCount: number;
+  readonly scatterPayout: number;
+}
+export interface FreeGameSpinResult {
+  readonly index: number;
+  readonly accumulatedMultiplierBefore: number;
+  readonly tumbleRounds: readonly TumbleRound[];
+  readonly accumulatedMultiplierAfter: number;
+  readonly scattersLanded: number;
+  readonly scatterPayout: number;
+  readonly retriggeredSpins: number;
+  readonly win: number;
+}
+export interface FreeGameFeatureResult {
+  readonly initialAward: number;
+  readonly totalSpinsPlayed: number;
+  readonly retriggerCount: number;
+  readonly startingMultiplier: 0;
+  readonly endingMultiplier: number;
+  readonly spins: readonly FreeGameSpinResult[];
+  readonly totalWin: number;
+}
+export interface WinComponents {
+  readonly baseGameRegularPayout: number;
+  readonly baseGameScatterPayout: number;
+  readonly baseGameMultiplierUplift: number;
+  readonly freeGameRegularPayout: number;
+  readonly freeGameScatterPayout: number;
+  readonly freeGameMultiplierUplift: number;
+}
+export interface BathalaSpinResult {
+  readonly initialBoard?: Board;
+  readonly finalBoard: Board;
+  readonly tumbleRounds: readonly TumbleRound[];
+  readonly baseGameWin: number;
+  readonly scatterCount: number;
+  readonly scatterPayout: number;
+  readonly freeGamesAwarded: number;
+  readonly feature: FreeGameFeatureResult | null;
+  readonly components: WinComponents;
+  readonly totalWin: number;
+}
+export interface BathalaSimulationConfig {
+  readonly spins: number;
+  readonly seed: number;
+  readonly trace?: boolean;
+}
+export interface BathalaTailMetric {
+  readonly threshold: number;
+  readonly count: number;
+  readonly frequency: number;
+}
+export interface BathalaSimulationReport {
+  readonly schemaVersion: '2.0.0';
+  readonly methodology: 'deterministic-streaming-monte-carlo';
+  readonly configurationId: string;
+  readonly seed: number;
+  readonly totalSpins: number;
+  readonly totalBet: number;
+  readonly totalCreditedWin: number;
+  readonly rtp: number;
+  readonly winningSpinFrequency: number;
+  readonly averageWinPerWinningSpin: number;
+  readonly baseGameTumbleTriggerFrequency: number;
+  readonly freeGameTumbleTriggerFrequency: number;
+  readonly averageBaseGameTumbleRoundsPerTrigger: number;
+  readonly averageFreeGameTumbleRoundsPerTrigger: number;
+  readonly tumbleRoundsPerPaidSpin: number;
+  readonly tumbleTriggerFrequency: number;
+  readonly averageTumbleRoundsPerTriggeringSpin: number;
+  readonly maximumObservedBaseGameTumbleDepth: number;
+  readonly maximumObservedFreeGameTumbleDepth: number;
+  readonly maximumObservedTumbleDepth: number;
+  readonly bathalaActivations: number;
+  readonly bathalaActivationFrequency: number;
+  readonly averageSymbolsRemoved: number;
+  readonly bathalaToNextWinConversionRate: number;
+  readonly multiplierAppearanceFrequency: number;
+  readonly averageMultiplierValue: number;
+  readonly averageSummedMultiplierOnMultipliedWins: number;
+  readonly maximumSummedMultiplier: number;
+  readonly freeGameTriggerCount: number;
+  readonly featureFrequency: number;
+  readonly averageFreeGamesPlayed: number;
+  readonly averageInitiallyAwardedFreeGames: number;
+  readonly maximumObservedFeatureLength: number;
+  readonly featureLengthPercentiles: {
+    readonly p50: number;
+    readonly p75: number;
+    readonly p90: number;
+    readonly p95: number;
+    readonly p99: number;
+  };
+  readonly retriggerCount: number;
+  readonly averageRetriggersPerFeature: number;
+  readonly averageEndingFreeGameMultiplier: number;
+  readonly freeGameWinContribution: number;
+  readonly baseGameWinContribution: number;
+  readonly maximumObservedWin: number;
+  readonly meanWinPerPaidSpin: number;
+  readonly variance: number;
+  readonly standardDeviation: number;
+  readonly coefficientOfVariation: number;
+  readonly standardError: number;
+  readonly confidenceInterval95: readonly [number, number];
+  readonly components: WinComponents;
+  readonly tails: readonly BathalaTailMetric[];
+}

@@ -1,119 +1,55 @@
-# LUCKY888
+# Lucky888 Bathala-style mathematics prototype
 
-LUCKY888 is a production-oriented workspace for an HTML5 slot-machine prototype and its supporting mathematics. Its original emblem depicts three intertwined Chinese dragons. It contains a responsive Phaser 3 shell, editable CSV/JSON math sheets, deterministic TypeScript mathematics, validation, simulation, tests, and documentation.
+Lucky888 is a deterministic, simulation-first 6×5 count-pay tumble game. It reproduces the known observable Bathala-style rules while keeping unknown production probabilities and pays explicit, editable placeholders.
 
-> **Non-monetary prototype:** LUCKY888 uses simulated credits with no cash value. It is not a real-money gambling product and has no wagering accounts, deposits, withdrawals, purchases, cryptocurrency, payments, or cash-out path.
+## Active model
 
-## Status
+- 6 columns × 5 rows; all 30 cells are generated independently from weighted profiles.
+- L1–L5 and H1–H4 pay when 8 or more identical symbols are visible anywhere. Adjacency is irrelevant and multiple types may pay together.
+- Every scoring type is removed. Bathala then removes a configurable low-symbol type without direct payout, survivors collapse downward, and empty cells refill.
+- Visible Base Game multiplier values add together and multiply that tumble's regular-symbol pay.
+- Four or more final-board Scatters award 15 Free Games. Direct Scatter pays are 4=3×, 5=5×, and 6=100×.
+- During Free Games, 3+ final-board Scatters add five spins. Newly visible multiplier instances are collected on a winning round only, once per identity, into a feature-level total that never resets on a retrigger.
+- Scatter effects resolve once from the final board after all tumbles. This is the documented prototype interpretation of the supplied timing rule.
 
-The game runs a complete Scatter-anywhere free-spin flow with bounded retriggers. The active balanced engineering profile is deliberately reviewed against provisional bands, but it is **not mathematically finalized or certified**; independent verification and target approval remain outstanding.
+The retired five-reel evaluator is kept only in unreferenced legacy source files for historical comparison. Active exports, builds, tests, generated configuration, CLI simulation, and the browser prototype do not load reel strips, paylines, or WILD logic.
 
-## Architecture
+## Resolution sequence
 
-`math/source` is the human-edited source of truth. Its compiler manifest contains exactly `symbols.csv`, `paytable.csv`, `paylines.csv`, `reel-strips.csv`, `free-spin-reel-strips.csv`, `game-config.json`, `rules-config.json`, and `bonus-config.json`. Root scripts validate and compile only those files into ignored runtime artifacts. The legacy `math-engine.xlsx` workbook is reference material and is never read, hashed, or compiled. `@lucky/math-engine` owns RNG, reel selection, evaluation, caps, and simulation. The Phaser client consumes resolved `SpinResult` objects and never calculates awards in animation code.
+1. Generate a 30-cell board from the active Base or Free Game weight profile.
+2. Count regular symbols globally and resolve every 8+ count pay.
+3. Resolve visible multipliers. In Free Games, collect only not-yet-collected multiplier identities.
+4. Credit the round, remove winning cells, apply Bathala, collapse, and refill.
+5. Repeat until there is no regular-symbol win.
+6. Resolve final-board Scatter direct pay and the feature trigger/retrigger.
+7. In Free Games, consume one spin per initial board, preserve the cumulative multiplier, then add any retriggered spins.
 
-```text
-math/source -> validation/compiler -> math/generated -> game runtime
-                              \----> simulator -> math/reports
-shared-types <---- math-engine <---- game orchestration -> Phaser presentation
-```
+## Configuration authority
 
-## Directory map
+The seven files in `math/source` are the only active math authority:
 
-```text
-.github/                 CI, issue forms, and pull-request template
-apps/game/               Vite + Phaser browser application
-packages/math-engine/    Pure evaluation, RNG, validation, and simulation
-packages/shared-types/   Cross-workspace data contracts
-math/source/             Editable CSV/JSON source sheets
-math/schemas/            JSON Schemas for contracts
-math/generated/          Compiled runtime data (ignored except .gitkeep)
-math/reports/            Named tracked evidence plus ignored bulk reports
-math/templates/          PAR-sheet template
-scripts/                 Compiler, validator, and simulator entry points
-docs/                    Architecture, math, contracts, workflow, and policy
-tests/fixtures/          Repository-wide fixture space
-```
+- `game-config.json`: layout, model, safety limit, symbol taxonomy, collection trigger.
+- `base-symbol-weights.csv`: Base Game relative cell weights.
+- `freegame-symbol-weights.csv`: independently tunable Free Game weights.
+- `cluster-paytable.csv`: configurable range-based count pays covering 8–30.
+- `multiplier-values.csv`: relative weights for ×2 through ×500.
+- `bathala-config.json`: target selection and removal modes.
+- `scatter-config.json`: final-board timing, direct pays, initial award, and retrigger.
 
-## Prerequisites and Windows setup
-
-- Node.js 22 LTS or a newer supported LTS (`.nvmrc` specifies 22)
-- npm, included with Node
-- Git
-
-On Windows with nvm-windows, run `nvm install 22`, `nvm use 22`, then confirm `node --version`. Clone or open `C:\Users\ludoa\develop\lucky`; do not create another nested folder. If PowerShell blocks `npm.ps1`, use `npm.cmd` in place of `npm`.
-
-## Install and develop
-
-```bash
-npm install
-npm run dev
-```
-
-`dev` compiles current math sheets, then starts Vite. Open the printed local URL. Use the Spin button or Space. Starting credits are simulated. The prototype control panel selects animation speed, a 5/10/20/50/100-credit bet, and a sequential 1/5/10/15/20-spin batch. Controls lock for the complete batch; each paid spin and any attached feature finishes before the next begins.
-
-The top-right language selector switches the complete presentation between English (`en-US`), Brazilian Portuguese (`pt-BR`), and Simplified Chinese (`zh-CN`) without resetting credits, controls, the active sequence, or spin history. The choice is saved under `lucky888.locale`; an unsupported saved or browser locale safely falls back to English. `LUCKY888`, reel symbols and their IDs, and the visible `SPIN` label intentionally remain invariant. Diagnostic CSV filenames, headers, and machine-facing fields also remain stable English for downstream tooling. See [localization architecture](docs/localization.md) for the translation contract and steps to add a locale.
-
-The independent simulation management dashboard runs at `http://127.0.0.1:5174/` with `npm run dashboard:dev`. It reads version 1.2.0 deterministic Monte Carlo JSON reports, validates and reconciles them, presents management KPIs and provisional target assessments, and compares compatible runs. Its presentation can be switched between English (`en`), Brazilian Portuguese (`pt-BR`), and Simplified Chinese (`zh-CN`) without rerunning the simulation; the choice persists per user and active report. PDF/print and PNG exports capture an immutable locale snapshot, include the locale in the filename and metadata, and retain the report's language-neutral values. The dashboard does not load Phaser or resolve spins. Built-in fixtures live in `apps/math-dashboard/public/reports`; additional reports can be reviewed locally through JSON upload without modifying the source file.
-
-The default management simulation is one deterministic cumulative run with checkpoints at 100, 1,000, 10,000, 100,000, 250,000, 500,000, and 1,000,000 paid bets. The dashboard and static exports show every checkpoint against the unchanged theoretical RTP reference. Game symbols retain their original glyphs and math IDs while using centrally configured deep-blue, royal-purple, emerald, crimson, turquoise, burnt-orange, and magenta presentation families for faster visual recognition.
-
-For repeatable local presentation checks, append an integer `?seed=` query (for example, `?seed=13`). This is a development-only deterministic RNG control, not production randomness.
+Weights and count pays are calibration placeholders, not claims about Spin Master Bathala's production math. Bathala's current target interpretation—random eligible low symbol type, remove all instances—is also a configurable estimate.
 
 ## Commands
 
-| Command                                               | Purpose                                                  |
-| ----------------------------------------------------- | -------------------------------------------------------- |
-| `npm run dev`                                         | Compile math data and start the game                     |
-| `npm run dashboard:dev`                               | Start the independent report dashboard on port 5174      |
-| `npm run dashboard:build` / `dashboard:preview`       | Build / preview the static report dashboard              |
-| `npm run build`                                       | Compile math data and create `apps/game/dist`            |
-| `npm test` / `npm run test:watch`                     | Run tests once / watch                                   |
-| `npm run lint` / `npm run lint:fix`                   | Check / fix lint issues                                  |
-| `npm run format` / `npm run format:check`             | Write / check formatting                                 |
-| `npm run typecheck`                                   | Strict TypeScript project build check                    |
-| `npm run math:validate`                               | Validate source math data with located errors            |
-| `npm run math:build`                                  | Compile source sheets without changing them              |
-| `npm run math:enumerate`                              | Exact stop/finite-feature enumeration and PAR report     |
-| `npm run math:balance`                                | Aggregate five deterministic million-spin balance runs   |
-| `npm run math:simulate -- --spins 100000 --seed 2026` | Run a repeatable simulation                              |
-| `npm run math:report -- --spins 1000000 --seed 2026`  | Generate reconciled JSON and Markdown simulation reports |
-| `npm run validate`                                    | Format, lint, types, math, tests, and production build   |
-| `npm run clean`                                       | Remove workspace build output                            |
+```text
+npm run math:build
+npm run math:validate
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm run math:simulate -- --spins 10000 --seed 2026
+```
 
-The production output is static and uses a GitHub Pages-compatible `/lucky/` base during GitHub Actions builds. No deployment or credentials are configured.
+The simulator aggregates results while each spin is discarded, so large runs do not retain board histories. `resolveSpin(config, rng, true)` enables rich trace boards for debugging.
 
-## Math-sheet workflow
-
-1. Edit only files in `math/source/`, retaining headers and stable IDs.
-2. Run `npm run math:validate`; errors name the file, record/row, field, value, and rule.
-3. Run `npm run math:build` to write fingerprinted runtime data. This never rewrites sources.
-4. Run `npm run math:inspect` to print the canonical production-profile summary.
-5. Run `npm run math:enumerate` for exact finite-state feature expectations and the configuration PAR.
-6. Test or simulate: `npm run math:simulate -- --spins=10000 --seed=42`.
-7. Review ignored bulk output in `math/reports/`; the named configuration PAR is intentionally tracked.
-
-CSV files can be edited in Excel, LibreOffice, or Google Sheets. Import and export as UTF-8 comma-separated values; keep the first row, column order, exact IDs, integer credit fields, and leading text unchanged. Disable automatic date conversion where possible. JSON percentages/rates are decimal ratios (`0.96` means 96%), never ambiguous whole percentages.
-
-## Terms
-
-- **Theoretical RTP:** expected payout divided by wager from exact probability weighting or enumeration.
-- **Hit frequency:** probability that one paid spin, including its resulting feature, returns any positive award.
-- **Bonus frequency:** probability that a configured feature trigger occurs.
-- **Volatility:** dispersion of spin returns, described here with variance and standard deviation of bet multiples.
-- **Maximum win:** the cap applied once to all base and feature payout arising from one paid spin.
-- **Pay distribution:** probabilities/counts grouped by payout multiple buckets.
-- **Confidence interval:** simulation-based range around an estimate; the included 95% RTP interval uses a normal approximation and is not an exact guarantee.
-- **Deterministic seed:** integer that reproduces the development PRNG sequence. This PRNG supports tests and offline simulations; it is not regulatory-grade production randomness.
-
-Monte Carlo values are estimates and depend on seed and sample size. They do not establish final game performance. See [the math model](docs/math-model.md) and [data contracts](docs/data-contracts.md).
-
-## Contribution and Git workflow
-
-Create a short-lived branch from `main`, make focused commits, update source/docs/tests together, and run `npm run validate` before opening a pull request. Do not commit secrets, dependency folders, generated reports, or bulk raw results. Reviews should verify engine/presentation separation and manually check material math changes. Use conventional commit-style messages where practical; merge through reviewed pull requests without rewriting shared history.
-
-## Responsible design and deployment
-
-The allowed scope is simulated credits only. Autoplay, rapid spin, purchases, loss-chasing prompts, misleading claims, and real-money infrastructure are excluded. See [responsible design](docs/responsible-design.md). A future deployment may publish `apps/game/dist` to a static host such as GitHub Pages after an explicit deployment workflow is reviewed.
-
-Licensed under the [MIT License](LICENSE).
+The previous dashboard is intentionally deferred. Simulation JSON uses a clean `{ config, simulation, metrics }` envelope for a future dashboard migration.

@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "trigger": "after_scoring_elimination",
+  "eligibleSymbols": ["L1", "L2", "L3", "L4", "L5"],
+  "selectionMode": "random_symbol_type",
+  "selectionWeights": { "L1": 1, "L2": 1, "L3": 1, "L4": 1, "L5": 1 },
+  "removeMode": "all_instances",
+  "randomCount": { "minimum": 1, "maximum": 4 },
+  "allowNoEligibleTarget": true,
+  "awardsDirectPayout": false
+}

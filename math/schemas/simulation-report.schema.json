@@ -1,139 +1,101 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lucky.local/schemas/simulation-report.schema.json",
-  "title": "LUCKY888 feature-inclusive simulation report",
+  "$id": "https://lucky888.local/schemas/bathala-simulation-report-2.0.0.json",
+  "title": "Lucky888 Bathala Simulation Report 2.x",
   "type": "object",
-  "required": [
-    "methodology",
-    "paidSpins",
-    "totalWageredCredits",
-    "uncappedBaseLinePayoutCredits",
-    "initialBoardBaseLinePayoutCredits",
-    "uncappedBaseScatterPayoutCredits",
-    "uncappedFeaturePayoutCredits",
-    "freeSpinFeatureNonCascadePayoutCredits",
-    "uncappedTotalPayoutCredits",
-    "creditedTotalPayoutCredits",
-    "capReductionCredits",
-    "uncappedBaseLineRtp",
-    "initialBoardBaseLineRtp",
-    "uncappedBaseScatterRtp",
-    "uncappedFeatureRtp",
-    "freeSpinFeatureNonCascadeRtp",
-    "uncappedTotalRtp",
-    "creditedTotalRtp",
-    "featureLengthPercentiles",
-    "standardDeviation",
-    "standardError",
-    "confidenceInterval95",
-    "capApplications",
-    "tailMetrics",
-    "outcomePercentiles",
-    "paidSpinsPerFeatureTrigger"
-  ],
+  "required": ["metadata", "simulation", "metrics"],
   "properties": {
-    "methodology": { "const": "deterministic-monte-carlo" },
-    "paidSpins": { "type": "integer", "minimum": 1 },
-    "theoreticalRtp": { "type": "number", "minimum": 0 },
-    "maxSimulatedBets": { "type": "integer", "minimum": 1 },
-    "cumulativeSimulation": { "const": true },
-    "simulationCheckpoints": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "bets",
-          "totalWageredCredits",
-          "totalReturnedCredits",
-          "simulatedRtp",
-          "theoreticalRtp",
-          "rtpDeviation",
-          "totalWins",
-          "hitFrequency",
-          "bonusTriggers",
-          "bonusFrequency",
-          "maximumWinCredits",
-          "maximumWinMultiplier",
-          "standardDeviation",
-          "confidenceInterval95"
-        ],
-        "properties": {
-          "bets": { "type": "integer", "minimum": 1 },
-          "totalWageredCredits": { "type": "integer", "minimum": 0 },
-          "totalReturnedCredits": { "type": "integer", "minimum": 0 },
-          "simulatedRtp": { "type": "number", "minimum": 0 },
-          "theoreticalRtp": { "type": "number", "minimum": 0 },
-          "rtpDeviation": { "type": "number" },
-          "totalWins": { "type": "integer", "minimum": 0 },
-          "hitFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
-          "bonusTriggers": { "type": "integer", "minimum": 0 },
-          "bonusFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
-          "maximumWinCredits": { "type": "integer", "minimum": 0 },
-          "maximumWinMultiplier": { "type": "number", "minimum": 0 },
-          "standardDeviation": { "type": "number", "minimum": 0 },
-          "confidenceInterval95": {
-            "type": "array",
-            "prefixItems": [{ "type": "number" }, { "type": "number" }],
-            "minItems": 2,
-            "maxItems": 2
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "totalWageredCredits": { "type": "integer", "minimum": 0 },
-    "uncappedBasePayoutCredits": { "type": "integer", "minimum": 0 },
-    "uncappedBaseLinePayoutCredits": { "type": "number", "minimum": 0 },
-    "initialBoardBaseLinePayoutCredits": { "type": "number", "minimum": 0 },
-    "freeSpinFeatureNonCascadePayoutCredits": { "type": "number", "minimum": 0 },
-    "uncappedTotalPayoutCredits": { "type": "integer", "minimum": 0 },
-    "creditedTotalPayoutCredits": { "type": "integer", "minimum": 0 },
-    "capReductionCredits": { "type": "integer", "minimum": 0 },
-    "uncappedTotalRtp": { "type": "number", "minimum": 0 },
-    "uncappedBaseLineRtp": { "type": "number", "minimum": 0 },
-    "initialBoardBaseLineRtp": { "type": "number", "minimum": 0 },
-    "freeSpinFeatureNonCascadeRtp": { "type": "number", "minimum": 0 },
-    "creditedTotalRtp": { "type": "number", "minimum": 0 },
-    "featureTriggerFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
-    "paidSpinsPerFeatureTrigger": { "type": ["number", "null"], "exclusiveMinimum": 0 },
-    "zeroReturnProbability": { "type": "number", "minimum": 0, "maximum": 1 },
-    "subBetReturnProbability": { "type": "number", "minimum": 0, "maximum": 1 },
-    "tailMetrics": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["thresholdMultiple", "count", "probability", "rtpContribution"]
-      }
-    },
-    "outcomePercentiles": {
+    "metadata": {
       "type": "object",
-      "required": ["p90", "p95", "p99", "p995", "p999", "p9999"]
+      "required": [
+        "schemaVersion",
+        "gameId",
+        "gameName",
+        "gameVersion",
+        "configurationId",
+        "generatedAt"
+      ],
+      "properties": {
+        "schemaVersion": { "type": "string", "pattern": "^2\\.[0-9]+\\.[0-9]+$" },
+        "gameId": { "const": "lucky888" },
+        "gameName": { "type": "string", "minLength": 1 },
+        "gameVersion": { "type": "string", "minLength": 1 },
+        "configurationId": { "type": "string", "minLength": 1 },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "calibrationProfile": { "type": "string" }
+      },
+      "additionalProperties": false
     },
-    "cascadeEnabled": { "type": "boolean" },
-    "spinsWithCascade": { "type": "integer", "minimum": 0 },
-    "eligibleCascadeSpins": { "type": "integer", "minimum": 1 },
-    "cascadeSpinRate": { "type": "number", "minimum": 0, "maximum": 1 },
-    "totalCascadeSteps": { "type": "integer", "minimum": 0 },
-    "averageCascadeStepsPerPaidSpin": { "type": "number", "minimum": 0 },
-    "averageCascadeStepsWhenTriggered": { "type": "number", "minimum": 0 },
-    "maxCascadeDepthObserved": { "type": "integer", "minimum": 0 },
-    "cascadePayout": { "type": "integer", "minimum": 0 },
-    "cascadePayoutCredits": { "type": "integer", "minimum": 0 },
-    "cascadeRtpContribution": { "type": "number", "minimum": 0 },
-    "baseGameSpinsWithCascade": { "type": "integer", "minimum": 0 },
-    "baseGameCascadeSpinRate": { "type": "number", "minimum": 0, "maximum": 1 },
-    "baseGameCascadeSteps": { "type": "integer", "minimum": 0 },
-    "baseGameCascadePayoutCredits": { "type": "integer", "minimum": 0 },
-    "freeSpinSpinsWithCascade": { "type": "integer", "minimum": 0 },
-    "freeSpinCascadeSpinRate": { "type": "number", "minimum": 0, "maximum": 1 },
-    "freeSpinCascadeSteps": { "type": "integer", "minimum": 0 },
-    "freeSpinCascadePayoutCredits": { "type": "integer", "minimum": 0 },
-    "confidenceInterval95": {
-      "type": "array",
-      "prefixItems": [{ "type": "number" }, { "type": "number" }],
-      "minItems": 2,
-      "maxItems": 2
+    "simulation": {
+      "type": "object",
+      "required": ["methodology", "seed", "spins"],
+      "properties": {
+        "methodology": { "const": "deterministic-streaming-monte-carlo" },
+        "seed": { "type": "integer", "minimum": 0 },
+        "spins": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "totalSpins",
+        "totalBet",
+        "totalCreditedWin",
+        "rtp",
+        "winningSpinFrequency",
+        "components",
+        "tails",
+        "variance",
+        "standardDeviation",
+        "standardError",
+        "confidenceInterval95"
+      ],
+      "properties": {
+        "totalSpins": { "type": "integer", "minimum": 1 },
+        "totalBet": { "type": "number", "minimum": 0 },
+        "totalCreditedWin": { "type": "number", "minimum": 0 },
+        "rtp": { "type": "number", "minimum": 0, "maximum": 1 },
+        "winningSpinFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "variance": { "type": "number", "minimum": 0 },
+        "standardDeviation": { "type": "number", "minimum": 0 },
+        "standardError": { "type": "number", "minimum": 0 },
+        "confidenceInterval95": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "number", "minimum": 0 },
+            { "type": "number", "minimum": 0 }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "components": {
+          "type": "object",
+          "required": [
+            "baseGameRegularPayout",
+            "baseGameScatterPayout",
+            "baseGameMultiplierUplift",
+            "freeGameRegularPayout",
+            "freeGameScatterPayout",
+            "freeGameMultiplierUplift"
+          ],
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "tails": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["threshold", "count", "frequency"],
+            "properties": {
+              "threshold": { "type": "number", "exclusiveMinimum": 0 },
+              "count": { "type": "integer", "minimum": 0 },
+              "frequency": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

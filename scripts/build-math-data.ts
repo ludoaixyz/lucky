@@ -1,14 +1,12 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { validateConfig } from '@lucky/math-engine';
-import type { RuntimeGameConfig } from '@lucky/shared-types';
+import type { ActiveGameConfig } from '@lucky/shared-types';
 import { loadSourceConfig } from './lib/source-loader.js';
-import { assertProductionProfile, assertRuntimeMatchesSource } from './lib/production-profile.js';
 
 const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig();
-const issues = validateConfig(config, 'math/source');
+const issues = validateConfig(config);
 if (issues.length > 0) throw new Error(`Math build stopped: ${issues.length} validation issue(s)`);
-assertProductionProfile(config);
 const artifact = {
   metadata: {
     schemaVersion: config.schemaVersion,
@@ -37,8 +35,9 @@ for (const [label, serialized] of [
   ['math generated runtime', generatedRuntime],
   ['game public runtime', gameRuntime],
 ] as const) {
-  const compiled = JSON.parse(serialized) as { config: RuntimeGameConfig };
-  assertRuntimeMatchesSource(compiled.config, config, label);
+  const compiled = JSON.parse(serialized) as { config: ActiveGameConfig };
+  if (JSON.stringify(compiled.config) !== JSON.stringify(config))
+    throw new Error(`${label} differs from canonical source data`);
 }
 console.log(`Built runtime configuration ${config.configurationId} (${sourceHash.slice(0, 12)}).`);
 console.log(`Generated runtime: ${generatedRuntimePath}`);

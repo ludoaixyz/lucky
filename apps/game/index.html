@@ -3,198 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="LUCKY888 simulated-credit slot prototype" />
+    <meta name="description" content="Lucky888 Bathala-style mathematics prototype" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>LUCKY888</title>
+    <title>LUCKY888 — Bathala Math Prototype</title>
   </head>
   <body>
-    <nav
-      class="language-selector no-export"
-      data-i18n-aria-label="languageSelector"
-      aria-label="Language"
-    >
-      <button
-        type="button"
-        data-locale="en-US"
-        aria-label="English"
-        title="English"
-        aria-pressed="true"
-      >
-        <img src="%BASE_URL%assets/flags/us.svg" alt="" />
-      </button>
-      <button
-        type="button"
-        data-locale="pt-BR"
-        aria-label="Português do Brasil"
-        title="Português do Brasil"
-        aria-pressed="false"
-      >
-        <img src="%BASE_URL%assets/flags/br.svg" alt="" />
-      </button>
-      <button
-        type="button"
-        data-locale="zh-CN"
-        aria-label="简体中文"
-        title="简体中文"
-        aria-pressed="false"
-      >
-        <img src="%BASE_URL%assets/flags/cn.svg" alt="" />
-      </button>
-      <button
-        type="button"
-        data-locale="fil-PH"
-        aria-label="Filipino"
-        title="Filipino"
-        aria-pressed="false"
-      >
-        <img src="%BASE_URL%assets/flags/ph.svg" alt="" />
-      </button>
-    </nav>
-    <p id="language-announcement" class="visually-hidden" aria-live="polite"></p>
-    <main class="page-shell">
-      <section class="game-column" aria-labelledby="game-title">
-        <header class="brand-lockup">
-          <img
-            class="brand-mascot"
-            src="/assets/images/lucky888-three-dragons.svg"
-            data-i18n-alt="mascotAlt"
-            alt="Three intertwined golden Chinese dragons, the LUCKY888 mascot"
-          />
-          <h1 id="game-title">LUCKY888</h1>
-        </header>
-        <section
-          class="game-panel"
-          data-i18n-aria-label="pageGameRegion"
-          aria-label="Five-reel simulated-credit prototype"
-        >
-          <div
-            id="game"
-            role="img"
-            data-i18n-aria-label="reelsAria"
-            aria-label="Five reels with three visible symbol rows"
-          ></div>
-          <p id="cascade-announcement" class="visually-hidden" aria-live="polite"></p>
-          <div class="status" aria-live="polite">
-            <span><span data-i18n="credits">Credits</span> <strong id="credits">1000</strong></span>
-            <span><span data-i18n="betSize">Bet Size</span> <strong id="bet">5</strong></span>
-            <span><span data-i18n="latestWin">Latest Win</span> <strong id="win">0</strong></span>
-          </div>
-          <section
-            class="control-panel"
-            data-i18n-aria-label="controlPanel"
-            aria-label="Prototype spin controls"
-          >
-            <label class="control-field" for="speed-control">
-              <span data-i18n="animationSpeed">Animation Speed</span>
-              <input
-                id="speed-control"
-                type="range"
-                min="0"
-                max="3"
-                step="1"
-                value="1"
-                aria-valuetext="1.0×"
-              />
-              <span id="speed-pips" class="slider-pips" aria-hidden="true"></span>
-              <output id="speed-value" for="speed-control">1.0×</output>
-            </label>
-            <label class="control-field" for="bet-control">
-              <span data-i18n="betAmount">Bet Amount</span>
-              <input
-                id="bet-control"
-                type="range"
-                min="0"
-                max="4"
-                step="1"
-                value="0"
-                aria-valuetext="5 credits"
-              />
-              <span id="bet-pips" class="slider-pips" aria-hidden="true"></span>
-              <output id="bet-value" for="bet-control">5</output>
-            </label>
-            <label class="control-field" for="spins-control">
-              <span data-i18n="numberOfSpins">Number of Spins</span>
-              <input
-                id="spins-control"
-                type="range"
-                min="0"
-                max="9"
-                step="1"
-                value="0"
-                aria-valuetext="1 spin"
-              />
-              <span id="spins-pips" class="slider-pips" aria-hidden="true"></span>
-              <output id="spins-value" for="spins-control">1</output>
-            </label>
-          </section>
-          <button
-            id="spin"
-            class="spin-button"
-            type="button"
-            aria-label="Spin five simulated reels"
-          >
-            SPIN
-          </button>
-          <p id="message" class="message" aria-live="polite">Loading configuration…</p>
-        </section>
-      </section>
-
-      <aside class="diagnostics-panel" aria-labelledby="diagnostics-title">
-        <div class="diagnostics-heading">
-          <div>
-            <p class="diagnostics-kicker" data-i18n="session">SESSION</p>
-            <h2 id="diagnostics-title" data-i18n="diagnosticsTitle">Spin Diagnostics</h2>
-          </div>
-          <a id="download-csv" class="download-button" aria-disabled="true" data-i18n="downloadCsv"
-            >Download CSV</a
-          >
+    <main>
+      <header>
+        <img src="/assets/images/lucky888-three-dragons.svg" alt="Lucky888 three dragons" />
+        <div>
+          <p>MATHEMATICS LAB</p>
+          <h1>LUCKY888</h1>
         </div>
-
-        <dl class="session-summary">
+      </header>
+      <section class="game-panel" aria-labelledby="board-title">
+        <div class="heading">
           <div>
-            <dt data-i18n="totalSpins">Total Spins</dt>
-            <dd id="diagnostics-spins">0</dd>
+            <p class="eyebrow">6 × 5 · COUNT ANYWHERE</p>
+            <h2 id="board-title">Bathala-style prototype</h2>
+          </div>
+          <button id="spin" type="button">SPIN</button>
+        </div>
+        <div
+          id="game"
+          class="board"
+          role="img"
+          aria-label="Loading six-column by five-row board"
+        ></div>
+        <dl class="stats">
+          <div>
+            <dt>Latest win</dt>
+            <dd id="win">0.00×</dd>
           </div>
           <div>
-            <dt data-i18n="totalWagered">Total Wagered</dt>
-            <dd id="diagnostics-wagered">0</dd>
+            <dt>Free Games</dt>
+            <dd id="feature">—</dd>
           </div>
           <div>
-            <dt data-i18n="totalWon">Total Won</dt>
-            <dd id="diagnostics-won">0</dd>
-          </div>
-          <div>
-            <dt data-i18n="sessionRtp">Session RTP</dt>
-            <dd id="diagnostics-rtp">0.00%</dd>
-          </div>
-          <div>
-            <dt data-i18n="uncappedReturn">Uncapped Return</dt>
-            <dd id="diagnostics-uncapped">0.00%</dd>
-          </div>
-          <div>
-            <dt data-i18n="capReduction">Cap Reduction</dt>
-            <dd id="diagnostics-cap-reduction">0</dd>
-          </div>
-          <div>
-            <dt data-i18n="featureTriggerRate">Feature Trigger Rate</dt>
-            <dd id="diagnostics-trigger-rate">0.00%</dd>
-          </div>
-          <div>
-            <dt data-i18n="averageFeatureLength">Average Feature Length</dt>
-            <dd id="diagnostics-feature-length">0.00</dd>
+            <dt>Ending multiplier</dt>
+            <dd id="multiplier">—</dd>
           </div>
         </dl>
-
-        <section class="history-section" aria-labelledby="history-title">
-          <div class="history-heading">
-            <h3 id="history-title" data-i18n="recentSpins">Recent Spins</h3>
-            <span data-i18n="latestTen">Latest 10</span>
-          </div>
-          <p id="history-empty" class="history-empty" data-i18n="completedSpinsEmpty">
-            Completed spins will appear here.
-          </p>
-          <ol id="spin-history" class="spin-history" aria-live="polite"></ol>
-        </section>
+        <p id="message" class="message" aria-live="polite">Loading configuration…</p>
+      </section>
+      <aside>
+        <strong>Known mechanics</strong
+        ><span
+          >8+ matching regular symbols anywhere · Tumble Win · Bathala low-symbol elimination ·
+          final-board Scatters · additive multiplier symbols · persistent Free Game multiplier</span
+        >
       </aside>
     </main>
     <script type="module" src="/src/main.ts"></script>

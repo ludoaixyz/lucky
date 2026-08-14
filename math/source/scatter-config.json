@@ -1,0 +1,6 @@
+{
+  "evaluationTiming": "final_board",
+  "payouts": { "4": 3, "5": 5, "6": 100 },
+  "baseGameTrigger": { "minimumScatters": 4, "freeGamesAwarded": 15 },
+  "freeGameRetrigger": { "minimumScatters": 3, "additionalFreeGames": 5 }
+}

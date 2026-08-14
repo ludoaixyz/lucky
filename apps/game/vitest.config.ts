@@ -1,5 +1,11 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
 
 export default defineConfig({
-  test: { name: 'game', environment: 'jsdom', include: ['tests/**/*.test.ts'] },
+  root: resolve(import.meta.dirname, '../..'),
+  test: {
+    name: 'game',
+    environment: 'jsdom',
+    include: ['apps/game/tests/bathala-prototype.test.ts'],
+  },
 });

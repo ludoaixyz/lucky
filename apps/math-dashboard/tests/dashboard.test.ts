@@ -1,639 +1,142 @@
-// @vitest-environment jsdom
+import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
-import { DEFAULT_SIMULATION_CHECKPOINTS } from '@lucky/shared-types';
-import { renderCheckpointConvergenceChart } from '../src/charts.js';
-import { createExportOptions, createExportSnapshot, exportFilename } from '../src/export.js';
-import {
-  DASHBOARD_LOCALES,
-  persistDashboardLocale,
-  readReportLocale,
-  readStoredLocale,
-  resolveDashboardLocale,
-  TRANSLATIONS,
-} from '../src/i18n/index.js';
-import { formatDate, formatDecimal, formatInteger, formatPercent } from '../src/i18n/format.js';
-import {
-  bindLanguageButtons,
-  DASHBOARD_LANGUAGE_OPTIONS,
-  languageButtons,
-} from '../src/i18n/language-selector.js';
-import { bindPrintLayout, setPrintLayout } from '../src/print.js';
-import {
-  comparisonRows,
-  evaluateTargets,
-  featureFrequencyOdds,
-  isNestedDeterministicSamples,
-  meetsAllTargets,
-  reconcileReport,
-  riskFlags,
-} from '../src/reports/analysis.js';
-import {
-  createCheckpointViewModel,
-  normalizeSimulationCheckpoints,
-} from '../src/reports/checkpoints.js';
-import { parseSimulationReport, validateSimulationReport } from '../src/reports/validation.js';
-import type { LoadedReport, SimulationReport } from '../src/types/simulation-report.js';
-
-const millionJson = readFileSync(
-  resolve(process.cwd(), 'apps/math-dashboard/public/reports/simulation-2026-1000000.json'),
-  'utf8',
-);
-const thousandJson = readFileSync(
-  resolve(process.cwd(), 'apps/math-dashboard/public/reports/simulation-2026-1000.json'),
-  'utf8',
-);
-
-function reportFrom(json: string): SimulationReport {
-  const result = parseSimulationReport(json);
-  if (!result.ok) throw new Error(result.errors.map((issue) => issue.key).join(' '));
-  return result.report;
-}
-
-function memoryStorage(): Storage {
-  const values = new Map<string, string>();
-  return {
-    get length() {
-      return values.size;
-    },
-    clear: () => values.clear(),
-    getItem: (key) => values.get(key) ?? null,
-    key: (index) => [...values.keys()][index] ?? null,
-    removeItem: (key) => values.delete(key),
-    setItem: (key, value) => values.set(key, value),
-  };
-}
-
-function dictionaryShape(value: unknown, prefix = ''): string[] {
-  if (typeof value === 'function' || typeof value === 'string') return [prefix];
-  if (!value || typeof value !== 'object') return [];
-  return Object.entries(value)
-    .flatMap(([key, child]) => dictionaryShape(child, prefix ? `${prefix}.${key}` : key))
-    .sort();
-}
-
-const million = reportFrom(millionJson);
-const thousand = reportFrom(thousandJson);
-
-describe('simulation report validation', () => {
-  it('accepts complete deterministic Monte Carlo schema 1.2.0 reports', () => {
-    const result = validateSimulationReport(JSON.parse(millionJson) as unknown);
-    expect(result.ok).toBe(true);
-    if (result.ok) expect(result.report.paidSpins).toBe(1_000_000);
-  });
-
-  it('rejects missing required metrics with useful field identifiers', () => {
-    const malformed = { ...(JSON.parse(millionJson) as Record<string, unknown>) };
-    delete malformed.creditedTotalRtp;
-    const result = validateSimulationReport(malformed);
-    expect(result.ok).toBe(false);
-    if (!result.ok)
-      expect(result.errors).toContainEqual({ key: 'finiteNumber', field: 'creditedTotalRtp' });
-  });
-  it('accepts additive cascade metrics while keeping legacy reports valid', () => {
-    const legacyValue = { ...(JSON.parse(millionJson) as Record<string, unknown>) };
-    for (const field of [
-      'uncappedBasePayoutCredits',
-      'cascadeEnabled',
-      'spinsWithCascade',
-      'eligibleCascadeSpins',
-      'cascadeSpinRate',
-      'totalCascadeSteps',
-      'averageCascadeStepsPerPaidSpin',
-      'averageCascadeStepsWhenTriggered',
-      'maxCascadeDepthObserved',
-      'cascadePayout',
-      'cascadePayoutCredits',
-      'cascadeRtpContribution',
-      'baseGameSpinsWithCascade',
-      'baseGameCascadeSpinRate',
-      'baseGameCascadeSteps',
-      'baseGameCascadePayoutCredits',
-      'freeSpinSpinsWithCascade',
-      'freeSpinCascadeSpinRate',
-      'freeSpinCascadeSteps',
-      'freeSpinCascadePayoutCredits',
-    ])
-      delete legacyValue[field];
-    const legacy = reportFrom(JSON.stringify(legacyValue));
-    expect(legacy.cascadeEnabled).toBeUndefined();
-    const result = validateSimulationReport({
-      ...legacy,
-      cascadeEnabled: true,
-      spinsWithCascade: 12,
-      eligibleCascadeSpins: 100,
-      cascadeSpinRate: 0.12,
-      totalCascadeSteps: 18,
-      averageCascadeStepsPerPaidSpin: 0.18,
-      averageCascadeStepsWhenTriggered: 1.5,
-      maxCascadeDepthObserved: 4,
-      cascadePayoutCredits: 25,
-      cascadeRtpContribution: 0.05,
-      baseGameSpinsWithCascade: 10,
-      baseGameCascadeSpinRate: 0.1,
-      baseGameCascadeSteps: 14,
-      baseGameCascadePayoutCredits: 20,
-      freeSpinSpinsWithCascade: 2,
-      freeSpinCascadeSpinRate: 0.2,
-      freeSpinCascadeSteps: 4,
-      freeSpinCascadePayoutCredits: 5,
-      uncappedBasePayoutCredits:
-        legacy.uncappedBaseLinePayoutCredits + legacy.uncappedBaseScatterPayoutCredits,
-    });
-    expect(result.ok).toBe(true);
-  });
-
-  it('handles malformed JSON without throwing or storing rendered English', () => {
-    const result = parseSimulationReport('{"schemaVersion":');
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.errors[0]?.key).toBe('malformedJson');
-  });
-});
-
-describe('language-neutral management calculations', () => {
-  it('loads all seven canonical cumulative checkpoints without changing final values', () => {
-    expect(million.simulationCheckpoints?.map((checkpoint) => checkpoint.bets)).toEqual(
-      DEFAULT_SIMULATION_CHECKPOINTS,
-    );
-    expect(million.simulationCheckpoints).toHaveLength(7);
-    expect(million.simulationCheckpoints?.at(-1)?.simulatedRtp).toBe(million.creditedTotalRtp);
-    expect(million.simulationCheckpoints?.at(-1)?.totalWageredCredits).toBe(
-      million.totalWageredCredits,
-    );
-  });
-
-  it('normalizes the report checkpoint series and builds the full chart and table models', () => {
-    const normalized = normalizeSimulationCheckpoints(
-      [...(million.simulationCheckpoints ?? [])].reverse(),
-    );
-    expect(normalized.map((checkpoint) => checkpoint.bets)).toEqual([
-      100, 1_000, 10_000, 100_000, 250_000, 500_000, 1_000_000,
-    ]);
-    const model = createCheckpointViewModel({ ...million, simulationCheckpoints: normalized });
-    expect(model.labels).toEqual(['100', '1K', '10K', '100K', '250K', '500K', '1M']);
-    expect(model.simulatedRtp).toHaveLength(7);
-    expect(model.theoreticalRtp).toHaveLength(7);
-    expect(model.tableRows).toHaveLength(7);
-    expect(model.isCanonical).toBe(true);
-  });
-
-  it('preserves and sorts checkpoints while parsing instead of reconstructing endpoint summaries', () => {
-    const parsed = parseSimulationReport(
-      JSON.stringify({
-        ...million,
-        simulationCheckpoints: [...(million.simulationCheckpoints ?? [])].reverse(),
-      }),
-    );
-    expect(parsed.ok).toBe(true);
-    if (parsed.ok)
-      expect(parsed.report.simulationCheckpoints?.map((checkpoint) => checkpoint.bets)).toEqual([
-        100, 1_000, 10_000, 100_000, 250_000, 500_000, 1_000_000,
-      ]);
-  });
-
-  it('keeps legacy reports loadable while marking their missing checkpoint series incompatible', () => {
-    const model = createCheckpointViewModel(thousand);
-    expect(model.checkpoints).toEqual([]);
-    expect(model.isCanonical).toBe(false);
-  });
-
-  it('renders every checkpoint marker and a theoretical reference line', () => {
-    const container = document.createElement('div');
-    const checkpoints = million.simulationCheckpoints ?? [];
-    renderCheckpointConvergenceChart(
-      container,
-      checkpoints.map((checkpoint) => ({
-        bets: checkpoint.bets,
-        simulatedRtp: checkpoint.simulatedRtp,
-        theoreticalRtp: checkpoint.theoreticalRtp,
-        axisLabel: String(checkpoint.bets),
-        rtpDisplay: String(checkpoint.simulatedRtp),
-        tooltip: String(checkpoint.bets),
-      })),
-      'Theoretical RTP',
-    );
-    expect(container.querySelectorAll('.checkpoint-point')).toHaveLength(7);
-    expect(container.querySelector('.theoretical-line')).not.toBeNull();
-    expect(container.textContent).toContain('250000');
-    expect(container.textContent).toContain('500000');
-  });
-  it('reconciles RTP, payouts, and bucket totals', () => {
-    expect(reconcileReport(million).every((check) => check.status === 'PASS')).toBe(true);
-  });
-
-  it('fails payout bucket reconciliation without correcting the report', () => {
-    const changed = {
-      ...million,
-      payoutDistribution: million.payoutDistribution.map((bucket, index) =>
-        index === 0 ? { ...bucket, count: bucket.count - 1 } : bucket,
+import { TRANSLATIONS } from '../src/i18n/index.js';
+import { componentRtp, frequencyOdds, reconcileReport } from '../src/reports/analysis.js';
+import { normalizeReport, parseSimulationReport } from '../src/reports/report-normalizer.js';
+const metrics = {
+  schemaVersion: '2.0.0',
+  methodology: 'deterministic-streaming-monte-carlo',
+  configurationId: 'test',
+  seed: 2026,
+  totalSpins: 100,
+  totalBet: 100,
+  totalCreditedWin: 50,
+  rtp: 0.5,
+  winningSpinFrequency: 0.25,
+  averageWinPerWinningSpin: 2,
+  baseGameTumbleTriggerFrequency: 0.2,
+  freeGameTumbleTriggerFrequency: 0.1,
+  averageBaseGameTumbleRoundsPerTrigger: 1.5,
+  averageFreeGameTumbleRoundsPerTrigger: 1.2,
+  tumbleRoundsPerPaidSpin: 0.4,
+  tumbleTriggerFrequency: 0.2,
+  averageTumbleRoundsPerTriggeringSpin: 1.5,
+  maximumObservedBaseGameTumbleDepth: 3,
+  maximumObservedFreeGameTumbleDepth: 2,
+  maximumObservedTumbleDepth: 3,
+  bathalaActivations: 10,
+  bathalaActivationFrequency: 0.5,
+  averageSymbolsRemoved: 3,
+  bathalaToNextWinConversionRate: 0.4,
+  multiplierAppearanceFrequency: 0.1,
+  averageMultiplierValue: 5,
+  averageSummedMultiplierOnMultipliedWins: 8,
+  maximumSummedMultiplier: 20,
+  freeGameTriggerCount: 1,
+  featureFrequency: 0.01,
+  averageFreeGamesPlayed: 15,
+  averageInitiallyAwardedFreeGames: 15,
+  maximumObservedFeatureLength: 15,
+  featureLengthPercentiles: { p50: 15, p75: 15, p90: 15, p95: 15, p99: 15 },
+  retriggerCount: 0,
+  averageRetriggersPerFeature: 0,
+  averageEndingFreeGameMultiplier: 4,
+  freeGameWinContribution: 0.1,
+  baseGameWinContribution: 0.4,
+  maximumObservedWin: 10,
+  meanWinPerPaidSpin: 0.5,
+  variance: 2,
+  standardDeviation: Math.sqrt(2),
+  coefficientOfVariation: 2.828,
+  standardError: 0.1414,
+  confidenceInterval95: [0.2228, 0.7772],
+  components: {
+    baseGameRegularPayout: 10,
+    baseGameScatterPayout: 2,
+    baseGameMultiplierUplift: 28,
+    freeGameRegularPayout: 3,
+    freeGameScatterPayout: 1,
+    freeGameMultiplierUplift: 6,
+  },
+  tails: [],
+};
+const canonical = {
+  metadata: {
+    schemaVersion: '2.0.0',
+    gameId: 'lucky888',
+    gameName: 'Lucky888',
+    gameVersion: '2.0.0',
+    configurationId: 'test',
+    generatedAt: '2026-01-01T00:00:00.000Z',
+  },
+  simulation: { methodology: 'deterministic-streaming-monte-carlo', seed: 2026, spins: 100 },
+  metrics,
+};
+describe('Bathala report parsing', () => {
+  it('loads the bundled 100,000-spin Bathala acceptance report', () => {
+    const json = readFileSync(
+      resolve(
+        process.cwd(),
+        'apps/math-dashboard/public/reports/bathala-simulation-2026-100000.json',
       ),
-    };
-    expect(reconcileReport(changed).find((check) => check.key === 'bucketCounts')?.status).toBe(
-      'FAIL',
+      'utf8',
     );
-    expect(changed.payoutDistribution[0]?.count).toBe(
-      (million.payoutDistribution[0]?.count ?? 0) - 1,
-    );
-  });
-
-  it('calculates feature odds and provisional targets independently of locale', () => {
-    expect(featureFrequencyOdds(million)).toBeCloseTo(1 / million.featureTriggerFrequency, 12);
-    expect(evaluateTargets(million).find((target) => target.key === 'creditedRtp')?.status).toBe(
-      'PASS',
-    );
-    expect(meetsAllTargets(million)).toBe(true);
-  });
-
-  it('does not mutate report mathematics while formatting every locale', () => {
-    const original = structuredClone(million);
-    const expectedMetrics = {
-      creditedRtp: million.creditedTotalRtp,
-      featureFrequency: million.featureTriggerFrequency,
-      cascadeRate: million.cascadeSpinRate,
-      standardDeviation: million.standardDeviation,
-      cascadePayout: million.cascadePayoutCredits,
-      targets: evaluateTargets(million),
-    };
-
-    for (const locale of DASHBOARD_LOCALES) {
-      formatPercent(million.creditedTotalRtp, locale);
-      formatPercent(million.featureTriggerFrequency, locale, 3);
-      formatPercent(million.cascadeSpinRate ?? 0, locale);
-      formatDecimal(million.standardDeviation, locale, 3);
-      formatInteger(million.cascadePayoutCredits ?? 0, locale);
-      expect({
-        creditedRtp: million.creditedTotalRtp,
-        featureFrequency: million.featureTriggerFrequency,
-        cascadeRate: million.cascadeSpinRate,
-        standardDeviation: million.standardDeviation,
-        cascadePayout: million.cascadePayoutCredits,
-        targets: evaluateTargets(million),
-      }).toEqual(expectedMetrics);
+    const result = parseSimulationReport(json);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.report.metrics.rtp).toBeCloseTo(0.6354815, 7);
+      expect(result.report.metrics.freeGameTriggerCount).toBe(20);
     }
-
-    expect(million).toEqual(original);
   });
-
-  it('returns semantic small-sample risk keys', () => {
-    expect(riskFlags(thousand).map((flag) => flag.key)).toContain('smokeSample');
-    expect(riskFlags({ ...million, paidSpins: 50_000 }).map((flag) => flag.key)).toContain(
-      'limitedSample',
-    );
+  it('accepts schema 2 canonical envelope', () => expect(normalizeReport(canonical).ok).toBe(true));
+  it('normalizes the current config/simulation/metrics envelope', () =>
+    expect(
+      normalizeReport({
+        config: { configurationId: 'test', source: 'placeholder calibration profile' },
+        simulation: { seed: 2026, spins: 100 },
+        metrics,
+      }).ok,
+    ).toBe(true));
+  it('rejects legacy schema and malformed JSON', () => {
+    expect(normalizeReport({ schemaVersion: '1.2.0' }).ok).toBe(false);
+    expect(parseSimulationReport('{').ok).toBe(false);
   });
-
-  it('calculates absolute and relative comparison differences', () => {
-    const credited = comparisonRows(thousand, million).find((row) => row.key === 'creditedRtp');
-    expect(credited?.absoluteDifference).toBeCloseTo(
-      million.creditedTotalRtp - thousand.creditedTotalRtp,
-      12,
-    );
-    expect(credited?.relativeDifference).toBeCloseTo(
-      (million.creditedTotalRtp - thousand.creditedTotalRtp) / thousand.creditedTotalRtp,
-      12,
-    );
-  });
-
-  it('identifies same-seed different-size reports as nested deterministic samples', () => {
-    const loaded: LoadedReport[] = [
-      { id: 'small', label: 'Small', source: 'built-in', report: thousand },
-      { id: 'large', label: 'Large', source: 'built-in', report: million },
-    ];
-    expect(isNestedDeterministicSamples(loaded)).toBe(true);
-  });
-});
-
-describe('dashboard localization', () => {
-  it('provides exactly four structurally complete dictionaries, including Filipino', () => {
-    expect(DASHBOARD_LOCALES).toEqual(['en', 'pt-BR', 'zh-CN', 'fil-PH']);
-    const shape = dictionaryShape(TRANSLATIONS.en);
-    for (const locale of DASHBOARD_LOCALES)
-      expect(dictionaryShape(TRANSLATIONS[locale])).toEqual(shape);
-    expect(dictionaryShape(TRANSLATIONS['fil-PH'])).toEqual(shape);
-  });
-
-  it('uses the required professional terminology baseline', () => {
-    expect(TRANSLATIONS['pt-BR'].dashboard.title).toBe('Painel de Desempenho Matemático');
-    expect(TRANSLATIONS['pt-BR'].metrics.featureRtp).toBe('RTP do Recurso');
-    expect(TRANSLATIONS.en.metrics.cascadeRate).toBe('Cascade Rate');
-    expect(TRANSLATIONS['pt-BR'].metrics.cascadeRate).toBe('Taxa de Cascata');
-    expect(TRANSLATIONS['zh-CN'].metrics.cascadeRate).toBe('连消触发率');
-    expect(TRANSLATIONS.en.metrics).toMatchObject({
-      cascades: 'Cascades',
-      averageCascadesPerPaidSpin: 'Avg. Cascades per Paid Spin',
-      baseGameCascadeRate: 'Base Game Cascade Rate',
-      freeSpinCascadeRate: 'Free Spin Cascade Rate',
-      cascadePayout: 'Cascade Payout',
-    });
-    expect(TRANSLATIONS['pt-BR'].metrics).toMatchObject({
-      cascades: 'Cascatas',
-      averageCascadesPerPaidSpin: 'Média de Cascatas por Giro Pago',
-    });
-    expect(TRANSLATIONS['zh-CN'].metrics).toMatchObject({
-      cascades: '连消',
-      averageCascadesPerPaidSpin: '每次付费旋转平均连消次数',
-    });
-    expect(TRANSLATIONS['zh-CN'].dashboard.title).toBe('数学表现仪表板');
-    expect(TRANSLATIONS['zh-CN'].metrics).toMatchObject({
-      creditedRtp: '封顶后 RTP',
-      uncappedRtp: '未封顶 RTP',
-      featureRtp: '免费旋转 RTP',
-      awardFrequency: '正派彩频率',
-      netReturnFrequency: '回本频率',
-      featureFrequency: '免费旋转触发频率',
-      averageFeatureLength: '平均免费旋转局数',
-      p95FeatureLength: '免费旋转局数 P95',
-      maximumObservedWin: '模拟观测最高派彩',
-      capHitFrequency: '封顶触发频率',
-    });
-    expect(TRANSLATIONS.en.status.PASS).toBe('Pass');
-    expect(TRANSLATIONS['fil-PH']).toMatchObject({
-      languageName: 'Filipino',
-      dashboard: {
-        title: 'Dashboard ng Pagganap ng Math',
-        keyPerformanceIndicators: 'Mga Pangunahing Sukatan ng Pagganap',
-        reconciliation: 'Reconciliation',
-      },
-      metrics: {
-        cascades: 'Mga Cascade',
-        cascadeRtpContribution: 'Ambag ng Cascade sa RTP',
-        maximumObservedWin: 'Pinakamataas na Naobserbahang Panalo',
-      },
-    });
-  });
-
-  it('renders four accessible flag buttons with the Philippines flag fourth', () => {
-    expect(DASHBOARD_LANGUAGE_OPTIONS).toEqual([
-      { locale: 'en', flag: 'gb.svg' },
-      { locale: 'pt-BR', flag: 'br.svg' },
-      { locale: 'zh-CN', flag: 'cn.svg' },
-      { locale: 'fil-PH', flag: 'ph.svg' },
-    ]);
-    const nav = document.createElement('nav');
-    nav.innerHTML = languageButtons('fil-PH', '/');
-    const buttons = [...nav.querySelectorAll<HTMLButtonElement>('button')];
-    expect(buttons).toHaveLength(4);
-    expect(buttons.map((button) => button.dataset.locale)).toEqual(DASHBOARD_LOCALES);
-    expect(buttons.at(-1)?.querySelector('img')?.getAttribute('src')).toBe('/flags/ph.svg');
-    expect(buttons.at(-1)?.getAttribute('aria-label')).toBe('Filipino');
-    expect(buttons.at(-1)?.getAttribute('title')).toBe('Filipino');
-    expect(buttons.at(-1)?.getAttribute('aria-pressed')).toBe('true');
-    expect(buttons.at(-1)?.getAttribute('type')).toBe('button');
-  });
-
-  it('selects all locales by click and Filipino by keyboard', () => {
-    const nav = document.createElement('nav');
-    nav.innerHTML = languageButtons('en', '/');
-    const selections: string[] = [];
-    bindLanguageButtons(nav, (locale) => selections.push(locale));
-
-    for (const locale of DASHBOARD_LOCALES)
-      nav.querySelector<HTMLButtonElement>(`[data-locale="${locale}"]`)?.click();
-    nav
-      .querySelector<HTMLButtonElement>('[data-locale="fil-PH"]')
-      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    nav
-      .querySelector<HTMLButtonElement>('[data-locale="fil-PH"]')
-      ?.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-
-    expect(selections).toEqual([...DASHBOARD_LOCALES, 'fil-PH', 'fil-PH']);
-  });
-
-  it('excludes deprecated literal terminology from visible Chinese metric and chart labels', () => {
-    const visibleLabels = [
-      ...Object.values(TRANSLATIONS['zh-CN'].metrics),
-      ...Object.values(TRANSLATIONS['zh-CN'].metricDescriptions),
-      ...Object.values(TRANSLATIONS['zh-CN'].charts),
-    ].join('\n');
-    for (const deprecated of [
-      '获奖频率',
-      '净回报频率',
-      '平均功能时长',
-      '功能长度百分位数',
-      '封顶命中频率',
-      '观测到的最高赢取',
+  it('rejects missing metadata, invalid methodology, non-finite, negative, and ratios over one', () => {
+    for (const changed of [
+      { metadata: { ...canonical.metadata, gameVersion: '' } },
+      { simulation: { ...canonical.simulation, methodology: 'wrong' } },
+      { metrics: { ...metrics, rtp: Infinity } },
+      { metrics: { ...metrics, totalSpins: -1 } },
+      { metrics: { ...metrics, featureFrequency: 2 } },
     ])
-      expect(visibleLabels).not.toContain(deprecated);
+      expect(normalizeReport({ ...canonical, ...changed }).ok).toBe(false);
   });
-
-  it('resolves locale using user, report, browser, then English precedence', () => {
-    expect(resolveDashboardLocale('pt-BR', 'zh-CN', 'en-GB')).toBe('pt-BR');
-    expect(resolveDashboardLocale(null, 'zh-CN', 'pt-PT')).toBe('zh-CN');
-    expect(resolveDashboardLocale(null, null, 'pt-PT')).toBe('pt-BR');
-    expect(resolveDashboardLocale(null, null, 'zh-Hans-SG')).toBe('zh-CN');
-    expect(resolveDashboardLocale(null, null, 'fil-PH')).toBe('fil-PH');
-    expect(resolveDashboardLocale(null, null, 'tl-PH')).toBe('fil-PH');
-    expect(resolveDashboardLocale(null, null, 'fr-FR')).toBe('en');
-  });
-
-  it('persists the user locale globally and with the active report', () => {
-    const storage = memoryStorage();
-    persistDashboardLocale(storage, 'zh-CN', 'report-a');
-    expect(readStoredLocale(storage)).toBe('zh-CN');
-    expect(readReportLocale(storage, 'report-a')).toBe('zh-CN');
-    persistDashboardLocale(storage, 'fil-PH', 'report-b');
-    expect(readStoredLocale(storage)).toBe('fil-PH');
-    expect(readReportLocale(storage, 'report-b')).toBe('fil-PH');
-  });
-
-  it('formats numbers, percentages, decimals, and dates by locale without changing values', () => {
-    expect(formatInteger(1_000_000, 'en')).toBe('1,000,000');
-    expect(formatInteger(1_000_000, 'pt-BR')).toBe('1.000.000');
-    expect(formatInteger(1_000_000, 'zh-CN')).toBe('1,000,000');
-    expect(formatInteger(1_000_000, 'fil-PH')).toBe('1,000,000');
-    expect(formatPercent(0.9537, 'pt-BR')).toBe('95,37%');
-    expect(formatDecimal(2.377, 'pt-BR', 3)).toBe('2,377');
-    expect(formatDate(million.generatedAt, 'en')).not.toBe(
-      formatDate(million.generatedAt, 'zh-CN'),
+  it('accepts empty tails and rejects malformed components', () => {
+    expect(normalizeReport(canonical).ok).toBe(true);
+    expect(normalizeReport({ ...canonical, metrics: { ...metrics, components: {} } }).ok).toBe(
+      false,
     );
-    expect(formatDate(million.generatedAt, 'fil-PH')).not.toBe(
-      formatDate(million.generatedAt, 'zh-CN'),
-    );
-  });
-
-  it('renders grammatical dynamic summaries from locale templates', () => {
-    const values = {
-      rtp: '95.37%',
-      spins: '1,000,000',
-      awardFrequency: '33.50%',
-      featureOdds: '115.6',
-      averageLength: '9.3',
-      metTargets: true,
-    };
-    expect(TRANSLATIONS.en.templates.summary(values)).toContain('The current profile');
-    expect(TRANSLATIONS['pt-BR'].templates.summary(values)).toContain('O perfil atual');
-    expect(TRANSLATIONS['fil-PH'].templates.summary(values)).toContain(
-      'Nagbalik ang kasalukuyang profile',
-    );
-    const chinese = TRANSLATIONS['zh-CN'].templates.summary(values);
-    expect(chinese).toContain('当前配置在 1,000,000 次付费旋转模拟中的封顶后 RTP 为 95.37%');
-    expect(chinese).toContain('平均每 115.6 次付费旋转触发一次免费旋转');
-    expect(chinese).toContain('平均每次触发进行 9.3 局免费旋转');
-  });
-
-  it('adapts Chinese summaries for zero triggers, warnings, failures, unavailable values, and comparisons', () => {
-    const base = {
-      rtp: '95.37%',
-      spins: '12,345,678',
-      awardFrequency: '33.50%',
-      featureOdds: '115.6',
-      averageLength: '9.3',
-      metTargets: true,
-    } as const;
-    expect(
-      TRANSLATIONS['zh-CN'].templates.summary({
-        ...base,
-        featureOdds: null,
-        averageLength: null,
-        hasFeatureTriggers: false,
-      }),
-    ).toContain('本次模拟未观测到免费旋转触发');
-    expect(TRANSLATIONS['zh-CN'].templates.summary({ ...base, overallStatus: 'WARN' })).toContain(
-      '风险审查中存在警告项',
-    );
-    expect(
-      TRANSLATIONS['zh-CN'].templates.summary({
-        ...base,
-        metTargets: false,
-        overallStatus: 'FAIL',
-      }),
-    ).toContain('未满足全部临时管理目标');
-    expect(TRANSLATIONS['zh-CN'].templates.summary({ ...base, rtp: null, spins: null })).toContain(
-      '缺少生成完整摘要所需的可用指标',
-    );
-    expect(
-      TRANSLATIONS['zh-CN'].templates.summary({ ...base, comparisonSelected: true }),
-    ).toContain('所选对比报告不改变上述数值');
   });
 });
-
-describe('localized export and print behavior', () => {
-  it('uses locale-specific immutable filenames and metadata', () => {
-    const options = createExportOptions('pt-BR', million.configurationId, 'pdf');
-    expect(Object.isFrozen(options)).toBe(true);
-    expect(exportFilename(options)).toBe('lucky888_math-performance_pt-BR.pdf');
-    expect(exportFilename(createExportOptions('zh-CN', million.configurationId, 'png'))).toBe(
-      'lucky888_math-performance_zh-CN.png',
-    );
+describe('derived metrics', () => {
+  it('calculates RTP, odds, and reconciliation', () => {
+    const result = normalizeReport(canonical);
+    if (!result.ok) throw new Error('fixture');
+    expect(componentRtp(result.report, 28)).toBe(0.28);
+    expect(frequencyOdds(0.01)).toBe(100);
+    expect(frequencyOdds(0)).toBeNull();
+    expect(reconcileReport(result.report).every((x) => x.status === 'PASS')).toBe(true);
   });
-
-  it('keeps an export snapshot localized when the interactive source changes', () => {
-    const source = document.createElement('div');
-    source.innerHTML = '<main><h1>Painel de Desempenho Matemático</h1></main>';
-    const options = createExportOptions('pt-BR', million.configurationId, 'png');
-    const snapshot = createExportSnapshot(
-      source,
-      options,
-      'Português',
-      'Idioma: Português',
-      '2026-08-06T14:35:00.000Z',
-    );
-    source.querySelector('h1')?.replaceChildren('Math Performance Dashboard');
-    expect(snapshot.element.textContent).toContain('Painel de Desempenho Matemático');
-    expect(snapshot.element.textContent).not.toContain('Math Performance Dashboard');
-    expect(snapshot.metadata).toEqual({
-      reportId: million.configurationId,
-      locale: 'pt-BR',
-      exportedAt: '2026-08-06T14:35:00.000Z',
-    });
-    expect(snapshot.element.dataset.exportLocale).toBe('pt-BR');
-  });
-
-  it('creates a Filipino export with localized representative sections and metadata', () => {
-    const filipino = TRANSLATIONS['fil-PH'];
-    const source = document.createElement('div');
-    source.innerHTML = `<header><h1>${filipino.dashboard.title}</h1><nav class="language-selector no-export">flags</nav></header><main><h2>${filipino.dashboard.keyPerformanceIndicators}</h2><h3>${filipino.metrics.cascadeRtpContribution}</h3><h3>${filipino.dashboard.managementTargetAssessment}</h3><h3>${filipino.dashboard.reconciliation}</h3><strong>95.37%</strong></main>`;
-    const options = createExportOptions('fil-PH', million.configurationId, 'pdf');
-    const footer = filipino.templates.exportFooter(
-      filipino.languageName,
-      million.configurationId,
-      'Ago 6, 2026, 10:35 PM',
-    );
-    const snapshot = createExportSnapshot(
-      source,
-      options,
-      filipino.languageName,
-      footer,
-      '2026-08-06T14:35:00.000Z',
-    );
-    expect(snapshot.element.textContent).toContain('Dashboard ng Pagganap ng Math');
-    expect(snapshot.element.textContent).toContain('Mga Pangunahing Sukatan ng Pagganap');
-    expect(snapshot.element.textContent).toContain('Ambag ng Cascade sa RTP');
-    expect(snapshot.element.textContent).toContain('Pagtatasa sa mga Target ng Pamamahala');
-    expect(snapshot.element.textContent).toContain('Reconciliation');
-    expect(snapshot.element.textContent).toContain('Wika: Filipino');
-    expect(snapshot.element.textContent).toContain('95.37%');
-    expect(snapshot.element.querySelector('.language-selector')).toBeNull();
-    expect(snapshot.element.dataset.exportLocale).toBe('fil-PH');
-    expect(exportFilename(options)).toBe('lucky888_math-performance_fil-PH.pdf');
-  });
-
-  it('creates a Chinese export snapshot without interactive flags or mixed-language labels', () => {
-    const source = document.createElement('div');
-    source.innerHTML = `<header><h1>数学表现仪表板</h1><nav class="language-selector no-export">flags</nav></header><main><h2>封顶后 RTP</h2><h3>免费旋转触发构成</h3><strong>95.37%</strong><section><h2>连消</h2><h3>连消 RTP 贡献</h3><strong>25.17%</strong></section></main>`;
-    const options = createExportOptions('zh-CN', million.configurationId, 'png');
-    const snapshot = createExportSnapshot(
-      source,
-      options,
-      '简体中文',
-      '报告语言：简体中文 · 配置：lucky888-balanced-base-v1 · 导出时间：2026年8月6日 20:49',
-      '2026-08-06T14:35:00.000Z',
-    );
-    expect(snapshot.element.textContent).toContain('数学表现仪表板');
-    expect(snapshot.element.textContent).toContain('免费旋转触发构成');
-    expect(snapshot.element.textContent).toContain('连消 RTP 贡献');
-    expect(snapshot.element.textContent).toContain('25.17%');
-    expect(snapshot.element.textContent).toContain('报告语言：简体中文');
-    expect(snapshot.element.textContent).not.toContain('Math Performance Dashboard');
-    expect(snapshot.element.textContent).not.toContain('Painel de Desempenho Matemático');
-    expect(snapshot.element.querySelector('.language-selector')).toBeNull();
-    expect(snapshot.element.dataset.exportLocale).toBe('zh-CN');
-    expect(exportFilename(options)).toContain('zh-CN');
-  });
-
-  it('preserves all seven checkpoint values in every localized export snapshot', () => {
-    for (const locale of DASHBOARD_LOCALES) {
-      const source = document.createElement('div');
-      source.innerHTML = `<main>${DEFAULT_SIMULATION_CHECKPOINTS.map(
-        (bets) => `<span data-checkpoint-bets="${bets}">${formatInteger(bets, locale)}</span>`,
-      ).join('')}</main>`;
-      const snapshot = createExportSnapshot(
-        source,
-        createExportOptions(locale, million.configurationId, 'png'),
-        TRANSLATIONS[locale].languageName,
-        TRANSLATIONS[locale].dashboard.simulationCheckpoints,
-        '2026-08-06T14:35:00.000Z',
+});
+describe('localization and export contract', () => {
+  it('has every English key in all four locales and no obsolete terminology', () => {
+    const keys = Object.keys(TRANSLATIONS.en.labels);
+    for (const locale of Object.values(TRANSLATIONS)) {
+      expect(keys.every((k) => locale.labels[k])).toBe(true);
+      expect(Object.values(locale.labels).join(' ')).not.toMatch(
+        /payline|line win|WILD|reel strip/i,
       );
-      expect(
-        [...snapshot.element.querySelectorAll<HTMLElement>('[data-checkpoint-bets]')].map(
-          (element) => Number(element.dataset.checkpointBets),
-        ),
-      ).toEqual([...DEFAULT_SIMULATION_CHECKPOINTS]);
     }
-  });
-
-  it('keeps export secondary typography at a readable print size', () => {
-    const css = readFileSync(resolve(process.cwd(), 'apps/math-dashboard/src/style.css'), 'utf8');
-    expect(css).toMatch(/\.export-document \.axis-label,[\s\S]*font-size: 12px;/u);
-    expect(css).toMatch(/table \{[\s\S]*font-size: 8\.5pt;/u);
-    expect(css).toMatch(/\.export-metadata \{[\s\S]*font-size: 8\.5pt;/u);
-  });
-
-  it('includes the reviewed Chinese full-dashboard visual regression fixture', () => {
-    const fixture = readFileSync(
-      resolve(process.cwd(), 'apps/math-dashboard/tests/fixtures/zh-CN-dashboard-export.png'),
-    );
-    expect([...fixture.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
-    expect(fixture.byteLength).toBeGreaterThan(1_000_000);
-  });
-
-  it('toggles the print layout class through print lifecycle events', () => {
-    const dispose = bindPrintLayout();
-    window.dispatchEvent(new Event('beforeprint'));
-    expect(document.body.classList.contains('print-layout')).toBe(true);
-    window.dispatchEvent(new Event('afterprint'));
-    expect(document.body.classList.contains('print-layout')).toBe(false);
-    dispose();
-    setPrintLayout(false);
   });
 });

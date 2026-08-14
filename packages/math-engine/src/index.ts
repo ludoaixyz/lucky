@@ -1,31 +1,36 @@
 export type { RandomSource, ProductionRandomSource } from './rng/random-source.js';
 export { SeededRandom } from './rng/seeded-random.js';
-export { selectReelStops, buildVisibleWindow } from './evaluation/reels.js';
 export {
-  DEFAULT_MAXIMUM_CASCADES_PER_SPIN,
-  collapseAndRefill,
-  extractWinningCoordinates,
-  resolveCascadeSequence,
-} from './evaluation/cascade.js';
+  cloneBoard,
+  collapseBoard,
+  generateBoard,
+  generateCell,
+  occupiedCellCount,
+  refillBoard,
+  removePositions,
+  weightedPick,
+} from './bathala/board.js';
+export type { GenerationState } from './bathala/board.js';
 export {
-  countScatters,
-  evaluatePaylines,
-  aggregateWins,
-  enforceMaximumWin,
-} from './evaluation/evaluate.js';
-export { resolveSpin } from './evaluation/spin.js';
+  countSymbol,
+  evaluateCountWins,
+  payoutFor,
+  positionsFor,
+} from './bathala/count-evaluator.js';
+export { applyBathalaSkill } from './bathala/skill.js';
+export { resolveTumbleChain } from './bathala/tumble.js';
+export type { TumbleOptions } from './bathala/tumble.js';
 export {
-  resolveBonusAward,
-  resolveRetriggerAward,
-  resolveFreeSpin,
-  resolveFreeSpinFeature,
-} from './evaluation/bonus.js';
-export { maximumReachableScatterCount, validateConfig } from './validation/config.js';
-export type { ValidationIssue } from './validation/config.js';
+  resolveBaseFreeGameAward,
+  resolveFreeGameFeature,
+  resolveFreeGameRetrigger,
+  resolveScatterPayout,
+  resolveSpin,
+} from './bathala/spin.js';
 export {
-  SimulationAccumulator,
-  runSimulation,
-  runSimulationCheckpoints,
+  BathalaSimulationAccumulator,
   assertFiniteReport,
-} from './simulation/accumulator.js';
-export { enumerateExact } from './enumeration/exact.js';
+  runSimulation,
+} from './bathala/simulation.js';
+export { validateConfig } from './bathala/validation.js';
+export type { ValidationIssue } from './bathala/validation.js';

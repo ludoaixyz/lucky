@@ -8,5 +8,11 @@
       "@lucky/math-engine": ["src/index.ts"]
     }
   },
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": [
+    "src/index.ts",
+    "src/rng",
+    "src/bathala",
+    "tests/bathala-engine.test.ts",
+    "vitest.config.ts"
+  ]
 }

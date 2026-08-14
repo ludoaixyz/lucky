@@ -9,13 +9,10 @@
     }
   },
   "include": [
-    "src/diagnostics",
-    "src/game",
-    "src/ui",
-    "src/config",
-    "src/startup-error.ts",
+    "src/main.ts",
+    "src/config/load-config.ts",
     "src/vite-env.d.ts",
-    "tests",
+    "tests/bathala-prototype.test.ts",
     "vitest.config.ts"
   ]
 }

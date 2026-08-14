@@ -1,0 +1,133 @@
+{
+  "metadata": {
+    "schemaVersion": "2.0.0",
+    "gameId": "lucky888",
+    "gameName": "Lucky888",
+    "gameVersion": "2.0.0",
+    "configurationId": "lucky888-bathala-prototype-v1",
+    "generatedAt": "2026-08-13T10:45:12.795Z",
+    "calibrationProfile": "placeholder calibration profile"
+  },
+  "simulation": {
+    "methodology": "deterministic-streaming-monte-carlo",
+    "spins": 100000,
+    "seed": 2026
+  },
+  "metrics": {
+    "schemaVersion": "2.0.0",
+    "methodology": "deterministic-streaming-monte-carlo",
+    "configurationId": "lucky888-bathala-prototype-v1",
+    "seed": 2026,
+    "totalSpins": 100000,
+    "totalBet": 100000,
+    "totalCreditedWin": 63548.14999999858,
+    "rtp": 0.6354814999999858,
+    "winningSpinFrequency": 0.3187,
+    "averageWinPerWinningSpin": 1.9939802321932407,
+    "baseGameTumbleTriggerFrequency": 0.31867,
+    "freeGameTumbleTriggerFrequency": 0.190625,
+    "averageBaseGameTumbleRoundsPerTrigger": 1.6662691812847146,
+    "averageFreeGameTumbleRoundsPerTrigger": 1.4754098360655739,
+    "tumbleRoundsPerPaidSpin": 0.53189,
+    "tumbleTriggerFrequency": 0.31928,
+    "averageTumbleRoundsPerTriggeringSpin": 1.6659045352042094,
+    "maximumObservedBaseGameTumbleDepth": 9,
+    "maximumObservedFreeGameTumbleDepth": 5,
+    "maximumObservedTumbleDepth": 9,
+    "bathalaActivations": 53187,
+    "bathalaActivationFrequency": 0.9999623982402377,
+    "averageSymbolsRemoved": 3.4736119728505086,
+    "bathalaToNextWinConversionRate": 0.39972173651456183,
+    "multiplierAppearanceFrequency": 0.11693,
+    "averageMultiplierValue": 6.579384908917458,
+    "averageSummedMultiplierOnMultipliedWins": 8.063333886951225,
+    "maximumSummedMultiplier": 512,
+    "freeGameTriggerCount": 20,
+    "featureFrequency": 0.0002,
+    "averageFreeGamesPlayed": 16,
+    "averageInitiallyAwardedFreeGames": 15,
+    "maximumObservedFeatureLength": 25,
+    "featureLengthPercentiles": {
+      "p50": 15,
+      "p75": 15,
+      "p90": 20,
+      "p95": 20,
+      "p99": 25
+    },
+    "retriggerCount": 4,
+    "averageRetriggersPerFeature": 0.2,
+    "averageEndingFreeGameMultiplier": 17.25,
+    "freeGameWinContribution": 0.004546999999999999,
+    "baseGameWinContribution": 0.6309344999999857,
+    "maximumObservedWin": 675,
+    "meanWinPerPaidSpin": 0.6354814999999883,
+    "variance": 16.88275448815773,
+    "standardDeviation": 4.1088629191246735,
+    "coefficientOfVariation": 6.465747498746619,
+    "standardError": 0.012993365417842188,
+    "confidenceInterval95": [
+      0.6100145037810176,
+      0.6609484962189589
+    ],
+    "components": {
+      "baseGameRegularPayout": 18849.15000000077,
+      "baseGameScatterPayout": 66,
+      "baseGameMultiplierUplift": 44178.30000000021,
+      "freeGameRegularPayout": 31.949999999999996,
+      "freeGameScatterPayout": 3,
+      "freeGameMultiplierUplift": 419.75
+    },
+    "tails": [
+      {
+        "threshold": 10,
+        "count": 1017,
+        "frequency": 0.01017
+      },
+      {
+        "threshold": 20,
+        "count": 274,
+        "frequency": 0.00274
+      },
+      {
+        "threshold": 50,
+        "count": 43,
+        "frequency": 0.00043
+      },
+      {
+        "threshold": 100,
+        "count": 11,
+        "frequency": 0.00011
+      },
+      {
+        "threshold": 250,
+        "count": 3,
+        "frequency": 0.00003
+      },
+      {
+        "threshold": 500,
+        "count": 2,
+        "frequency": 0.00002
+      },
+      {
+        "threshold": 1000,
+        "count": 0,
+        "frequency": 0
+      },
+      {
+        "threshold": 2500,
+        "count": 0,
+        "frequency": 0
+      },
+      {
+        "threshold": 5000,
+        "count": 0,
+        "frequency": 0
+      },
+      {
+        "threshold": 10000,
+        "count": 0,
+        "frequency": 0
+      }
+    ]
+  }
+}

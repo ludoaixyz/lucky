@@ -1,47 +1,21 @@
 {
-  "schemaVersion": "1.2.0",
+  "schemaVersion": "2.0.0",
   "gameId": "lucky888",
-  "gameName": "LUCKY888",
-  "gameVersion": "0.4.0",
-  "configurationId": "lucky888-production-20line-v1",
-  "reelCount": 5,
-  "visibleRows": 3,
-  "payModel": "fixed-paylines-left-to-right",
-  "lineBetCredits": 0.25,
-  "totalBetCredits": 5,
-  "maximumWinCredits": 5000,
-  "maximumWinScope": "paid-spin-including-feature",
-  "selectedRtpProfile": "lucky888-production-20line-v1",
-  "cascades": {
-    "enabled": true,
-    "scatterEvaluation": "initial-grid-only",
-    "maximumCascadesPerSpin": 100
-  },
-  "rtpBudgets": {
-    "provisional": true,
-    "initialBoardBaseLine": { "minimum": 0.66, "maximum": 0.7 },
-    "cascadeStages": { "minimum": 0.15, "maximum": 0.18 },
-    "freeSpinFeature": { "minimum": 0.08, "maximum": 0.11 },
-    "scatterDirectPay": { "minimum": 0, "maximum": 0.02 },
-    "creditedTotal": { "minimum": 0.94, "maximum": 0.97 },
-    "notes": "Provisional balancing guidance; component RTP values sum to total RTP and are not certification limits."
-  },
-  "volatilityTarget": {
-    "classification": "medium-high",
-    "provisional": true,
-    "standardDeviationMultiple": { "minimum": 3.0, "maximum": 4.5 },
-    "tailTargets": {
-      "20xPlusProbability": { "minimum": 0.001, "maximum": 0.01 },
-      "50xPlusProbability": { "minimum": 0.0001, "maximum": 0.003 },
-      "100xPlusProbability": { "minimum": 0.00001, "maximum": 0.001 },
-      "250xPlusProbability": { "minimum": 0, "maximum": 0.0002 }
-    },
-    "notes": "Provisional engineering volatility and tail targets derived from the production profile; not certification limits."
-  },
-  "featureFrequencyTarget": {
-    "paidSpinsPerTrigger": { "target": 120, "minimum": 116, "maximum": 124 },
-    "provisional": true
-  },
-  "simulationMetadata": { "defaultSpins": 1000000, "defaultSeed": 2026 },
-  "notes": "Provisional balanced engineering profile; not a certification claim."
+  "gameName": "Lucky888",
+  "gameVersion": "2.0.0",
+  "configurationId": "lucky888-bathala-prototype-v1",
+  "model": "bathala-count-pay-tumble",
+  "columns": 6,
+  "rows": 5,
+  "minimumWinCount": 8,
+  "totalBet": 1,
+  "maximumTumbleRounds": 100,
+  "freeGameMultiplierCollectionTrigger": "winning_round",
+  "symbols": ["L1", "L2", "L3", "L4", "L5", "H1", "H2", "H3", "H4", "SCATTER", "MULTIPLIER"],
+  "regularSymbols": ["L1", "L2", "L3", "L4", "L5", "H1", "H2", "H3", "H4"],
+  "lowSymbols": ["L1", "L2", "L3", "L4", "L5"],
+  "notes": [
+    "Known rules are encoded as mechanics; all weights and count pays are calibration placeholders.",
+    "Scatter is resolved once on the final board after the tumble chain."
+  ]
 }

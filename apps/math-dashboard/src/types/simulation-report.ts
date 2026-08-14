@@ -1,122 +1,93 @@
 import type { DashboardLocale } from '../i18n/types.js';
 import type { SimulationCheckpoint } from '@lucky/shared-types';
 
-export interface PayoutBucket {
-  readonly label: string;
-  readonly minimumMultiple: number;
-  readonly maximumMultiple: number | null;
-  readonly count: number;
-  readonly probability: number;
+export interface ReportMetadata {
+  schemaVersion: string;
+  gameId: string;
+  gameName: string;
+  gameVersion: string;
+  configurationId: string;
+  generatedAt: string;
+  calibrationProfile?: string;
 }
-
+export interface ReportSimulation {
+  methodology: 'deterministic-streaming-monte-carlo';
+  seed: number;
+  spins: number;
+}
+export interface ReportComponents {
+  baseGameRegularPayout: number;
+  baseGameScatterPayout: number;
+  baseGameMultiplierUplift: number;
+  freeGameRegularPayout: number;
+  freeGameScatterPayout: number;
+  freeGameMultiplierUplift: number;
+}
+export interface TailMetric {
+  threshold: number;
+  count: number;
+  frequency: number;
+}
+export interface BathalaMetrics {
+  totalSpins: number;
+  totalBet: number;
+  totalCreditedWin: number;
+  rtp: number;
+  winningSpinFrequency: number;
+  averageWinPerWinningSpin: number;
+  baseGameTumbleTriggerFrequency: number;
+  freeGameTumbleTriggerFrequency: number;
+  averageBaseGameTumbleRoundsPerTrigger: number;
+  averageFreeGameTumbleRoundsPerTrigger: number;
+  tumbleRoundsPerPaidSpin: number;
+  maximumObservedBaseGameTumbleDepth: number;
+  maximumObservedFreeGameTumbleDepth: number;
+  maximumObservedTumbleDepth: number;
+  bathalaActivations: number;
+  bathalaActivationFrequency: number;
+  averageSymbolsRemoved: number;
+  bathalaToNextWinConversionRate: number;
+  multiplierAppearanceFrequency: number;
+  averageMultiplierValue: number;
+  averageSummedMultiplierOnMultipliedWins: number;
+  maximumSummedMultiplier: number;
+  freeGameTriggerCount: number;
+  featureFrequency: number;
+  averageFreeGamesPlayed: number;
+  averageInitiallyAwardedFreeGames: number;
+  maximumObservedFeatureLength: number;
+  featureLengthPercentiles: { p50: number; p75: number; p90: number; p95: number; p99: number };
+  retriggerCount: number;
+  averageRetriggersPerFeature: number;
+  averageEndingFreeGameMultiplier: number;
+  freeGameWinContribution: number;
+  baseGameWinContribution: number;
+  maximumObservedWin: number;
+  meanWinPerPaidSpin: number;
+  variance: number;
+  standardDeviation: number;
+  coefficientOfVariation: number;
+  standardError: number;
+  confidenceInterval95: [number, number];
+  components: ReportComponents;
+  tails: TailMetric[];
+}
 export interface SimulationReport {
-  readonly schemaVersion: '1.2.0';
-  readonly methodology: 'deterministic-monte-carlo';
-  readonly gameVersion: string;
-  readonly configurationId: string;
-  readonly generatedAt: string;
-  readonly seed: number;
-  readonly paidSpins: number;
-  readonly totalWageredCredits: number;
-  readonly uncappedBaseLinePayoutCredits: number;
-  readonly initialBoardBaseLinePayoutCredits?: number;
-  readonly uncappedBaseScatterPayoutCredits: number;
-  readonly uncappedBasePayoutCredits?: number;
-  readonly uncappedFeaturePayoutCredits: number;
-  readonly freeSpinFeatureNonCascadePayoutCredits?: number;
-  readonly uncappedTotalPayoutCredits: number;
-  readonly creditedTotalPayoutCredits: number;
-  readonly capReductionCredits: number;
-  readonly uncappedBaseLineRtp: number;
-  readonly initialBoardBaseLineRtp?: number;
-  readonly uncappedBaseScatterRtp: number;
-  readonly uncappedFeatureRtp: number;
-  readonly freeSpinFeatureNonCascadeRtp?: number;
-  readonly uncappedTotalRtp: number;
-  readonly creditedTotalRtp: number;
-  readonly baseHitFrequency: number;
-  readonly featureTriggerFrequency: number;
-  readonly featureTriggerFrequencyByScatterCount: Readonly<
-    Partial<Record<'3' | '4' | '5', number>>
-  >;
-  readonly featureInclusiveHitFrequency: number;
-  readonly averageInitiallyAwardedFreeSpins: number;
-  readonly averageTotalFreeSpinsPerTrigger: number;
-  readonly averageRetriggersPerTrigger: number;
-  readonly featureLengthPercentiles: {
-    readonly median: number;
-    readonly p75: number;
-    readonly p90: number;
-    readonly p95: number;
-    readonly p99: number;
-  };
-  readonly maximumObservedFeatureLength: number;
-  readonly featureCapHitFrequency: number;
-  readonly variance: number;
-  readonly standardDeviation: number;
-  readonly standardError: number;
-  readonly confidenceInterval95: readonly [number, number];
-  readonly maximumObservedWinCredits: number;
-  readonly capApplications: number;
-  readonly capApplicationFrequency: number;
-  readonly payoutDistribution: readonly PayoutBucket[];
-  readonly zeroReturnProbability?: number;
-  readonly subBetReturnProbability?: number;
-  readonly tailMetrics?: readonly {
-    readonly thresholdMultiple: number;
-    readonly count: number;
-    readonly probability: number;
-    readonly rtpContribution: number;
-  }[];
-  readonly outcomePercentiles?: Readonly<Record<string, number>>;
-  readonly volatilityTarget?: {
-    readonly classification: 'low' | 'medium' | 'medium-high' | 'high';
-    readonly standardDeviationMultiple: { readonly minimum: number; readonly maximum: number };
-  };
-  readonly volatilityAssessment?: {
-    readonly status: 'PASS' | 'FAIL';
-    readonly observedClassification: 'low' | 'medium' | 'medium-high' | 'high' | null;
-  };
-  readonly paidSpinsPerFeatureTrigger?: number | null;
-  readonly baseBetCredits?: number;
-  readonly dashboardLocale?: DashboardLocale;
-  readonly theoreticalRtp?: number;
-  readonly maxSimulatedBets?: number;
-  readonly cumulativeSimulation?: true;
-  readonly simulationCheckpoints?: readonly SimulationCheckpoint[];
-  readonly exactEnumeration?: Readonly<Record<string, unknown>> | null;
-  readonly cascadeEnabled?: boolean;
-  readonly spinsWithCascade?: number;
-  readonly eligibleCascadeSpins?: number;
-  readonly cascadeSpinRate?: number;
-  readonly totalCascadeSteps?: number;
-  readonly averageCascadeStepsPerPaidSpin?: number;
-  readonly averageCascadeStepsWhenTriggered?: number;
-  readonly maxCascadeDepthObserved?: number;
-  readonly cascadePayout?: number;
-  readonly cascadePayoutCredits?: number;
-  readonly cascadeRtpContribution?: number;
-  readonly baseGameSpinsWithCascade?: number;
-  readonly baseGameCascadeSpinRate?: number;
-  readonly baseGameCascadeSteps?: number;
-  readonly baseGameCascadePayoutCredits?: number;
-  readonly freeSpinSpinsWithCascade?: number;
-  readonly freeSpinCascadeSpinRate?: number;
-  readonly freeSpinCascadeSteps?: number;
-  readonly freeSpinCascadePayoutCredits?: number;
+  metadata: ReportMetadata;
+  simulation: ReportSimulation;
+  metrics: BathalaMetrics;
+  dashboardLocale?: DashboardLocale;
+  simulationCheckpoints?: readonly SimulationCheckpoint[];
 }
-
 export interface ReportIndexEntry {
-  readonly file: string;
-  readonly label: string;
-  readonly default?: boolean;
+  file: string;
+  label: string;
+  default?: boolean;
 }
-
 export interface LoadedReport {
-  readonly id: string;
-  readonly label: string;
-  readonly source: 'built-in' | 'upload';
-  readonly report: SimulationReport;
+  id: string;
+  label: string;
+  source: 'built-in' | 'upload';
+  report: SimulationReport;
 }
-
-export type Status = 'PASS' | 'WARN' | 'FAIL' | 'INFO';
+export type Status = 'PASS' | 'WARN' | 'FAIL' | 'N/A';

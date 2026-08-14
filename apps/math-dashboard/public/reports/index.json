@@ -1,15 +1,7 @@
 [
   {
-    "file": "simulation-2026-1000.json",
-    "label": "1,000-spin smoke test"
-  },
-  {
-    "file": "simulation-2026-1000000.json",
-    "label": "Previous 1,000,000-spin profile"
-  },
-  {
-    "file": "lucky888-production-20line-v1-simulation.json",
-    "label": "Production 20-line 1,000,000-spin run",
+    "file": "bathala-simulation-2026-100000.json",
+    "label": "Bathala 100,000-spin acceptance run",
     "default": true
   }
 ]

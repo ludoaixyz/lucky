@@ -2,15 +2,11 @@ import { validateConfig } from '@lucky/math-engine';
 import { loadSourceConfig } from './lib/source-loader.js';
 
 const { config } = await loadSourceConfig();
-const issues = validateConfig(config, 'math/source');
+const issues = validateConfig(config);
 if (issues.length > 0) {
-  for (const item of issues)
-    console.error(
-      `${item.file}:${item.record}:${item.field}: invalid ${JSON.stringify(item.value)}; ${item.rule}`,
-    );
-  process.exitCode = 1;
-} else {
-  console.log(
-    `Math data valid: ${config.configurationId}, ${config.reelStrips.length} reels, ${config.paylines.length} paylines.`,
-  );
+  for (const issue of issues) console.error(`${issue.path}: ${issue.message}`);
+  throw new Error(`Math validation failed with ${issues.length} issue(s)`);
 }
+console.log(
+  `Math data valid: ${config.configurationId}, ${config.columns}x${config.rows}, ${config.paytable.length} count-pay ranges.`,
+);

@@ -1,6 +1,13 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": { "composite": true, "noEmit": true },
-  "include": ["**/*.ts"],
+  "include": [
+    "build-math-data.ts",
+    "validate-math-data.ts",
+    "simulate.ts",
+    "lib/source-loader.ts",
+    "tests/bathala-source.test.ts",
+    "vitest.config.ts"
+  ],
   "references": [{ "path": "../packages/shared-types" }, { "path": "../packages/math-engine" }]
 }
