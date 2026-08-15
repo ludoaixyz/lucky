@@ -3,56 +3,245 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Lucky888 Bathala-style mathematics prototype" />
+    <meta name="description" content="Lucky888 Bathala-style interactive slot math workbench" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>LUCKY888 — Bathala Math Prototype</title>
+    <title>LUCKY888 — Interactive Math Workbench</title>
   </head>
   <body>
     <main>
-      <header>
-        <img src="/assets/images/lucky888-three-dragons.svg" alt="Lucky888 three dragons" />
-        <div>
-          <p>MATHEMATICS LAB</p>
-          <h1>LUCKY888</h1>
+      <header class="topbar">
+        <div class="brand">
+          <img src="/assets/images/lucky888-three-dragons.svg" alt="Lucky888 three dragons" />
+          <div>
+            <p>INTERACTIVE MATH WORKBENCH</p>
+            <h1>LUCKY888</h1>
+          </div>
         </div>
-      </header>
-      <section class="game-panel" aria-labelledby="board-title">
-        <div class="heading">
+        <dl class="config-status">
           <div>
-            <p class="eyebrow">6 × 5 · COUNT ANYWHERE</p>
-            <h2 id="board-title">Bathala-style prototype</h2>
-          </div>
-          <button id="spin" type="button">SPIN</button>
-        </div>
-        <div
-          id="game"
-          class="board"
-          role="img"
-          aria-label="Loading six-column by five-row board"
-        ></div>
-        <dl class="stats">
-          <div>
-            <dt>Latest win</dt>
-            <dd id="win">0.00×</dd>
+            <dt>PROFILE</dt>
+            <dd id="profile-name">—</dd>
           </div>
           <div>
-            <dt>Free Games</dt>
-            <dd id="feature">—</dd>
+            <dt>CONFIG</dt>
+            <dd id="configuration-id">—</dd>
           </div>
           <div>
-            <dt>Ending multiplier</dt>
-            <dd id="multiplier">—</dd>
+            <dt>SESSION</dt>
+            <dd id="session-id">—</dd>
           </div>
         </dl>
-        <p id="message" class="message" aria-live="polite">Loading configuration…</p>
+      </header>
+
+      <div class="workspace">
+        <section class="game-panel" aria-labelledby="board-title">
+          <div class="heading">
+            <div>
+              <p class="eyebrow">6 × 5 · COUNT ANYWHERE</p>
+              <h2 id="board-title">Bathala-style prototype</h2>
+            </div>
+            <div id="mode-badge" class="mode-badge">BASE GAME</div>
+          </div>
+          <div
+            id="game"
+            class="board"
+            role="img"
+            aria-label="Six-column by five-row Lucky888 board"
+          ></div>
+          <div class="resolution-strip" aria-live="polite">
+            <span id="tumble-state">Tumbles —</span><span id="bathala-state">Bathala —</span
+            ><span id="multiplier-state">Multiplier —</span>
+          </div>
+          <p id="message" class="message" aria-live="polite">Loading configuration…</p>
+        </section>
+
+        <aside class="history-panel" aria-labelledby="history-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">PAID-SPIN OUTCOMES</p>
+              <h2 id="history-title">Spin History</h2>
+            </div>
+            <span>Latest 10</span>
+          </div>
+          <section class="session-summary" aria-label="Session observations">
+            <div><span>Spins</span><strong id="stat-spins">0</strong></div>
+            <div><span>Wagered</span><strong id="stat-wagered">0.00</strong></div>
+            <div><span>Won</span><strong id="stat-won">0.00</strong></div>
+            <div><span>Session RTP</span><strong id="stat-rtp">0.00%</strong></div>
+            <div><span>Win Rate</span><strong id="stat-win-rate">0.00%</strong></div>
+            <div><span>Features</span><strong id="stat-features">0</strong></div>
+            <div class="wide">
+              <span>Feature Rate</span><strong id="stat-feature-rate">Not observed</strong>
+            </div>
+          </section>
+          <div id="history-list" class="history-list">
+            <p class="empty-state">Completed paid spins will appear here.</p>
+          </div>
+          <div class="history-actions">
+            <button id="export-csv" class="secondary" type="button" disabled>EXPORT CSV</button
+            ><button id="new-session" class="tertiary" type="button">NEW SESSION</button>
+          </div>
+        </aside>
+      </div>
+
+      <section class="player-controls" aria-label="Game controls">
+        <dl class="credit-readout">
+          <div>
+            <dt>BALANCE</dt>
+            <dd id="balance">0.00</dd>
+          </div>
+          <div>
+            <dt>BET</dt>
+            <dd id="bet-display">1.00</dd>
+          </div>
+          <div>
+            <dt>WIN</dt>
+            <dd><span id="win-credits">0.00</span><small id="win-multiple">0.00×</small></dd>
+          </div>
+        </dl>
+        <label>Bet Size<select id="bet-select"></select></label
+        ><label>Auto Spins<select id="auto-select"></select></label>
+        <div class="spin-wrap">
+          <button id="spin" class="spin-button" type="button">SPIN</button
+          ><span id="auto-progress">Ready</span>
+        </div>
       </section>
-      <aside>
-        <strong>Known mechanics</strong
-        ><span
-          >8+ matching regular symbols anywhere · Tumble Win · Bathala low-symbol elimination ·
-          final-board Scatters · additive multiplier symbols · persistent Free Game multiplier</span
-        >
-      </aside>
+
+      <details class="live-math">
+        <summary>LIVE MATH <span>Session estimates · unstable at low sample counts</span></summary>
+        <div class="live-grid">
+          <div><span>Sample</span><strong id="live-sample">0 spins</strong></div>
+          <div><span>Target RTP</span><strong id="live-target-rtp">—</strong></div>
+          <div><span>Session RTP</span><strong id="live-rtp">—</strong></div>
+          <div><span>Multiplier Appearance</span><strong id="live-multiplier">—</strong></div>
+          <div><span>Average Multiplier</span><strong id="live-average-multiplier">—</strong></div>
+          <div><span>Average Tumble Depth</span><strong id="live-tumble">—</strong></div>
+          <div><span>Maximum Win</span><strong id="live-max-win">—</strong></div>
+        </div>
+      </details>
+
+      <details class="math-lab" id="math-lab">
+        <summary>
+          <span>MATH LAB <em id="dirty-state">ACTIVE CONFIG</em></span
+          ><small>Designer controls · collapsed by default</small>
+        </summary>
+        <div class="lab-body">
+          <p class="lab-note">
+            <strong>References are not outcome switches.</strong> Target RTP, feature entry, and
+            volatility describe intent. Observed performance must be validated by Monte Carlo
+            simulation.
+          </p>
+          <div id="validation-errors" class="validation-errors" role="alert" hidden></div>
+          <form id="math-form">
+            <fieldset>
+              <legend>Identity & references</legend>
+              <label>Configuration ID<input id="cfg-id" required /></label
+              ><label>Profile Name<input id="profile-input" required /></label
+              ><label>Version<input id="version-input" required /></label
+              ><label
+                >Volatility Profile<select id="volatility-input">
+                  <option value="stable">Stable</option>
+                  <option value="balanced">Balanced</option>
+                  <option value="high">High Volatility</option>
+                  <option value="custom">Custom</option>
+                </select></label
+              ><label
+                >Target RTP <span class="reference">REFERENCE</span
+                ><input id="target-rtp" type="number" min="0" step="0.01" /></label
+              ><label
+                >Feature Entry <span class="reference">REFERENCE · 1 IN</span
+                ><input id="feature-entry" type="number" min="1" step="1"
+              /></label>
+            </fieldset>
+            <fieldset>
+              <legend>Betting & limits</legend>
+              <label>Bet Ladder <span>comma separated</span><input id="bet-ladder" /></label
+              ><label
+                >Default Bet<input id="default-bet" type="number" min="0.01" step="0.01" /></label
+              ><label
+                >Starting Credits<input
+                  id="starting-credits"
+                  type="number"
+                  min="1"
+                  step="1" /></label
+              ><label
+                >Maximum Win <span>bet units</span
+                ><input id="max-win" type="number" min="1" step="1" /></label
+              ><label
+                >Maximum Multiplier<input
+                  id="max-multiplier"
+                  type="number"
+                  min="1"
+                  step="1" /></label
+              ><label
+                >Maximum Tumble Rounds<input id="max-tumbles" type="number" min="1" step="1"
+              /></label>
+            </fieldset>
+            <fieldset>
+              <legend>Feature & actual levers</legend>
+              <label
+                >Base Scatter Weight<input
+                  id="base-scatter-weight"
+                  type="number"
+                  min="0"
+                  step="0.1" /></label
+              ><label
+                >Free-Game Scatter Weight<input
+                  id="free-scatter-weight"
+                  type="number"
+                  min="0"
+                  step="0.1" /></label
+              ><label
+                >Base Multiplier Appearance Weight<input
+                  id="base-multiplier-weight"
+                  type="number"
+                  min="0"
+                  step="0.1" /></label
+              ><label
+                >Free Multiplier Appearance Weight<input
+                  id="free-multiplier-weight"
+                  type="number"
+                  min="0"
+                  step="0.1" /></label
+              ><label
+                >Initial Free Games<input
+                  id="initial-free-games"
+                  type="number"
+                  min="1"
+                  step="1" /></label
+              ><label
+                >Retrigger Award<input id="retrigger-award" type="number" min="1" step="1"
+              /></label>
+            </fieldset>
+            <fieldset class="advanced">
+              <legend>Advanced distributions</legend>
+              <label
+                >Base Symbol Weights <span>JSON array</span
+                ><textarea id="base-weights" rows="7"></textarea></label
+              ><label
+                >Free-Game Symbol Weights <span>JSON array</span
+                ><textarea id="free-weights" rows="7"></textarea></label
+              ><label
+                >Multiplier Distribution <span>JSON array</span
+                ><textarea id="multiplier-values" rows="7"></textarea></label
+              ><label
+                >Paytable <span>JSON array</span><textarea id="paytable" rows="7"></textarea>
+              </label>
+            </fieldset>
+          </form>
+          <div class="lab-actions">
+            <button id="discard-config" class="tertiary" type="button">DISCARD CHANGES</button
+            ><button id="import-config" class="tertiary" type="button">IMPORT JSON</button
+            ><input id="config-file" type="file" accept="application/json,.json" hidden /><button
+              id="export-config"
+              class="secondary"
+              type="button"
+            >
+              EXPORT CONFIG JSON</button
+            ><button id="apply-config" type="button" disabled>APPLY & RESET</button>
+          </div>
+        </div>
+      </details>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

@@ -105,6 +105,9 @@ describe('Bathala report parsing', () => {
   it('rejects missing metadata, invalid methodology, non-finite, negative, and ratios over one', () => {
     for (const changed of [
       { metadata: { ...canonical.metadata, gameVersion: '' } },
+      { metadata: { ...canonical.metadata, gameId: '' } },
+      { metadata: { ...canonical.metadata, gameName: '' } },
+      { metadata: { ...canonical.metadata, generatedAt: 'not-a-date' } },
       { simulation: { ...canonical.simulation, methodology: 'wrong' } },
       { metrics: { ...metrics, rtp: Infinity } },
       { metrics: { ...metrics, totalSpins: -1 } },
@@ -133,7 +136,7 @@ describe('localization and export contract', () => {
   it('has every English key in all four locales and no obsolete terminology', () => {
     const keys = Object.keys(TRANSLATIONS.en.labels);
     for (const locale of Object.values(TRANSLATIONS)) {
-      expect(keys.every((k) => locale.labels[k])).toBe(true);
+      expect(keys.every((k) => (locale.labels as Readonly<Record<string, string>>)[k])).toBe(true);
       expect(Object.values(locale.labels).join(' ')).not.toMatch(
         /payline|line win|WILD|reel strip/i,
       );

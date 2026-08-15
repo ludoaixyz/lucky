@@ -36,7 +36,7 @@ export function finite(
   value: unknown,
   path: string,
   errors: ValidationIssue[],
-  options: { ratio?: boolean; integer?: boolean; positive?: boolean } = {},
+  options: { probability?: boolean; integer?: boolean; positive?: boolean } = {},
 ): value is number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     errors.push({ field: path, message: `${path} must be a finite number` });
@@ -49,7 +49,7 @@ export function finite(
     });
   if (options.integer && !Number.isSafeInteger(value))
     errors.push({ field: path, message: `${path} must be a safe integer` });
-  if (options.ratio && value > 1)
+  if (options.probability && value > 1)
     errors.push({ field: path, message: `${path} must be between 0 and 1` });
   return true;
 }

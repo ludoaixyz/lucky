@@ -474,12 +474,38 @@ export interface ScatterConfig {
     readonly additionalFreeGames: number;
   };
 }
+export interface MathConfigMetadata {
+  readonly profileName: string;
+  readonly version: string;
+  readonly volatilityProfile: 'stable' | 'balanced' | 'high' | 'custom';
+}
+export interface BettingConfig {
+  readonly bets: readonly number[];
+  readonly defaultBet: number;
+  readonly startingCredits: number;
+  readonly autoSpinOptions: readonly number[];
+}
+export interface MathReferenceConfig {
+  /** Designer reference only. RTP remains an emergent simulation/session result. */
+  readonly targetRtp: number;
+  /** Designer reference expressed as paid spins per feature trigger. */
+  readonly featureEntrySpins: number;
+}
+export interface BathalaLimitConfig {
+  readonly maximumWinMultiple: number;
+  readonly maximumMultiplier: number;
+  readonly maximumSessionRecords: number;
+}
 export interface ActiveGameConfig {
   readonly schemaVersion: string;
   readonly gameId: 'lucky888';
   readonly gameName: string;
   readonly gameVersion: string;
   readonly configurationId: string;
+  readonly metadata: MathConfigMetadata;
+  readonly betting: BettingConfig;
+  readonly references: MathReferenceConfig;
+  readonly limits: BathalaLimitConfig;
   readonly model: 'bathala-count-pay-tumble';
   readonly columns: 6;
   readonly rows: 5;
@@ -578,6 +604,40 @@ export interface BathalaSpinResult {
   readonly feature: FreeGameFeatureResult | null;
   readonly components: WinComponents;
   readonly totalWin: number;
+  readonly uncappedTotalWin: number;
+  readonly maximumWinApplied: boolean;
+}
+
+export interface SpinRecord {
+  readonly sessionId: string;
+  readonly sessionSeed: number;
+  readonly spinNumber: number;
+  readonly spinIndex: number;
+  readonly timestamp: string;
+  readonly configurationId: string;
+  readonly configurationVersion: string;
+  readonly profileName: string;
+  readonly bet: number;
+  readonly baseWin: number;
+  readonly featureWin: number;
+  readonly totalWin: number;
+  readonly winMultiple: number;
+  readonly winning: boolean;
+  readonly baseTumbleRounds: number;
+  readonly freeGameTumbleRounds: number;
+  readonly maximumTumbleDepth: number;
+  readonly bathalaActivations: number;
+  readonly bathalaSymbolsRemoved: number;
+  readonly multiplierAppeared: boolean;
+  readonly multiplierValues: readonly number[];
+  readonly summedMultiplier: number;
+  readonly scatterCount: number;
+  readonly featureTriggered: boolean;
+  readonly freeGamesAwarded: number;
+  readonly freeGamesPlayed: number;
+  readonly retriggerCount: number;
+  readonly endingFreeGameMultiplier?: number;
+  readonly maximumWinApplied: boolean;
 }
 export interface BathalaSimulationConfig {
   readonly spins: number;

@@ -8,6 +8,10 @@ export const DASHBOARD_LANGUAGE_OPTIONS = [
   { locale: 'fil-PH', flag: 'ph.svg' },
 ] as const satisfies readonly { readonly locale: DashboardLocale; readonly flag: string }[];
 
+export function flagAssetPath(baseUrl: string, flag: string): string {
+  return `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}flags/${flag}`;
+}
+
 const escapeHtml = (value: string): string =>
   value.replace(/[&<>'"]/gu, (character) => {
     const entities: Readonly<Record<string, string>> = {
@@ -24,7 +28,7 @@ export function languageButtons(locale: DashboardLocale, baseUrl: string): strin
   return DASHBOARD_LANGUAGE_OPTIONS.map(({ locale: code, flag }) => {
     const label = dictionary(code).languageName;
     const safeLabel = escapeHtml(label);
-    return `<button type="button" data-locale="${code}" aria-label="${safeLabel}" title="${safeLabel}" aria-pressed="${String(code === locale)}"><img src="${baseUrl}flags/${flag}" alt=""> <span>${safeLabel}</span></button>`;
+    return `<button type="button" data-locale="${code}" aria-label="${safeLabel}" title="${safeLabel}" aria-pressed="${String(code === locale)}"><img src="${flagAssetPath(baseUrl, flag)}" alt=""> <span>${safeLabel}</span></button>`;
   }).join('');
 }
 

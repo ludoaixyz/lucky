@@ -45,14 +45,25 @@ export function createExportSnapshot(
   snapshot.dataset.exportMetadata = JSON.stringify(metadata);
   snapshot.dataset.exportLocale = options.locale;
   snapshot.setAttribute('lang', options.locale);
-  const footer = document.createElement('footer');
-  footer.className = 'export-metadata';
-  const language = document.createElement('strong');
-  language.textContent = languageName;
-  const details = document.createElement('span');
-  details.textContent = footerText;
-  footer.append(language, details);
-  snapshot.append(footer);
+  const pageFooters = [...snapshot.querySelectorAll<HTMLElement>('.export-page-footer')];
+  if (pageFooters.length) {
+    for (const footer of pageFooters) {
+      const language = document.createElement('strong');
+      language.textContent = languageName;
+      const details = document.createElement('span');
+      details.textContent = footerText;
+      footer.append(language, details);
+    }
+  } else {
+    const footer = document.createElement('footer');
+    footer.className = 'export-metadata';
+    const language = document.createElement('strong');
+    language.textContent = languageName;
+    const details = document.createElement('span');
+    details.textContent = footerText;
+    footer.append(language, details);
+    snapshot.append(footer);
+  }
   return { element: snapshot, metadata };
 }
 
@@ -85,7 +96,7 @@ function downloadBlob(blob: Blob, filename: string): void {
 }
 
 async function renderPng(snapshot: HTMLElement, filename: string): Promise<void> {
-  const width = Math.max(1200, snapshot.scrollWidth);
+  const width = snapshot.scrollWidth;
   const height = snapshot.scrollHeight;
   const serialized = new XMLSerializer().serializeToString(snapshot);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${collectCss()}</style>${serialized}</div></foreignObject></svg>`;

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
   assertFiniteReport,
@@ -7,6 +7,7 @@ import {
   validateConfig,
 } from '@lucky/math-engine';
 import { formatPercentRatio } from '@lucky/shared-types';
+import type { ActiveGameConfig } from '@lucky/shared-types';
 import { loadSourceConfig } from './lib/source-loader.js';
 
 function option(name: string, fallback: number): number {
@@ -21,9 +22,24 @@ function option(name: string, fallback: number): number {
   return value;
 }
 
+function textOption(name: string): string | undefined {
+  const prefix = `--${name}=`;
+  const inline = process.argv.find((argument) => argument.startsWith(prefix));
+  const position = process.argv.indexOf(`--${name}`);
+  return inline?.slice(prefix.length) ?? (position >= 0 ? process.argv[position + 1] : undefined);
+}
+
+async function simulationMathConfig(): Promise<ActiveGameConfig> {
+  const path = textOption('config');
+  if (!path) return (await loadSourceConfig()).config;
+  const payload = JSON.parse(await readFile(resolve(process.cwd(), path), 'utf8')) as
+    ActiveGameConfig | { readonly config: ActiveGameConfig };
+  return 'config' in payload ? payload.config : payload;
+}
+
 const spins = option('spins', 100_000);
 const seed = option('seed', 2026);
-const { config } = await loadSourceConfig();
+const config = await simulationMathConfig();
 const issues = validateConfig(config);
 if (issues.length > 0) throw new Error(`Simulation stopped: ${issues.length} validation issue(s)`);
 const report = runSimulation(config, { spins, seed }, new SeededRandom(seed));
@@ -50,7 +66,7 @@ const envelope = {
     gameVersion: config.gameVersion,
     configurationId: config.configurationId,
     generatedAt: new Date().toISOString(),
-    calibrationProfile: 'placeholder calibration profile',
+    calibrationProfile: config.metadata.profileName,
   },
   simulation: { methodology: report.methodology, spins, seed },
   metrics: report,

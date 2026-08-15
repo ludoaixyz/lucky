@@ -55,7 +55,7 @@
         "totalSpins": { "type": "integer", "minimum": 1 },
         "totalBet": { "type": "number", "minimum": 0 },
         "totalCreditedWin": { "type": "number", "minimum": 0 },
-        "rtp": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rtp": { "type": "number", "minimum": 0 },
         "winningSpinFrequency": { "type": "number", "minimum": 0, "maximum": 1 },
         "variance": { "type": "number", "minimum": 0 },
         "standardDeviation": { "type": "number", "minimum": 0 },

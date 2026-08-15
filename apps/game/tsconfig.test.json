@@ -11,8 +11,10 @@
   "include": [
     "src/main.ts",
     "src/config/load-config.ts",
+    "src/workbench/**/*.ts",
     "src/vite-env.d.ts",
     "tests/bathala-prototype.test.ts",
+    "tests/workbench.test.ts",
     "vitest.config.ts"
   ]
 }

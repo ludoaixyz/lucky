@@ -16,6 +16,35 @@ export function validateConfig(config: ActiveGameConfig): ValidationIssue[] {
   if (config.totalBet !== 1) issue('totalBet', 'must equal 1');
   if (config.model !== 'bathala-count-pay-tumble')
     issue('model', 'must select Bathala count-pay tumble');
+  if (!config.configurationId.trim()) issue('configurationId', 'must not be empty');
+  if (!config.metadata?.profileName?.trim()) issue('metadata.profileName', 'must not be empty');
+  if (!config.metadata?.version?.trim()) issue('metadata.version', 'must not be empty');
+  if (!['stable', 'balanced', 'high', 'custom'].includes(config.metadata?.volatilityProfile))
+    issue('metadata.volatilityProfile', 'must be stable, balanced, high, or custom');
+  const bets = config.betting?.bets ?? [];
+  if (bets.length === 0 || bets.some((bet) => !Number.isFinite(bet) || bet <= 0))
+    issue('betting.bets', 'Bet values must be greater than zero.');
+  if (new Set(bets).size !== bets.length) issue('betting.bets', 'must not contain duplicates');
+  if (!bets.includes(config.betting?.defaultBet))
+    issue('betting.defaultBet', 'must be present in the bet ladder');
+  if (!(config.betting?.startingCredits > 0)) issue('betting.startingCredits', 'must be positive');
+  if (
+    !config.betting?.autoSpinOptions?.length ||
+    config.betting.autoSpinOptions.some((count) => !Number.isSafeInteger(count) || count <= 0)
+  )
+    issue('betting.autoSpinOptions', 'must contain positive integers');
+  if (!(config.references?.targetRtp >= 0)) issue('references.targetRtp', 'must be non-negative');
+  if (!(config.references?.featureEntrySpins > 0))
+    issue('references.featureEntrySpins', 'must be positive');
+  if (!(config.limits?.maximumWinMultiple > 0))
+    issue('limits.maximumWinMultiple', 'must be positive');
+  if (!(config.limits?.maximumMultiplier > 0))
+    issue('limits.maximumMultiplier', 'must be positive');
+  if (
+    !Number.isSafeInteger(config.limits?.maximumSessionRecords) ||
+    config.limits.maximumSessionRecords <= 0
+  )
+    issue('limits.maximumSessionRecords', 'must be a positive integer');
   if (!Number.isSafeInteger(config.maximumTumbleRounds) || config.maximumTumbleRounds <= 0)
     issue('maximumTumbleRounds', 'must be a positive safety limit');
   const expected = [
@@ -43,10 +72,12 @@ export function validateConfig(config: ActiveGameConfig): ValidationIssue[] {
     for (const entry of weights) {
       if (!symbolSet.has(entry.symbol)) issue(name, `unknown symbol ${entry.symbol}`);
       if (seen.has(entry.symbol)) issue(name, `duplicate symbol ${entry.symbol}`);
-      if (!Number.isFinite(entry.weight) || entry.weight <= 0)
-        issue(name, `${entry.symbol} weight must be positive`);
+      if (!Number.isFinite(entry.weight) || entry.weight < 0)
+        issue(name, `${entry.symbol} weight must be non-negative`);
       seen.add(entry.symbol);
     }
+    if (!weights.some((entry) => entry.weight > 0))
+      issue(name, 'At least one symbol must have positive weight.');
   }
   for (const symbol of config.regularSymbols) {
     for (let count = 8; count <= 30; count += 1) {
@@ -57,34 +88,42 @@ export function validateConfig(config: ActiveGameConfig): ValidationIssue[] {
         issue('paytable', `${symbol} count ${count} must have exactly one award`);
     }
   }
-  const requiredMultipliers = [2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 50, 100, 250, 500];
+  if (config.multiplierValues.length === 0)
+    issue('multiplierValues', 'Multiplier distribution must have positive total weight.');
   if (
-    JSON.stringify(config.multiplierValues.map(({ value }) => value)) !==
-    JSON.stringify(requiredMultipliers)
+    config.multiplierValues.some(
+      ({ value, weight }) =>
+        !Number.isFinite(value) || value <= 0 || !Number.isFinite(weight) || weight < 0,
+    )
   )
-    issue('multiplierValues', 'must contain the required 2 through 500 values in order');
+    issue('multiplierValues', 'values must be positive and weights non-negative');
+  if (!config.multiplierValues.some(({ weight }) => weight > 0))
+    issue('multiplierValues', 'Multiplier distribution must have positive total weight.');
+  if (config.multiplierValues.some(({ value }) => value > config.limits.maximumMultiplier))
+    issue('multiplierValues', 'values may not exceed Maximum Multiplier');
   if (config.bathala.awardsDirectPayout !== false)
     issue('bathala.awardsDirectPayout', 'must be false');
   if (config.bathala.eligibleSymbols.some((symbol) => !config.lowSymbols.includes(symbol)))
     issue('bathala.eligibleSymbols', 'may contain only L1-L5');
   if (config.scatter.evaluationTiming !== 'final_board')
     issue('scatter.evaluationTiming', 'must explicitly resolve on final board');
-  for (const [count, payout] of [
-    ['4', 3],
-    ['5', 5],
-    ['6', 100],
-  ] as const)
-    if (config.scatter.payouts[count] !== payout)
-      issue(`scatter.payouts.${count}`, `must equal ${payout}`);
+  for (const [count, payout] of Object.entries(config.scatter.payouts))
+    if (
+      !Number.isSafeInteger(Number(count)) ||
+      Number(count) < 0 ||
+      !Number.isFinite(payout) ||
+      payout < 0
+    )
+      issue(`scatter.payouts.${count}`, 'count and payout must be non-negative');
   if (
-    config.scatter.baseGameTrigger.minimumScatters !== 4 ||
-    config.scatter.baseGameTrigger.freeGamesAwarded !== 15
+    config.scatter.baseGameTrigger.minimumScatters < 0 ||
+    config.scatter.baseGameTrigger.freeGamesAwarded <= 0
   )
-    issue('scatter.baseGameTrigger', 'must award 15 Free Games for 4+ Scatters');
+    issue('scatter.baseGameTrigger', 'threshold must be non-negative and award positive');
   if (
-    config.scatter.freeGameRetrigger.minimumScatters !== 3 ||
-    config.scatter.freeGameRetrigger.additionalFreeGames !== 5
+    config.scatter.freeGameRetrigger.minimumScatters < 0 ||
+    config.scatter.freeGameRetrigger.additionalFreeGames <= 0
   )
-    issue('scatter.freeGameRetrigger', 'must add 5 Free Games for 3+ Scatters');
+    issue('scatter.freeGameRetrigger', 'threshold must be non-negative and award positive');
   return issues;
 }

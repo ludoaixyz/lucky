@@ -6,6 +6,6 @@ export default defineConfig({
   test: {
     name: 'game',
     environment: 'jsdom',
-    include: ['apps/game/tests/bathala-prototype.test.ts'],
+    include: ['apps/game/tests/bathala-prototype.test.ts', 'apps/game/tests/workbench.test.ts'],
   },
 });

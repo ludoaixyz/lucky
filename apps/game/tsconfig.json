@@ -5,7 +5,13 @@
     "noEmit": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/main.ts", "src/config/load-config.ts", "src/vite-env.d.ts", "vite.config.ts"],
+  "include": [
+    "src/main.ts",
+    "src/config/load-config.ts",
+    "src/workbench/**/*.ts",
+    "src/vite-env.d.ts",
+    "vite.config.ts"
+  ],
   "references": [
     { "path": "../../packages/shared-types" },
     { "path": "../../packages/math-engine" }

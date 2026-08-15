@@ -25,6 +25,33 @@ export function formatPercent(value: number, locale: DashboardLocale, digits = 2
   }).format(value);
 }
 
+export function formatPercentRange(
+  lower: number,
+  upper: number,
+  locale: DashboardLocale,
+  digits = 2,
+): string {
+  return `${formatPercent(lower, locale, digits)}\u2013${formatPercent(upper, locale, digits)}`;
+}
+
+export function formatAdaptivePercent(value: number, locale: DashboardLocale): string {
+  if (value > 0 && value < 0.0001) return `<${formatPercent(0.0001, locale, 2)}`;
+  const digits = value > 0 && value < 0.001 ? 3 : 2;
+  return formatPercent(value, locale, digits);
+}
+
+export function formatCredits(value: number, locale: DashboardLocale): string {
+  return `${formatFixedDecimal(value, locale, 2)} credits`;
+}
+
+export function formatMultiplier(value: number, locale: DashboardLocale, digits = 2): string {
+  return `${formatFixedDecimal(value, locale, digits)}×`;
+}
+
+export function formatOneIn(value: number, locale: DashboardLocale, prefix = '1 in'): string {
+  return value > 0 ? `${prefix} ${formatInteger(1 / value, locale)}` : '—';
+}
+
 export function formatDate(value: string | Date, locale: DashboardLocale): string {
   return new Intl.DateTimeFormat(intlLocale(locale), {
     dateStyle: 'medium',

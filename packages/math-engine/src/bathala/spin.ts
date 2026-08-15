@@ -110,7 +110,7 @@ export function resolveSpin(
         spinSum + spin.tumbleRounds.reduce((roundSum, round) => roundSum + round.creditedWin, 0),
       0,
     ) ?? 0;
-  const components: WinComponents = {
+  const uncappedComponents: WinComponents = {
     baseGameRegularPayout: baseRaw,
     baseGameScatterPayout: directScatterPay,
     baseGameMultiplierUplift: base.totalWin - baseRaw,
@@ -119,7 +119,12 @@ export function resolveSpin(
     freeGameMultiplierUplift: featureTumbleCredited - featureRegularRaw,
   };
   const baseGameWin = base.totalWin + directScatterPay;
-  const totalWin = baseGameWin + (feature?.totalWin ?? 0);
+  const uncappedTotalWin = baseGameWin + (feature?.totalWin ?? 0);
+  const totalWin = Math.min(uncappedTotalWin, config.limits.maximumWinMultiple);
+  const creditedScale = uncappedTotalWin === 0 ? 1 : totalWin / uncappedTotalWin;
+  const components: WinComponents = Object.fromEntries(
+    Object.entries(uncappedComponents).map(([key, value]) => [key, value * creditedScale]),
+  ) as unknown as WinComponents;
   return {
     ...(base.initialBoard ? { initialBoard: base.initialBoard } : {}),
     finalBoard: base.finalBoard,
@@ -131,5 +136,7 @@ export function resolveSpin(
     feature,
     components,
     totalWin,
+    uncappedTotalWin,
+    maximumWinApplied: totalWin < uncappedTotalWin,
   };
 }
