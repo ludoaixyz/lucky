@@ -70,8 +70,7 @@ export class BoardPresentationController {
 
   constructor(
     private readonly board: HTMLElement,
-    private readonly reducedMotion: () => boolean = () =>
-      matchMedia('(prefers-reduced-motion: reduce)').matches,
+    private readonly reducedMotion: () => boolean = () => false,
   ) {
     this.connectors = new WinConnectorLayer(board);
     this.setState('idle');

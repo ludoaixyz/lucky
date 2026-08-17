@@ -77,7 +77,7 @@ export function cellDropMotion(
   return {
     position,
     distance: boardHeight + position.row * cellHeight,
-    delay: reduce ? 0 : position.column * profile.columnStagger + position.row * profile.rowStagger,
+    delay: reduce ? 0 : position.column * profile.columnStagger +  (rows - 1 - position.row) * profile.rowStagger,
     duration: reduce ? 140 : profile.motion,
     landing: reduce ? 40 : profile.landing,
   };
