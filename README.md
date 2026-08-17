@@ -52,4 +52,31 @@ npm run math:simulate -- --spins 10000 --seed 2026
 
 The simulator aggregates results while each spin is discarded, so large runs do not retain board histories. `resolveSpin(config, rng, true)` enables rich trace boards for debugging.
 
-The previous dashboard is intentionally deferred. Simulation JSON uses a clean `{ config, simulation, metrics }` envelope for a future dashboard migration.
+## GitHub Pages Deployment
+
+Build the combined static deployment artifact with:
+
+```text
+npm run deploy:build
+```
+
+For a project-path build equivalent to the default Pages URL, run:
+
+```text
+VITE_BASE_PATH=/lucky/ npm run deploy:build
+```
+
+The repository is `https://github.com/ludoaixyz/lucky`. GitHub Actions builds and
+uploads `apps/game/dist` as one Pages artifact, with the dashboard nested at
+`/dashboard/`.
+
+The default Pages URL is `https://ludoaixyz.github.io/lucky/`, with its dashboard at
+`https://ludoaixyz.github.io/lucky/dashboard/`. The configured custom domain is
+`https://lucky888.ludoai.xyz/`, and its dashboard is available at
+`https://lucky888.ludoai.xyz/dashboard/`.
+
+The workflow uses GitHub Pages metadata to select `/lucky/` for the project URL or
+`/` for the custom domain. Build output remains uncommitted.
+
+Only `lucky888.ludoai.xyz` requires a DNS record. `/dashboard/` is a path on the
+same hostname and does not require a separate DNS record.

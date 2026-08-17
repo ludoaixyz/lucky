@@ -3,12 +3,15 @@
   "compilerOptions": { "composite": true, "noEmit": true },
   "include": [
     "build-math-data.ts",
+    "build-deployment.ts",
     "validate-math-data.ts",
     "simulate.ts",
     "calibrate-bathala.ts",
     "validate-bathala-calibration.ts",
+    "lib/deployment-base.ts",
     "lib/source-loader.ts",
     "tests/bathala-source.test.ts",
+    "tests/deployment-base.test.ts",
     "vitest.config.ts"
   ],
   "references": [{ "path": "../packages/shared-types" }, { "path": "../packages/math-engine" }]
