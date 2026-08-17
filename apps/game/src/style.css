@@ -137,6 +137,11 @@ main {
   padding: 0.42rem 0.8rem;
   font-size: 0.66rem;
 }
+.reel-toolbar .rules-button {
+  min-width: 180px;
+  padding: 0.55rem 1rem;
+  color: #07120f;
+}
 .heading,
 .panel-heading {
   justify-content: space-between;
@@ -178,6 +183,7 @@ main {
 }
 .board[data-winning-groups]::after,
 .board[data-bathala-removal]::after,
+.board[data-scatter-result]::after,
 .board--completed-win::before {
   position: absolute;
   left: 50%;
@@ -202,6 +208,12 @@ main {
 }
 .board[data-winning-groups]::after {
   top: 0.7rem;
+}
+.board[data-scatter-result]::after {
+  top: 0.7rem;
+  border-color: #d7adffbb;
+  color: #fff0a8;
+  content: attr(data-scatter-result);
 }
 .board[data-bathala-removal]::after {
   top: 0.7rem;
@@ -238,12 +250,30 @@ main {
   min-width: 0;
   min-height: 0;
   height: 100%;
-  will-change: transform;
+  z-index: 1;
 }
-.reel--spinning {
-  box-shadow:
-    inset 0 10px 16px #050912cc,
-    inset 0 -10px 16px #050912cc;
+.win-connector-layer {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.win-connector {
+  stroke: #ffe477;
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px #ffc928) drop-shadow(0 0 7px #ffb000aa);
+}
+.board--win-focus
+  .symbol:not(.symbol--winning):not(.symbol--scatter-winning):not(.symbol--multiplier-active) {
+  opacity: 0.5;
+  filter: brightness(0.5) saturate(0.75);
+  transition:
+    opacity 110ms ease-out,
+    filter 110ms ease-out;
 }
 .symbol--winning {
   z-index: 2;
@@ -255,20 +285,24 @@ main {
     0 0 0.8rem #ffd66ba8,
     0 0 1.4rem var(--symbol-glow);
 }
+.symbol--scatter-winning,
+.symbol--multiplier-active {
+  z-index: 3;
+  border-color: #fff3a0;
+  filter: brightness(1.25) saturate(1.15);
+  box-shadow:
+    inset 0 0 0 2px #fff4a05c,
+    0 0 0.9rem #ffd66bc0,
+    0 0 1.5rem var(--symbol-glow);
+}
 .symbol--removing {
   opacity: 0;
   transform: scale(1.12, 0.55);
-  transition: 130ms ease-in;
-}
-.symbol--collapsing {
-  animation: symbol-collapse 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: var(--symbol-remove-duration, 450ms) ease-in;
 }
 .symbol--bathala-removing {
   z-index: 3;
-  animation: bathala-removal 220ms ease-in forwards;
-}
-.symbol--refilling {
-  animation: symbol-refill 170ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: bathala-removal var(--bathala-remove-duration, 500ms) ease-in forwards;
 }
 @keyframes winning-pulse {
   to {
@@ -285,17 +319,6 @@ main {
     filter: brightness(2);
     opacity: 0;
     transform: translateY(-10px) scale(0.72);
-  }
-}
-@keyframes symbol-collapse {
-  from {
-    transform: translateY(-18px);
-  }
-}
-@keyframes symbol-refill {
-  from {
-    opacity: 0.2;
-    transform: translateY(-55px);
   }
 }
 .symbol {
@@ -478,8 +501,8 @@ main {
 .history-panel {
   display: flex;
   flex-direction: column;
-  height: min(730px, calc(100vh - 105px));
-  max-height: 730px;
+  height: min(803px, calc(100vh - 105px));
+  max-height: 803px;
   padding: 1rem;
   min-height: 0;
 }
@@ -694,7 +717,7 @@ main {
 }
 .player-controls {
   display: grid;
-  grid-template-columns: 92px 92px minmax(180px, 1fr) 120px;
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(210px, 1.4fr);
   align-items: end;
   gap: 0.5rem;
   width: 100%;
@@ -709,6 +732,12 @@ main {
 }
 .credit-readout dd {
   font-size: 1.15rem;
+}
+.credit-readout div,
+.credit-readout dt,
+.credit-readout dd,
+.credit-readout small {
+  text-align: center;
 }
 .credit-readout small {
   display: block;
@@ -738,10 +767,11 @@ main {
   display: grid;
   gap: 0.28rem;
 }
-.spin-wrap span {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.68rem;
+.game-spin-wrap {
+  grid-column: 1 / -1;
+  justify-items: center;
+  width: 100%;
+  margin-top: 0.7rem;
 }
 .speed-control {
   display: grid;
@@ -772,7 +802,7 @@ main {
 .speed-control span {
   display: grid;
   place-items: center;
-  min-height: 2.45rem;
+  min-height: 2.15rem;
   border: 1px solid #415678;
   border-radius: 0.48rem;
   color: #c6d2e6;
@@ -814,6 +844,8 @@ button:disabled {
   cursor: not-allowed;
 }
 .spin-button {
+  width: 190px;
+  min-width: 190px;
   font-size: 1.1rem;
 }
 .spin-button.is-stop {
@@ -825,6 +857,10 @@ button:disabled {
   color: #0e1728;
   background: var(--mint);
   box-shadow: 0 4px 0 #347e70;
+}
+#bet-select,
+#auto-select {
+  min-width: 150px;
 }
 .tertiary {
   color: #dbe5f6;
@@ -891,13 +927,6 @@ button:disabled {
 .lab-body {
   padding: 0 1rem 1rem;
 }
-.lab-note {
-  padding: 0.7rem;
-  border-left: 3px solid var(--mint);
-  color: #aebed9;
-  background: #0b1423;
-  font-size: 0.78rem;
-}
 .validation-errors {
   margin: 0.7rem 0;
   padding: 0.65rem;
@@ -950,7 +979,7 @@ button:disabled {
   overflow: auto;
 }
 .lab-actions {
-  justify-content: flex-end;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 0.55rem;
   margin-top: 0.8rem;
@@ -1128,7 +1157,7 @@ button:disabled {
     max-height: 460px;
   }
   .player-controls {
-    grid-template-columns: 1fr 1fr 1.5fr 1fr;
+    grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(210px, 1.4fr);
   }
   .credit-readout {
     grid-column: 1/-1;
@@ -1171,8 +1200,7 @@ button:disabled {
   .player-controls {
     grid-template-columns: 1fr 1fr;
   }
-  .credit-readout,
-  .spin-wrap {
+  .credit-readout {
     grid-column: 1/-1;
   }
   .speed-control {
@@ -1201,6 +1229,21 @@ button:disabled {
   }
 }
 @media (max-width: 420px) {
+  .player-controls {
+    grid-template-columns: 1fr;
+  }
+  .player-controls > label,
+  .speed-control {
+    grid-column: 1;
+  }
+  #bet-select,
+  #auto-select {
+    min-width: 0;
+  }
+  .credit-readout dd {
+    font-size: clamp(0.72rem, 3.8vw, 1rem);
+    overflow-wrap: anywhere;
+  }
   .resolution-strip {
     grid-template-columns: 1fr;
   }
@@ -1214,13 +1257,12 @@ button:disabled {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .reel--spinning .reel-track {
-    filter: none;
-  }
   .symbol {
     box-shadow: inset 0 0 0.55rem #0007;
   }
   .symbol--winning,
+  .symbol--scatter-winning,
+  .symbol--multiplier-active,
   .symbol--bathala-removing,
   .board--completed-win {
     animation: none;

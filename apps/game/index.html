@@ -37,7 +37,9 @@
         <div class="game-column">
           <section class="game-panel" aria-label="Lucky888 playable game">
             <div class="reel-toolbar">
-              <button id="rules-button" class="tertiary" type="button">RULES &amp; PAYTABLE</button>
+              <button id="rules-button" class="secondary rules-button" type="button">
+                RULES &amp; PAYTABLE
+              </button>
             </div>
             <div
               id="game"
@@ -56,6 +58,9 @@
               <div class="resolution-metric">
                 <span>MULTIPLIER</span><strong id="multiplier-state">—</strong>
               </div>
+            </div>
+            <div class="spin-wrap game-spin-wrap">
+              <button id="spin" class="spin-button" type="button">SPIN</button>
             </div>
             <p id="message" class="message" aria-live="polite">Loading configuration…</p>
           </section>
@@ -87,10 +92,6 @@
               <label><input type="radio" name="spin-speed" value="x1" /><span>x2</span></label>
               <label><input type="radio" name="spin-speed" value="x2" /><span>x3</span></label>
             </fieldset>
-            <div class="spin-wrap">
-              <button id="spin" class="spin-button" type="button">SPIN</button
-              ><span id="auto-progress">Ready</span>
-            </div>
           </section>
         </div>
 
@@ -138,15 +139,10 @@
           ><small>TAP TO OPEN/CLOSE</small>
         </summary>
         <div class="lab-body">
-          <p class="lab-note">
-            <strong>References are not outcome switches.</strong> Target RTP, feature entry, and
-            volatility describe intent. Observed performance must be validated by Monte Carlo
-            simulation.
-          </p>
           <div id="validation-errors" class="validation-errors" role="alert" hidden></div>
           <form id="math-form">
             <fieldset>
-              <legend>Identity & references</legend>
+              <legend>Config Identity</legend>
               <label>Configuration ID<input id="cfg-id" required /></label
               ><label>Profile Name<input id="profile-input" required /></label
               ><label>Version<input id="version-input" required /></label
@@ -166,7 +162,7 @@
               /></label>
             </fieldset>
             <fieldset>
-              <legend>Betting & limits</legend>
+              <legend>Betting Configs</legend>
               <label>Bet Ladder <span>comma separated</span><input id="bet-ladder" /></label
               ><label
                 >Default Bet<input id="default-bet" type="number" min="0.01" step="0.01" /></label
@@ -190,7 +186,7 @@
               /></label>
             </fieldset>
             <fieldset>
-              <legend>Feature & actual levers</legend>
+              <legend>Feature Configs</legend>
               <label
                 >Base Scatter Weight<input
                   id="base-scatter-weight"
@@ -226,7 +222,7 @@
               /></label>
             </fieldset>
             <fieldset class="advanced">
-              <legend>Advanced distributions</legend>
+              <legend>JSON Configs</legend>
               <label
                 >Base Symbol Weights <span>JSON array</span
                 ><textarea id="base-weights" rows="7"></textarea></label

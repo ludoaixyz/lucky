@@ -17,24 +17,28 @@ import {
 } from './workbench/math-config.js';
 import { createSpinRecord } from './workbench/spin-record.js';
 import { recordMechanicValues, resultMechanicValues } from './workbench/mechanics-presentation.js';
+import {
+  formatCredits,
+  formatDecimal,
+  formatInteger,
+  formatMultiplier,
+  formatPercent,
+} from './workbench/number-format.js';
 import { createSymbolElement } from './presentation/symbol-visuals.js';
 import { renderRulesContent } from './presentation/rules-dialog.js';
 import {
-  ReelPresentationController,
+  BoardPresentationController,
   resolvePresentCommit,
   runAutoSpinSequence,
   speedLabel,
   type SpinSpeed,
-} from './presentation/reel-presentation.js';
+} from './presentation/board-presentation-controller.js';
 
 const byId = <T extends HTMLElement>(id: string): T => {
   const node = document.querySelector<T>(`#${id}`);
   if (!node) throw new Error(`Missing required element #${id}`);
   return node;
 };
-const number = (value: number, digits = 2): string =>
-  value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
-const percent = (value: number): string => `${number(value * 100)}%`;
 const deepDownload = (text: string, filename: string, type: string): void => {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const link = document.createElement('a');
@@ -65,12 +69,19 @@ const getWeight = (weights: readonly WeightedSymbol[], symbol: WeightedSymbol['s
 
 function renderBoard(board: Board): void {
   byId('game').replaceChildren(
-    ...board.map((column) => {
+    ...board.map((column, columnIndex) => {
       const reel = document.createElement('div');
       reel.className = 'reel';
       const track = document.createElement('div');
       track.className = 'reel-track';
-      track.replaceChildren(...column.map((cell) => createSymbolElement(cell)));
+      track.replaceChildren(
+        ...column.map((cell, row) => {
+          const symbol = createSymbolElement(cell);
+          symbol.dataset.column = String(columnIndex);
+          symbol.dataset.row = String(row);
+          return symbol;
+        }),
+      );
       reel.append(track);
       return reel;
     }),
@@ -85,7 +96,7 @@ function summarizeResult(result: BathalaSpinResult): void {
   const featureStatus = byId('feature-status');
   featureStatus.hidden = !result.feature;
   featureStatus.textContent = result.feature
-    ? `FREE GAMES ${result.feature.totalSpinsPlayed} PLAYED · MULTIPLIER ${result.feature.endingMultiplier}×`
+    ? `FREE GAMES ${result.feature.totalSpinsPlayed} PLAYED · MULTIPLIER ${formatMultiplier(result.feature.endingMultiplier)}`
     : '';
 }
 
@@ -124,13 +135,13 @@ function historyRow(record: SpinRecord): HTMLElement {
             `<div class="outcome-round"><h5>${label}</h5>${outcomes
               .map(
                 (outcome) =>
-                  `<p><b>${outcome.symbolId} × ${outcome.symbolCount}</b><span>${number(outcome.basePayoutMultiple)}× × ${number(outcome.multiplierApplied)} → ${number(outcome.creditedPayoutMultiple)}×</span></p>`,
+                  `<p><b>${outcome.symbolId} × ${outcome.symbolCount}</b><span>${formatMultiplier(outcome.basePayoutMultiple)} × ${formatMultiplier(outcome.multiplierApplied)} → ${formatMultiplier(outcome.creditedPayoutMultiple)}</span></p>`,
               )
               .join('')}</div>`,
         )
         .join('')}</section>`
     : '';
-  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>Bet ${number(record.bet)}</small></span><em>${compactOutcomes}</em></span><strong>${number(record.totalWin)}<small>${number(record.winMultiple)}×</small></strong></span><span class="history-mechanics"><span><small>TUMBLES</small><b>${mechanics.tumbles}</b></span><span><small>BATHALA</small><b>${mechanics.bathala}</b></span><span><small>MULTIPLIER</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${number(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${number(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${mechanics.multiplier}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${record.endingFreeGameMultiplier ?? 0}×</dd></div>` : ''}</dl>${outcomeDetail}`;
+  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>Bet ${formatCredits(record.bet)}</small></span><em>${compactOutcomes}</em></span><strong>${formatCredits(record.totalWin)}<small>${formatMultiplier(record.winMultiple)}</small></strong></span><span class="history-mechanics"><span><small>TUMBLES</small><b>${mechanics.tumbles}</b></span><span><small>BATHALA</small><b>${mechanics.bathala}</b></span><span><small>MULTIPLIER</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${formatCredits(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${formatCredits(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${mechanics.multiplier}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${formatMultiplier(record.endingFreeGameMultiplier ?? 0)}</dd></div>` : ''}</dl>${outcomeDetail}`;
   return details;
 }
 
@@ -144,7 +155,7 @@ async function boot(): Promise<void> {
   let running = false;
   let stopRequested = false;
   let lastWin = 0;
-  const presenter = new ReelPresentationController(byId('game'));
+  const presenter = new BoardPresentationController(byId('game'));
   const rulesDialog = byId<HTMLDialogElement>('rules-dialog');
   const rulesButton = byId<HTMLButtonElement>('rules-button');
   const rulesContent = byId('rules-content');
@@ -163,7 +174,7 @@ async function boot(): Promise<void> {
     const chosenBet = Number(controls.bet.value) || active.betting.defaultBet;
     controls.bet.replaceChildren(
       ...active.betting.bets.map(
-        (bet) => new Option(number(bet), String(bet), false, bet === chosenBet),
+        (bet) => new Option(formatInteger(bet), String(bet), false, bet === chosenBet),
       ),
     );
     if (!active.betting.bets.includes(Number(controls.bet.value)))
@@ -177,20 +188,22 @@ async function boot(): Promise<void> {
     byId('profile-name').textContent = active.metadata.profileName;
     byId('configuration-id').textContent = active.configurationId;
     byId('session-id').textContent = session.id;
-    byId('balance').textContent = number(credits);
-    byId('bet-display').textContent = number(Number(controls.bet.value));
-    byId('win-credits').textContent = number(lastWin);
-    byId('win-multiple').textContent = `${number(lastWin / (Number(controls.bet.value) || 1))}×`;
+    byId('balance').textContent = formatCredits(credits);
+    byId('bet-display').textContent = formatCredits(Number(controls.bet.value));
+    byId('win-credits').textContent = formatCredits(lastWin);
+    byId('win-multiple').textContent = formatMultiplier(
+      lastWin / (Number(controls.bet.value) || 1),
+    );
     byId('stat-spins').textContent = String(stats.spinCount);
-    byId('stat-wagered').textContent = number(stats.totalWagered);
-    byId('stat-won').textContent = number(stats.totalWon);
-    byId('stat-rtp').textContent = percent(stats.sessionRtp);
-    byId('stat-win-rate').textContent = percent(stats.winningSpinFrequency);
+    byId('stat-wagered').textContent = formatCredits(stats.totalWagered);
+    byId('stat-won').textContent = formatCredits(stats.totalWon);
+    byId('stat-rtp').textContent = formatPercent(stats.sessionRtp);
+    byId('stat-win-rate').textContent = formatPercent(stats.winningSpinFrequency);
     byId('stat-features').textContent = String(stats.featureCount);
     byId('stat-feature-rate').textContent =
       stats.featureEntrySpins === null
         ? 'Not observed'
-        : `1 in ${number(stats.featureEntrySpins, 1)}`;
+        : `1 in ${formatDecimal(stats.featureEntrySpins, 1)}`;
     byId('history-list').replaceChildren(
       ...(history.getRecentSpins().length
         ? history.getRecentSpins().map(historyRow)
@@ -203,17 +216,19 @@ async function boot(): Promise<void> {
     );
     byId<HTMLButtonElement>('export-csv').disabled = stats.spinCount === 0;
     byId('live-sample').textContent = `${stats.spinCount} spins`;
-    byId('live-target-rtp').textContent = `${percent(active.references.targetRtp)} reference`;
-    byId('live-rtp').textContent = stats.spinCount ? percent(stats.sessionRtp) : '—';
+    byId('live-target-rtp').textContent = `${formatPercent(active.references.targetRtp)} reference`;
+    byId('live-rtp').textContent = stats.spinCount ? formatPercent(stats.sessionRtp) : '—';
     byId('live-multiplier').textContent = stats.spinCount
-      ? percent(stats.multiplierAppearance)
+      ? formatPercent(stats.multiplierAppearance)
       : '—';
     byId('live-average-multiplier').textContent = stats.spinCount
-      ? `${number(stats.averageMultiplier)}×`
+      ? formatMultiplier(stats.averageMultiplier)
       : '—';
-    byId('live-tumble').textContent = stats.spinCount ? number(stats.averageTumbleDepth) : '—';
+    byId('live-tumble').textContent = stats.spinCount
+      ? formatDecimal(stats.averageTumbleDepth)
+      : '—';
     byId('live-max-win').textContent = stats.spinCount
-      ? `${number(stats.maximumWinMultiple)}×`
+      ? formatMultiplier(stats.maximumWinMultiple)
       : '—';
     controls.spin.disabled = !running && credits < Number(controls.bet.value);
     controls.bet.disabled = running;
@@ -239,7 +254,7 @@ async function boot(): Promise<void> {
     byId('message').textContent = 'Fresh deterministic session ready.';
     renderSession();
   };
-  const playOne = async (current: number, total: number): Promise<boolean> => {
+  const playOne = async (): Promise<boolean> => {
     const bet = Number(controls.bet.value);
     if (credits < bet) {
       byId('message').textContent = 'Auto spins stopped: insufficient balance.';
@@ -249,7 +264,7 @@ async function boot(): Promise<void> {
     presenter.clearPersistentWinPresentation();
     credits -= bet;
     renderSession();
-    byId('message').textContent = `Reels spinning · ${speedLabel(speed)} speed.`;
+    byId('message').textContent = `Symbols falling · ${speedLabel(speed)} speed.`;
     const next = history.getAllSessionSpins().length + 1;
     let committedRecord: SpinRecord | undefined;
     await resolvePresentCommit({
@@ -259,16 +274,28 @@ async function boot(): Promise<void> {
           result.initialBoard ?? result.finalBoard,
           speed,
           result.tumbleRounds,
+          {
+            finalBoard: result.finalBoard,
+            count: result.scatterCount,
+            payout: result.scatterPayout,
+            freeGames: result.freeGamesAwarded,
+          },
         );
         for (const freeSpin of result.feature?.spins ?? []) {
           presenter.complete();
           const featureStatus = byId('feature-status');
           featureStatus.hidden = false;
-          featureStatus.textContent = `FREE GAMES ${freeSpin.index} / ${result.feature?.totalSpinsPlayed ?? freeSpin.index} · MULTIPLIER ${freeSpin.accumulatedMultiplierAfter}×`;
+          featureStatus.textContent = `FREE GAMES ${freeSpin.index} / ${result.feature?.totalSpinsPlayed ?? freeSpin.index} · MULTIPLIER ${formatMultiplier(freeSpin.accumulatedMultiplierAfter)}`;
           await presenter.present(
             freeSpin.initialBoard ?? freeSpin.finalBoard,
             speed,
             freeSpin.tumbleRounds,
+            {
+              finalBoard: freeSpin.finalBoard,
+              count: freeSpin.scattersLanded,
+              payout: freeSpin.scatterPayout,
+              retriggeredSpins: freeSpin.retriggeredSpins,
+            },
           );
         }
       },
@@ -292,9 +319,8 @@ async function boot(): Promise<void> {
     if (!record) throw new Error('Completed spin was not committed');
     presenter.retainCompletedWinPresentation(record.totalWin);
     byId('message').textContent = record.featureTriggered
-      ? `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won ${number(record.totalWin)} credits (${number(record.winMultiple)}×).`
-      : `Spin #${next} complete · Won ${number(record.totalWin)} credits (${number(record.winMultiple)}×).`;
-    byId('auto-progress').textContent = total > 1 ? `${current} / ${total}` : 'Complete';
+      ? `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`
+      : `Spin #${next} complete · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`;
     renderSession();
     return true;
   };
@@ -311,19 +337,14 @@ async function boot(): Promise<void> {
     controls.spin.classList.add('is-stop');
     renderSession();
     const total = Number(controls.auto.value);
-    let completed = 0;
     try {
-      completed = await runAutoSpinSequence(total, playOne, () => stopRequested);
+      await runAutoSpinSequence(total, playOne, () => stopRequested);
     } finally {
       if (presenter.state() !== 'idle') presenter.complete();
       running = false;
       stopRequested = false;
       controls.spin.textContent = 'SPIN';
       controls.spin.classList.remove('is-stop');
-      byId('auto-progress').textContent =
-        total > 1
-          ? `${completed} / ${total}${completed < total ? ' stopped' : ' complete'}`
-          : 'Ready';
       renderSession();
     }
   };

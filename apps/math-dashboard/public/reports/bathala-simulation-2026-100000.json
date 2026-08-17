@@ -65,10 +65,7 @@
     "standardDeviation": 4.1088629191246735,
     "coefficientOfVariation": 6.465747498746619,
     "standardError": 0.012993365417842188,
-    "confidenceInterval95": [
-      0.6100145037810176,
-      0.6609484962189589
-    ],
+    "confidenceInterval95": [0.6100145037810176, 0.6609484962189589],
     "components": {
       "baseGameRegularPayout": 18849.15000000077,
       "baseGameScatterPayout": 66,

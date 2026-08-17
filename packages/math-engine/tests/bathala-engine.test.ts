@@ -57,12 +57,18 @@ function fixture(overrides: Partial<ActiveGameConfig> = {}): ActiveGameConfig {
       weight: symbol === 'SCATTER' || symbol === 'MULTIPLIER' ? 0.001 : 1,
     })),
     multiplierValues: requiredMultipliers.map((value) => ({ value, weight: 1 })),
-    paytable: regular.map((symbol, index) => ({
-      symbol,
-      minCount: 8,
-      maxCount: 30,
-      payout: index + 1,
-    })),
+    paytable: regular.flatMap((symbol, index) =>
+      [
+        [8, 9],
+        [10, 11],
+        [12, 30],
+      ].map(([minCount, maxCount]) => ({
+        symbol,
+        minCount: minCount!,
+        maxCount: maxCount!,
+        payout: index + 1,
+      })),
+    ),
     bathala: {
       enabled: true,
       trigger: 'after_scoring_elimination',
@@ -331,5 +337,20 @@ describe('Bathala count-pay model', () => {
         return spin.accumulatedMultiplierAfter;
       }, 0);
     }
+  });
+
+  it('rejects any paytable shape other than the three aligned count bands', () => {
+    const collapsed = fixture({
+      paytable: regular.map((symbol, index) => ({
+        symbol,
+        minCount: 8,
+        maxCount: 30,
+        payout: index + 1,
+      })),
+    });
+    expect(validateConfig(collapsed)).toContainEqual({
+      path: 'paytable',
+      message: 'L1 must define exactly the 8-9, 10-11, and 12-30 bands',
+    });
   });
 });

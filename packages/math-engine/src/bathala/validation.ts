@@ -80,6 +80,18 @@ export function validateConfig(config: ActiveGameConfig): ValidationIssue[] {
       issue(name, 'At least one symbol must have positive weight.');
   }
   for (const symbol of config.regularSymbols) {
+    const entries = config.paytable.filter((award) => award.symbol === symbol);
+    const ranges = entries.map(({ minCount, maxCount }) => [minCount, maxCount]);
+    if (
+      entries.length !== 3 ||
+      JSON.stringify(ranges) !==
+        JSON.stringify([
+          [8, 9],
+          [10, 11],
+          [12, 30],
+        ])
+    )
+      issue('paytable', `${symbol} must define exactly the 8-9, 10-11, and 12-30 bands`);
     for (let count = 8; count <= 30; count += 1) {
       const matches = config.paytable.filter(
         (award) => award.symbol === symbol && count >= award.minCount && count <= award.maxCount,

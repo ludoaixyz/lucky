@@ -74,19 +74,19 @@ const canonical = {
   metrics,
 };
 describe('Bathala report parsing', () => {
-  it('loads the bundled 100,000-spin Bathala acceptance report', () => {
+  it('loads the bundled 1,000,000-spin calibrated Bathala acceptance report', () => {
     const json = readFileSync(
       resolve(
         process.cwd(),
-        'apps/math-dashboard/public/reports/bathala-simulation-2026-100000.json',
+        'apps/math-dashboard/public/reports/bathala-simulation-2026-1000000.json',
       ),
       'utf8',
     );
     const result = parseSimulationReport(json);
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.report.metrics.rtp).toBeCloseTo(0.6354815, 7);
-      expect(result.report.metrics.freeGameTriggerCount).toBe(20);
+      expect(result.report.metrics.rtp).toBeCloseTo(0.93153945, 7);
+      expect(result.report.metrics.freeGameTriggerCount).toBe(8818);
     }
   });
   it('accepts schema 2 canonical envelope', () => expect(normalizeReport(canonical).ok).toBe(true));

@@ -28,6 +28,8 @@
     "math:build": "tsx scripts/build-math-data.ts",
     "math:validate": "tsx scripts/validate-math-data.ts",
     "math:simulate": "tsx scripts/simulate.ts",
+    "math:calibrate": "tsx scripts/calibrate-bathala.ts",
+    "math:calibration:validate": "tsx scripts/validate-bathala-calibration.ts",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run dashboard:build && npm run build",
     "clean": "npm run clean --workspaces --if-present"
   },

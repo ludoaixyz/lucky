@@ -1,4 +1,5 @@
 import type { BathalaSpinResult, SpinRecord } from '@lucky/shared-types';
+import { formatMultiplier } from './number-format.js';
 
 export interface MechanicValues {
   readonly tumbles: string;
@@ -7,7 +8,7 @@ export interface MechanicValues {
 }
 
 const multiplierText = (values: readonly number[]): string =>
-  values.length ? values.map((value) => `${value}×`).join(' + ') : '—';
+  values.length ? values.map(formatMultiplier).join(' + ') : '—';
 
 export function resultMechanicValues(result: BathalaSpinResult): MechanicValues {
   const rounds = [

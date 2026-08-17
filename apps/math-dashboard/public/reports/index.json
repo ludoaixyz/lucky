@@ -1,7 +1,7 @@
 [
   {
-    "file": "bathala-simulation-2026-100000.json",
-    "label": "Bathala 100,000-spin acceptance run",
+    "file": "bathala-simulation-2026-1000000.json",
+    "label": "Bathala-aligned v3 1,000,000-spin acceptance run",
     "default": true
   }
 ]

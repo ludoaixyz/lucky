@@ -23,7 +23,7 @@ function fixture(): SimulationReport {
     readFileSync(
       resolve(
         process.cwd(),
-        'apps/math-dashboard/public/reports/bathala-simulation-2026-100000.json',
+        'apps/math-dashboard/public/reports/bathala-simulation-2026-1000000.json',
       ),
       'utf8',
     ),
@@ -46,9 +46,7 @@ describe('simulation workspace independence', () => {
     let workspace = createWorkspace();
     workspace = importIntoSet(workspace, 'sim-1', valid(reportA), 'a.json');
     workspace = importIntoSet(workspace, 'sim-2', valid(reportB), 'b.json');
-    expect(workspace.sets[0]?.report?.metadata.configurationId).toBe(
-      'lucky888-bathala-prototype-v1',
-    );
+    expect(workspace.sets[0]?.report?.metadata.configurationId).toBe('lucky888-bathala-aligned-v3');
     expect(workspace.sets[1]?.report?.metadata.configurationId).toBe('profile-b');
     expect(workspace.sets[2]?.report).toBeNull();
     workspace = removeSetReport(workspace, 'sim-2');
@@ -103,7 +101,7 @@ describe('nullable comparison semantics', () => {
     workspace = importIntoSet(workspace, 'sim-1', valid(report), 'a.json');
     workspace = importIntoSet(workspace, 'sim-2', valid(reportB), 'b.json');
     const html = renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels);
-    expect(html).toContain('lucky888-bathala-prototype-v1');
+    expect(html).toContain('lucky888-bathala-aligned-v3');
     expect(html).toContain('profile-b');
     expect(html).toContain('N/A');
     expect(html).not.toMatch(/NaN|Infinity|undefined/);

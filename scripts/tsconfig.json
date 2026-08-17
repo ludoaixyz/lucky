@@ -5,6 +5,8 @@
     "build-math-data.ts",
     "validate-math-data.ts",
     "simulate.ts",
+    "calibrate-bathala.ts",
+    "validate-bathala-calibration.ts",
     "lib/source-loader.ts",
     "tests/bathala-source.test.ts",
     "vitest.config.ts"

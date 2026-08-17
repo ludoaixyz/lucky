@@ -31,7 +31,7 @@ function rawFixture(): Record<string, unknown> {
     readFileSync(
       resolve(
         process.cwd(),
-        'apps/math-dashboard/public/reports/bathala-simulation-2026-100000.json',
+        'apps/math-dashboard/public/reports/bathala-simulation-2026-1000000.json',
       ),
       'utf8',
     ),

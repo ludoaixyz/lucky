@@ -24,7 +24,7 @@ function fixture(): SimulationReport {
     readFileSync(
       resolve(
         process.cwd(),
-        'apps/math-dashboard/public/reports/bathala-simulation-2026-100000.json',
+        'apps/math-dashboard/public/reports/bathala-simulation-2026-1000000.json',
       ),
       'utf8',
     ),
@@ -63,12 +63,12 @@ describe('derived analytics layer', () => {
       report.metrics.rtp,
       8,
     );
-    expect(d.featureOneInN).toBe(5000);
+    expect(d.featureOneInN).toBeCloseTo(1 / report.metrics.featureFrequency, 12);
     expect(d.ciWidth).toBeCloseTo(
       report.metrics.confidenceInterval95[1] - report.metrics.confidenceInterval95[0],
       12,
     );
-    expect(d.highestObservedTailThreshold).toBe(500);
+    expect(d.highestObservedTailThreshold).toBe(2500);
     expect(JSON.stringify(report)).toBe(before);
   });
 });
@@ -100,8 +100,8 @@ describe('management target evaluation', () => {
       rtp: {
         metric: 'rtp',
         type: 'range',
-        minimum: 0.7,
-        warningMinimum: 0.6,
+        minimum: report.metrics.rtp + 0.01,
+        warningMinimum: report.metrics.rtp - 0.01,
         criticality: 'critical',
       },
     };
@@ -109,8 +109,8 @@ describe('management target evaluation', () => {
       rtp: {
         metric: 'rtp',
         type: 'minimum',
-        minimum: 0.9,
-        warningMinimum: 0.8,
+        minimum: report.metrics.rtp + 0.1,
+        warningMinimum: report.metrics.rtp + 0.05,
         criticality: 'critical',
       },
     };
@@ -118,7 +118,7 @@ describe('management target evaluation', () => {
     expect(overallStatus(report, warn)).toBe('WARN');
     expect(overallStatus(report, fail)).toBe('FAIL');
     expect(evaluateTargets(report, fail).find((x) => x.key === 'rtp')?.delta).toBeCloseTo(
-      report.metrics.rtp - 0.9,
+      report.metrics.rtp - (report.metrics.rtp + 0.1),
       12,
     );
   });

@@ -72,11 +72,11 @@ const envelope = {
   metrics: report,
 };
 await writeFile(output, `${JSON.stringify(envelope, null, 2)}\n`);
-if (spins === 100_000 && seed === 2026)
+if (spins === 1_000_000 && seed === 2026)
   await writeFile(
     resolve(
       process.cwd(),
-      'apps/math-dashboard/public/reports/bathala-simulation-2026-100000.json',
+      'apps/math-dashboard/public/reports/bathala-simulation-2026-1000000.json',
     ),
     `${JSON.stringify(envelope, null, 2)}\n`,
   );
