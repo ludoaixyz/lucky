@@ -9,6 +9,7 @@
     "src/main.ts",
     "src/config/load-config.ts",
     "src/workbench/**/*.ts",
+    "src/presentation/**/*.ts",
     "src/vite-env.d.ts",
     "vite.config.ts"
   ],

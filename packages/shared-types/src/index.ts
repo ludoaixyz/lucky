@@ -568,6 +568,10 @@ export interface TumbleChainResult {
 }
 export interface FreeGameSpinResult {
   readonly index: number;
+  /** Present only when trace mode is enabled. */
+  readonly initialBoard?: Board;
+  /** Presentation snapshot only; mathematical evaluation is already complete. */
+  readonly finalBoard: Board;
   readonly accumulatedMultiplierBefore: number;
   readonly tumbleRounds: readonly TumbleRound[];
   readonly accumulatedMultiplierAfter: number;
@@ -623,6 +627,8 @@ export interface SpinRecord {
   readonly totalWin: number;
   readonly winMultiple: number;
   readonly winning: boolean;
+  readonly winOutcomes: readonly WinOutcome[];
+  readonly totalTumbleRounds: number;
   readonly baseTumbleRounds: number;
   readonly freeGameTumbleRounds: number;
   readonly maximumTumbleDepth: number;
@@ -638,6 +644,18 @@ export interface SpinRecord {
   readonly retriggerCount: number;
   readonly endingFreeGameMultiplier?: number;
   readonly maximumWinApplied: boolean;
+}
+
+export interface WinOutcome {
+  readonly phase: 'base' | 'free';
+  readonly freeGameIndex?: number;
+  /** Zero is the initial winning board; positive values are subsequent tumbles. */
+  readonly tumbleIndex: number;
+  readonly symbolId: RegularSymbolId;
+  readonly symbolCount: number;
+  readonly basePayoutMultiple: number;
+  readonly multiplierApplied: number;
+  readonly creditedPayoutMultiple: number;
 }
 export interface BathalaSimulationConfig {
   readonly spins: number;

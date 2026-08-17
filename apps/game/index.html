@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Lucky888 Bathala-style interactive slot math workbench" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>LUCKY888 — Interactive Math Workbench</title>
+    <title>LUCKY888 — Math Workbench</title>
   </head>
   <body>
     <main>
@@ -13,7 +13,7 @@
         <div class="brand">
           <img src="/assets/images/lucky888-three-dragons.svg" alt="Lucky888 three dragons" />
           <div>
-            <p>INTERACTIVE MATH WORKBENCH</p>
+            <p>MATH WORKBENCH</p>
             <h1>LUCKY888</h1>
           </div>
         </div>
@@ -34,34 +34,69 @@
       </header>
 
       <div class="workspace">
-        <section class="game-panel" aria-labelledby="board-title">
-          <div class="heading">
-            <div>
-              <p class="eyebrow">6 × 5 · COUNT ANYWHERE</p>
-              <h2 id="board-title">Bathala-style prototype</h2>
+        <div class="game-column">
+          <section class="game-panel" aria-label="Lucky888 playable game">
+            <div class="reel-toolbar">
+              <button id="rules-button" class="tertiary" type="button">RULES &amp; PAYTABLE</button>
             </div>
-            <div id="mode-badge" class="mode-badge">BASE GAME</div>
-          </div>
-          <div
-            id="game"
-            class="board"
-            role="img"
-            aria-label="Six-column by five-row Lucky888 board"
-          ></div>
-          <div class="resolution-strip" aria-live="polite">
-            <span id="tumble-state">Tumbles —</span><span id="bathala-state">Bathala —</span
-            ><span id="multiplier-state">Multiplier —</span>
-          </div>
-          <p id="message" class="message" aria-live="polite">Loading configuration…</p>
-        </section>
+            <div
+              id="game"
+              class="board"
+              role="img"
+              aria-label="Six-column by five-row Lucky888 board"
+            ></div>
+            <div id="feature-status" class="feature-status" aria-live="polite" hidden></div>
+            <div class="resolution-strip" aria-live="polite">
+              <div class="resolution-metric">
+                <span>TUMBLES</span><strong id="tumble-state">—</strong>
+              </div>
+              <div class="resolution-metric">
+                <span>BATHALA</span><strong id="bathala-state">—</strong>
+              </div>
+              <div class="resolution-metric">
+                <span>MULTIPLIER</span><strong id="multiplier-state">—</strong>
+              </div>
+            </div>
+            <p id="message" class="message" aria-live="polite">Loading configuration…</p>
+          </section>
+
+          <section class="player-controls" aria-label="Game controls">
+            <dl class="credit-readout">
+              <div>
+                <dt>BALANCE</dt>
+                <dd id="balance">0.00</dd>
+              </div>
+              <div>
+                <dt>BET</dt>
+                <dd id="bet-display">1.00</dd>
+              </div>
+              <div>
+                <dt>WIN</dt>
+                <dd><span id="win-credits">0.00</span><small id="win-multiple">0.00×</small></dd>
+              </div>
+            </dl>
+            <label>Bet Size<select id="bet-select"></select></label
+            ><label>Auto Spins<select id="auto-select"></select></label>
+            <fieldset class="speed-control">
+              <legend>SPEED</legend>
+              <label
+                ><input type="radio" name="spin-speed" value="normal" checked /><span
+                  >x1</span
+                ></label
+              >
+              <label><input type="radio" name="spin-speed" value="x1" /><span>x2</span></label>
+              <label><input type="radio" name="spin-speed" value="x2" /><span>x3</span></label>
+            </fieldset>
+            <div class="spin-wrap">
+              <button id="spin" class="spin-button" type="button">SPIN</button
+              ><span id="auto-progress">Ready</span>
+            </div>
+          </section>
+        </div>
 
         <aside class="history-panel" aria-labelledby="history-title">
           <div class="panel-heading">
-            <div>
-              <p class="eyebrow">PAID-SPIN OUTCOMES</p>
-              <h2 id="history-title">Spin History</h2>
-            </div>
-            <span>Latest 10</span>
+            <h2 id="history-title">Spin History</h2>
           </div>
           <section class="session-summary" aria-label="Session observations">
             <div><span>Spins</span><strong id="stat-spins">0</strong></div>
@@ -84,31 +119,8 @@
         </aside>
       </div>
 
-      <section class="player-controls" aria-label="Game controls">
-        <dl class="credit-readout">
-          <div>
-            <dt>BALANCE</dt>
-            <dd id="balance">0.00</dd>
-          </div>
-          <div>
-            <dt>BET</dt>
-            <dd id="bet-display">1.00</dd>
-          </div>
-          <div>
-            <dt>WIN</dt>
-            <dd><span id="win-credits">0.00</span><small id="win-multiple">0.00×</small></dd>
-          </div>
-        </dl>
-        <label>Bet Size<select id="bet-select"></select></label
-        ><label>Auto Spins<select id="auto-select"></select></label>
-        <div class="spin-wrap">
-          <button id="spin" class="spin-button" type="button">SPIN</button
-          ><span id="auto-progress">Ready</span>
-        </div>
-      </section>
-
       <details class="live-math">
-        <summary>LIVE MATH <span>Session estimates · unstable at low sample counts</span></summary>
+        <summary>LIVE MATH <span>TAP TO OPEN/CLOSE</span></summary>
         <div class="live-grid">
           <div><span>Sample</span><strong id="live-sample">0 spins</strong></div>
           <div><span>Target RTP</span><strong id="live-target-rtp">—</strong></div>
@@ -123,7 +135,7 @@
       <details class="math-lab" id="math-lab">
         <summary>
           <span>MATH LAB <em id="dirty-state">ACTIVE CONFIG</em></span
-          ><small>Designer controls · collapsed by default</small>
+          ><small>TAP TO OPEN/CLOSE</small>
         </summary>
         <div class="lab-body">
           <p class="lab-note">
@@ -230,6 +242,7 @@
             </fieldset>
           </form>
           <div class="lab-actions">
+            <button id="format-json" class="tertiary" type="button">FORMAT JSON</button>
             <button id="discard-config" class="tertiary" type="button">DISCARD CHANGES</button
             ><button id="import-config" class="tertiary" type="button">IMPORT JSON</button
             ><input id="config-file" type="file" accept="application/json,.json" hidden /><button
@@ -243,6 +256,31 @@
         </div>
       </details>
     </main>
+    <dialog
+      id="rules-dialog"
+      class="rules-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rules-title"
+    >
+      <div class="rules-modal">
+        <header class="rules-header">
+          <div>
+            <p class="eyebrow">ACTIVE CONFIGURATION REFERENCE</p>
+            <h2 id="rules-title">Rules &amp; Paytable</h2>
+          </div>
+          <button
+            id="rules-close"
+            class="tertiary"
+            type="button"
+            aria-label="Close Rules and Paytable"
+          >
+            CLOSE
+          </button>
+        </header>
+        <div id="rules-content" class="rules-content"></div>
+      </div>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

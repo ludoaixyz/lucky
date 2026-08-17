@@ -3,6 +3,7 @@ import type {
   BathalaSpinResult,
   SpinRecord,
   TumbleRound,
+  WinOutcome,
 } from '@lucky/shared-types';
 
 export interface SpinRecordContext {
@@ -32,6 +33,30 @@ export function createSpinRecord(
   );
   const baseMultiple = Math.min(result.baseGameWin, result.totalWin);
   const featureMultiple = Math.max(0, result.totalWin - baseMultiple);
+  const capScale = result.uncappedTotalWin === 0 ? 1 : result.totalWin / result.uncappedTotalWin;
+  const roundOutcomes = (
+    rounds: readonly TumbleRound[],
+    phase: WinOutcome['phase'],
+    freeGameIndex?: number,
+  ): WinOutcome[] =>
+    rounds.flatMap((round) =>
+      round.winningSymbols.map((win) => ({
+        phase,
+        ...(freeGameIndex === undefined ? {} : { freeGameIndex }),
+        tumbleIndex: round.index,
+        symbolId: win.symbol,
+        symbolCount: win.count,
+        basePayoutMultiple: win.payout,
+        multiplierApplied: round.effectiveMultiplier,
+        creditedPayoutMultiple: win.payout * round.effectiveMultiplier * capScale,
+      })),
+    );
+  const winOutcomes = [
+    ...roundOutcomes(result.tumbleRounds, 'base'),
+    ...(result.feature?.spins.flatMap((spin) =>
+      roundOutcomes(spin.tumbleRounds, 'free', spin.index),
+    ) ?? []),
+  ];
   return {
     sessionId: context.sessionId,
     sessionSeed: context.sessionSeed,
@@ -47,6 +72,8 @@ export function createSpinRecord(
     totalWin: scaleNormalizedWin(result.totalWin, context.bet),
     winMultiple: result.totalWin,
     winning: result.totalWin > 0,
+    winOutcomes,
+    totalTumbleRounds: allRounds.length,
     baseTumbleRounds: result.tumbleRounds.length,
     freeGameTumbleRounds: freeRounds.length,
     maximumTumbleDepth: Math.max(

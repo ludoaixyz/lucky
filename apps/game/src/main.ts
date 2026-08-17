@@ -16,6 +16,16 @@ import {
   serializeMathConfig,
 } from './workbench/math-config.js';
 import { createSpinRecord } from './workbench/spin-record.js';
+import { recordMechanicValues, resultMechanicValues } from './workbench/mechanics-presentation.js';
+import { createSymbolElement } from './presentation/symbol-visuals.js';
+import { renderRulesContent } from './presentation/rules-dialog.js';
+import {
+  ReelPresentationController,
+  resolvePresentCommit,
+  runAutoSpinSequence,
+  speedLabel,
+  type SpinSpeed,
+} from './presentation/reel-presentation.js';
 
 const byId = <T extends HTMLElement>(id: string): T => {
   const node = document.querySelector<T>(`#${id}`);
@@ -55,34 +65,28 @@ const getWeight = (weights: readonly WeightedSymbol[], symbol: WeightedSymbol['s
 
 function renderBoard(board: Board): void {
   byId('game').replaceChildren(
-    ...Array.from({ length: 5 }, (_, row) =>
-      board.map((column) => {
-        const cell = column[row];
-        const tile = document.createElement('div');
-        tile.className = `symbol symbol--${cell?.symbol.toLowerCase() ?? 'empty'}`;
-        tile.textContent =
-          cell?.symbol === 'MULTIPLIER' ? `×${cell.multiplierValue}` : (cell?.symbol ?? '');
-        return tile;
-      }),
-    ).flat(),
+    ...board.map((column) => {
+      const reel = document.createElement('div');
+      reel.className = 'reel';
+      const track = document.createElement('div');
+      track.className = 'reel-track';
+      track.replaceChildren(...column.map((cell) => createSymbolElement(cell)));
+      reel.append(track);
+      return reel;
+    }),
   );
 }
 
 function summarizeResult(result: BathalaSpinResult): void {
-  const rounds = [
-    ...result.tumbleRounds,
-    ...(result.feature?.spins.flatMap((spin) => spin.tumbleRounds) ?? []),
-  ];
-  const bathala = rounds.filter((round) => round.bathala?.occurred).length;
-  const multipliers = rounds.flatMap((round) => round.multiplierSymbols.map(({ value }) => value));
-  byId('tumble-state').textContent =
-    `Tumbles ${result.tumbleRounds.length + (result.feature?.spins.reduce((sum, spin) => sum + spin.tumbleRounds.length, 0) ?? 0)}`;
-  byId('bathala-state').textContent = `Bathala ${bathala || '—'}`;
-  byId('multiplier-state').textContent =
-    `Multiplier ${multipliers.length ? multipliers.map((value) => `${value}×`).join(' + ') : '—'}`;
-  byId('mode-badge').textContent = result.feature
-    ? `FEATURE · ${result.feature.totalSpinsPlayed} FREE GAMES`
-    : 'BASE GAME';
+  const mechanics = resultMechanicValues(result);
+  byId('tumble-state').textContent = mechanics.tumbles;
+  byId('bathala-state').textContent = mechanics.bathala;
+  byId('multiplier-state').textContent = mechanics.multiplier;
+  const featureStatus = byId('feature-status');
+  featureStatus.hidden = !result.feature;
+  featureStatus.textContent = result.feature
+    ? `FREE GAMES ${result.feature.totalSpinsPlayed} PLAYED · MULTIPLIER ${result.feature.endingMultiplier}×`
+    : '';
 }
 
 function historyRow(record: SpinRecord): HTMLElement {
@@ -94,7 +98,39 @@ function historyRow(record: SpinRecord): HTMLElement {
     record.multiplierAppeared ? 'MULTI' : '',
     record.featureTriggered ? 'FEATURE' : '',
   ].filter(Boolean);
-  details.innerHTML = `<summary><span><b>#${record.spinNumber}</b><small>Bet ${number(record.bet)}</small></span><strong>${number(record.totalWin)}<small>${number(record.winMultiple)}×</small></strong></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${number(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${number(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${record.multiplierValues.length ? record.multiplierValues.join(' + ') : '—'}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${record.endingFreeGameMultiplier ?? 0}×</dd></div>` : ''}</dl>`;
+  const mechanics = recordMechanicValues(record);
+  const compactOutcomes = record.winOutcomes.length
+    ? record.winOutcomes
+        .slice(0, 2)
+        .map((outcome) => `${outcome.symbolId}×${outcome.symbolCount}`)
+        .join(' · ') +
+      (record.winOutcomes.length > 2 ? ` · +${record.winOutcomes.length - 2} more` : '')
+    : record.featureTriggered
+      ? `SCATTER×${record.scatterCount} · FEATURE`
+      : record.totalWin > 0
+        ? `SCATTER×${record.scatterCount}`
+        : 'No winning outcomes';
+  const groups = new Map<string, typeof record.winOutcomes>();
+  for (const outcome of record.winOutcomes) {
+    const phase = outcome.phase === 'base' ? 'Base Game' : `Free Game ${outcome.freeGameIndex}`;
+    const round = outcome.tumbleIndex === 0 ? 'Initial Board' : `Tumble ${outcome.tumbleIndex}`;
+    const key = `${phase} · ${round}`;
+    groups.set(key, [...(groups.get(key) ?? []), outcome]);
+  }
+  const outcomeDetail = record.winOutcomes.length
+    ? `<section class="winning-outcomes"><h4>Winning Outcomes</h4>${[...groups.entries()]
+        .map(
+          ([label, outcomes]) =>
+            `<div class="outcome-round"><h5>${label}</h5>${outcomes
+              .map(
+                (outcome) =>
+                  `<p><b>${outcome.symbolId} × ${outcome.symbolCount}</b><span>${number(outcome.basePayoutMultiple)}× × ${number(outcome.multiplierApplied)} → ${number(outcome.creditedPayoutMultiple)}×</span></p>`,
+              )
+              .join('')}</div>`,
+        )
+        .join('')}</section>`
+    : '';
+  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>Bet ${number(record.bet)}</small></span><em>${compactOutcomes}</em></span><strong>${number(record.totalWin)}<small>${number(record.winMultiple)}×</small></strong></span><span class="history-mechanics"><span><small>TUMBLES</small><b>${mechanics.tumbles}</b></span><span><small>BATHALA</small><b>${mechanics.bathala}</b></span><span><small>MULTIPLIER</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${number(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${number(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${mechanics.multiplier}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${record.endingFreeGameMultiplier ?? 0}×</dd></div>` : ''}</dl>${outcomeDetail}`;
   return details;
 }
 
@@ -108,11 +144,20 @@ async function boot(): Promise<void> {
   let running = false;
   let stopRequested = false;
   let lastWin = 0;
+  const presenter = new ReelPresentationController(byId('game'));
+  const rulesDialog = byId<HTMLDialogElement>('rules-dialog');
+  const rulesButton = byId<HTMLButtonElement>('rules-button');
+  const rulesContent = byId('rules-content');
 
   const controls = {
     spin: byId<HTMLButtonElement>('spin'),
     bet: byId<HTMLSelectElement>('bet-select'),
     auto: byId<HTMLSelectElement>('auto-select'),
+    speed: [...document.querySelectorAll<HTMLInputElement>('input[name="spin-speed"]')],
+  };
+  const selectedSpeed = (): SpinSpeed => {
+    const selected = controls.speed.find((input) => input.checked)?.value;
+    return selected === 'x1' || selected === 'x2' ? selected : 'normal';
   };
   const refreshOptions = (): void => {
     const chosenBet = Number(controls.bet.value) || active.betting.defaultBet;
@@ -173,18 +218,24 @@ async function boot(): Promise<void> {
     controls.spin.disabled = !running && credits < Number(controls.bet.value);
     controls.bet.disabled = running;
     controls.auto.disabled = running;
+    byId<HTMLButtonElement>('apply-config').disabled = running || !manager.isDirty();
+    byId<HTMLButtonElement>('new-session').disabled = running;
+    byId<HTMLButtonElement>('discard-config').disabled = running;
+    byId<HTMLButtonElement>('import-config').disabled = running;
+    byId<HTMLButtonElement>('config-file').disabled = running;
   };
   const resetSession = (resetCredits = true): void => {
+    presenter.clearPersistentWinPresentation();
     session = newSessionIdentity();
     rng = new SeededRandom(session.seed);
     history = new HistoryStore(active.limits.maximumSessionRecords);
     lastWin = 0;
     if (resetCredits) credits = active.betting.startingCredits;
     renderBoard(generateBoard(active, 'base', new SeededRandom(session.seed), { nextId: 1 }));
-    byId('tumble-state').textContent = 'Tumbles —';
-    byId('bathala-state').textContent = 'Bathala —';
-    byId('multiplier-state').textContent = 'Multiplier —';
-    byId('mode-badge').textContent = 'BASE GAME';
+    byId('tumble-state').textContent = '—';
+    byId('bathala-state').textContent = '—';
+    byId('multiplier-state').textContent = '—';
+    byId('feature-status').hidden = true;
     byId('message').textContent = 'Fresh deterministic session ready.';
     renderSession();
   };
@@ -194,32 +245,63 @@ async function boot(): Promise<void> {
       byId('message').textContent = 'Auto spins stopped: insufficient balance.';
       return false;
     }
+    const speed = selectedSpeed();
+    presenter.clearPersistentWinPresentation();
     credits -= bet;
-    const result = resolveSpin(active, rng, true);
+    renderSession();
+    byId('message').textContent = `Reels spinning · ${speedLabel(speed)} speed.`;
     const next = history.getAllSessionSpins().length + 1;
-    const record = createSpinRecord(active, result, {
-      sessionId: session.id,
-      sessionSeed: session.seed,
-      spinNumber: next,
-      timestamp: new Date().toISOString(),
-      bet,
+    let committedRecord: SpinRecord | undefined;
+    await resolvePresentCommit({
+      resolve: () => resolveSpin(active, rng, true),
+      present: async (result) => {
+        await presenter.present(
+          result.initialBoard ?? result.finalBoard,
+          speed,
+          result.tumbleRounds,
+        );
+        for (const freeSpin of result.feature?.spins ?? []) {
+          presenter.complete();
+          const featureStatus = byId('feature-status');
+          featureStatus.hidden = false;
+          featureStatus.textContent = `FREE GAMES ${freeSpin.index} / ${result.feature?.totalSpinsPlayed ?? freeSpin.index} · MULTIPLIER ${freeSpin.accumulatedMultiplierAfter}×`;
+          await presenter.present(
+            freeSpin.initialBoard ?? freeSpin.finalBoard,
+            speed,
+            freeSpin.tumbleRounds,
+          );
+        }
+      },
+      commit: (result) => {
+        const record = createSpinRecord(active, result, {
+          sessionId: session.id,
+          sessionSeed: session.seed,
+          spinNumber: next,
+          timestamp: new Date().toISOString(),
+          bet,
+        });
+        committedRecord = record;
+        credits += record.totalWin;
+        lastWin = record.totalWin;
+        history.appendSpin(record);
+        summarizeResult(result);
+      },
     });
-    credits += record.totalWin;
-    lastWin = record.totalWin;
-    history.appendSpin(record);
-    renderBoard(result.finalBoard);
-    summarizeResult(result);
-    byId('message').textContent = result.feature
+    presenter.complete();
+    const record = committedRecord;
+    if (!record) throw new Error('Completed spin was not committed');
+    presenter.retainCompletedWinPresentation(record.totalWin);
+    byId('message').textContent = record.featureTriggered
       ? `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won ${number(record.totalWin)} credits (${number(record.winMultiple)}×).`
       : `Spin #${next} complete · Won ${number(record.totalWin)} credits (${number(record.winMultiple)}×).`;
     byId('auto-progress').textContent = total > 1 ? `${current} / ${total}` : 'Complete';
     renderSession();
-    await new Promise((resolve) => window.setTimeout(resolve, total > 1 ? 180 : 0));
     return true;
   };
   const run = async (): Promise<void> => {
     if (running) {
       stopRequested = true;
+      presenter.stop();
       controls.spin.textContent = 'STOPPING…';
       return;
     }
@@ -231,11 +313,9 @@ async function boot(): Promise<void> {
     const total = Number(controls.auto.value);
     let completed = 0;
     try {
-      while (completed < total && !stopRequested) {
-        if (!(await playOne(completed + 1, total))) break;
-        completed += 1;
-      }
+      completed = await runAutoSpinSequence(total, playOne, () => stopRequested);
     } finally {
+      if (presenter.state() !== 'idle') presenter.complete();
       running = false;
       stopRequested = false;
       controls.spin.textContent = 'SPIN';
@@ -363,7 +443,7 @@ async function boot(): Promise<void> {
     const dirty = manager.isDirty();
     byId('dirty-state').textContent = dirty ? 'UNAPPLIED CHANGES' : 'ACTIVE CONFIG';
     byId('dirty-state').classList.toggle('dirty', dirty);
-    byId<HTMLButtonElement>('apply-config').disabled = !dirty;
+    byId<HTMLButtonElement>('apply-config').disabled = running || !dirty;
   };
   byId('math-form').addEventListener('input', () => {
     try {
@@ -395,6 +475,7 @@ async function boot(): Promise<void> {
         return;
       stopRequested = true;
       active = manager.apply();
+      renderRulesContent(rulesContent, active);
       refreshOptions();
       populateDraft();
       resetSession(true);
@@ -411,6 +492,21 @@ async function boot(): Promise<void> {
       'application/json;charset=utf-8',
     ),
   );
+  byId('format-json').addEventListener('click', () => {
+    const editors = [inputs.baseWeights, inputs.freeWeights, inputs.multipliers, inputs.paytable];
+    try {
+      const formatted = editors.map((editor) => JSON.stringify(JSON.parse(editor.value), null, 2));
+      editors.forEach((editor, index) => {
+        editor.value = formatted[index] ?? editor.value;
+      });
+      readDraft();
+      byId('validation-errors').hidden = true;
+    } catch (error) {
+      const box = byId('validation-errors');
+      box.hidden = false;
+      box.textContent = `JSON formatting stopped: ${error instanceof Error ? error.message : String(error)}`;
+    }
+  });
   byId('import-config').addEventListener('click', () =>
     byId<HTMLInputElement>('config-file').click(),
   );
@@ -443,9 +539,24 @@ async function boot(): Promise<void> {
     )
       resetSession(true);
   });
+  rulesButton.addEventListener('click', () => {
+    renderRulesContent(rulesContent, active);
+    rulesDialog.showModal();
+  });
+  byId('rules-close').addEventListener('click', () => rulesDialog.close());
+  rulesDialog.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !rulesDialog.open) return;
+    event.preventDefault();
+    rulesDialog.close();
+  });
+  rulesDialog.addEventListener('click', (event) => {
+    if (event.target === rulesDialog) rulesDialog.close();
+  });
+  rulesDialog.addEventListener('close', () => rulesButton.focus());
   controls.spin.addEventListener('click', () => void run());
   controls.bet.addEventListener('change', renderSession);
   refreshOptions();
+  renderRulesContent(rulesContent, active);
   populateDraft();
   resetSession(true);
 }

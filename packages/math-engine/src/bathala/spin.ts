@@ -63,6 +63,8 @@ export function resolveFreeGameFeature(
     totalWin += win;
     spins.push({
       index: spins.length + 1,
+      ...(chain.initialBoard ? { initialBoard: chain.initialBoard } : {}),
+      finalBoard: chain.finalBoard,
       accumulatedMultiplierBefore: before,
       tumbleRounds: chain.rounds,
       accumulatedMultiplierAfter: accumulatedMultiplier,
