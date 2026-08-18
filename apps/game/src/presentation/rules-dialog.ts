@@ -18,6 +18,18 @@ function section(title: string): HTMLElement {
   return element;
 }
 
+type CopyPart = string | HTMLElement;
+
+function paragraph(...parts: CopyPart[]): HTMLParagraphElement {
+  const element = node('p');
+  element.append(...parts);
+  return element;
+}
+
+function strong(text: string): HTMLElement {
+  return node('strong', undefined, text);
+}
+
 function payoutRange(award: CountPayAward): string {
   return award.minCount === award.maxCount
     ? String(award.minCount)
@@ -27,10 +39,11 @@ function payoutRange(award: CountPayAward): string {
 export function renderRulesContent(container: HTMLElement, config: ActiveGameConfig): void {
   const howToWin = section('How to Win');
   howToWin.append(
-    node(
-      'p',
-      undefined,
-      `${config.minimumWinCount} or more identical regular symbols anywhere across the complete ${config.columns}×${config.rows} board produce a count-pay win. No paylines are used.`,
+    paragraph(
+      'Land ',
+      strong(`${config.minimumWinCount} or more matching Pay Symbols`),
+      ` anywhere on the ${config.columns}×${config.rows} grid to win. More matching symbols award higher payouts. `,
+      strong('No paylines are used.'),
     ),
   );
 
@@ -62,7 +75,7 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
   const header = node('tr');
   header.append(
     node('th', undefined, 'Symbol'),
-    ...ranges.map((range) => node('th', undefined, range)),
+    ...ranges.map((range) => node('th', undefined, `${range} Symbols`)),
   );
   const thead = node('thead');
   thead.append(header);
@@ -80,82 +93,130 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
   }
   table.append(thead, tbody);
   tableWrap.append(table);
-  paytable.append(node('p', 'rules-caption', 'Payouts are normalized bet multiples.'), tableWrap);
+  const paytableCaption = paragraph(strong('All payouts are shown as multiples of the Total Bet.'));
+  paytableCaption.className = 'rules-caption';
+  paytable.append(paytableCaption, tableWrap);
 
   const tumble = section('Tumble');
   tumble.append(
-    node(
-      'p',
-      undefined,
-      `After a count-pay win, winning symbols are removed, remaining symbols collapse, and new symbols refill the board. Evaluation continues until no additional win remains, subject to the configured ${config.maximumTumbleRounds}-round safety limit.`,
+    paragraph(
+      'After a win, the ',
+      strong('winning symbols are removed'),
+      '. Remaining symbols fall into place and new symbols drop in from above. The grid is then checked again for another win.',
     ),
+    paragraph(strong('Tumbles continue until no new win is formed.')),
   );
 
-  const bathala = section('Bathala');
+  const bathala = section('Bathala Skill');
+  const firstEligibleSymbol = config.bathala.eligibleSymbols[0] ?? '';
+  const lastEligibleSymbol = config.bathala.eligibleSymbols.at(-1) ?? '';
+  const eligibleSymbolRange =
+    firstEligibleSymbol === lastEligibleSymbol
+      ? firstEligibleSymbol
+      : `${firstEligibleSymbol}–${lastEligibleSymbol}`;
   const removal =
     config.bathala.removeMode === 'all_instances'
-      ? 'all instances of the selected eligible symbol'
-      : `${config.bathala.randomCount?.minimum ?? 0}–${config.bathala.randomCount?.maximum ?? 0} instances`;
+      ? 'all symbols of that type from the grid'
+      : `${config.bathala.randomCount?.minimum ?? 0}–${config.bathala.randomCount?.maximum ?? 0} symbols of that type from the grid`;
   bathala.append(
-    node(
-      'p',
-      undefined,
-      config.bathala.enabled
-        ? `After scoring symbols are eliminated, Bathala selects from ${config.bathala.eligibleSymbols.join(', ')} and removes ${removal}. The removal awards no direct payout; the board then collapses, refills, and is evaluated again.`
-        : 'Bathala is disabled in the active configuration.',
-    ),
+    ...(config.bathala.enabled
+      ? [
+          paragraph(
+            'After each winning Tumble, ',
+            strong(
+              `Bathala randomly selects one Low Pay Symbol (${eligibleSymbolRange}) and removes ${removal}.`,
+            ),
+          ),
+          paragraph(
+            "Bathala's removal does not award a payout by itself. Remaining symbols fall into place, new symbols drop in, and the next Tumble is evaluated.",
+          ),
+          ...(config.bathala.allowNoEligibleTarget
+            ? [paragraph('If no Low Pay Symbols remain, Bathala does not activate.')]
+            : []),
+        ]
+      : [paragraph('The Bathala Skill is not active.')]),
   );
 
   const scatter = section('Scatter');
-  const scatterPays = Object.entries(config.scatter.payouts)
-    .map(([count, payout]) => `${count}: ${payout}×`)
-    .join(' · ');
+  scatter.append(paragraph('Scatter Symbols pay anywhere on the grid.'));
+  const scatterPayouts = Object.entries(config.scatter.payouts).sort(
+    ([left], [right]) => Number(left) - Number(right),
+  );
+  for (const [index, [count, payout]] of scatterPayouts.entries()) {
+    scatter.append(
+      paragraph(
+        strong(`${count}${index === scatterPayouts.length - 1 ? '+' : ''} Scatters:`),
+        ` ${payout}× Total Bet`,
+      ),
+    );
+  }
   scatter.append(
-    node(
-      'p',
-      undefined,
-      `Scatters are evaluated on the final board. Configured scatter pays: ${scatterPays || 'none'}. ${config.scatter.baseGameTrigger.minimumScatters}+ Scatters trigger Free Games.`,
+    paragraph(
+      'Landing ',
+      strong(
+        `${config.scatter.baseGameTrigger.minimumScatters} or more Scatters in the Base Game awards ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Spins.`,
+      ),
     ),
   );
+  if (config.scatter.evaluationTiming === 'final_board')
+    scatter.append(
+      paragraph('Scatter Symbols are evaluated ', strong('after all Tumbles have finished.')),
+    );
 
-  const freeGames = section('Free Games');
-  freeGames.append(
-    node(
-      'p',
-      undefined,
-      `${config.scatter.baseGameTrigger.minimumScatters}+ Scatters award ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Games. ${config.scatter.freeGameRetrigger.minimumScatters}+ Scatters during the feature add ${config.scatter.freeGameRetrigger.additionalFreeGames} games. Multiplier symbols collected on winning free-game rounds persist additively through the feature.`,
+  const freeSpins = section('Free Spins');
+  freeSpins.append(
+    paragraph(
+      'Landing ',
+      strong(
+        `${config.scatter.baseGameTrigger.minimumScatters} or more Scatters in the Base Game awards ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Spins.`,
+      ),
+    ),
+    paragraph(
+      'Landing ',
+      strong(
+        `${config.scatter.freeGameRetrigger.minimumScatters} or more Scatters during Free Spins awards ${config.scatter.freeGameRetrigger.additionalFreeGames} additional Free Spins.`,
+      ),
+    ),
+    paragraph(
+      'Multipliers collected from winning Tumbles are ',
+      strong('added together and carried forward for the remainder of the Free Spins feature.'),
     ),
   );
 
   const multipliers = section('Multipliers');
   multipliers.append(
-    node(
-      'p',
-      undefined,
-      'On a winning base-game round, visible multiplier values are added together and applied to that round. During Free Games, newly collected multiplier values persist additively for later winning rounds.',
+    paragraph(
+      'When a winning Tumble contains one or more ',
+      strong('Multiplier Symbols'),
+      ', their values are added together and applied to the win.',
+    ),
+    paragraph(
+      'During ',
+      strong('Free Spins'),
+      ', collected multipliers are added to the ',
+      strong('current feature multiplier'),
+      ' and remain active for subsequent winning Tumbles.',
     ),
   );
+  if (config.freeGameMultiplierCollectionTrigger === 'winning_round')
+    multipliers.append(
+      paragraph(
+        'Multiplier Symbols are collected ',
+        strong('only when they appear on a winning Tumble.'),
+      ),
+    );
   const multiplierGrid = node('div', 'rules-multiplier-grid');
   for (const entry of config.multiplierValues)
     multiplierGrid.append(node('span', undefined, `${entry.value}×`));
-  const technical = node('details', 'rules-technical');
-  technical.append(
-    node('summary', undefined, 'Distribution weights'),
-    node(
-      'p',
-      undefined,
-      config.multiplierValues.map(({ value, weight }) => `${value}×:${weight}`).join(' · '),
-    ),
-  );
-  multipliers.append(multiplierGrid, technical);
+  multipliers.append(multiplierGrid);
 
-  const limits = section('Max Win / Limits');
+  const limits = section('Max Win');
+  const highestMultiplierSymbol = Math.max(...config.multiplierValues.map(({ value }) => value));
   limits.append(
-    node(
-      'p',
-      undefined,
-      `Maximum credited paid-spin outcome, including its feature: ${config.limits.maximumWinMultiple}× bet. Maximum configured multiplier value: ${config.limits.maximumMultiplier}×.`,
+    paragraph(
+      strong(`Maximum Win: ${config.limits.maximumWinMultiple.toLocaleString('en-US')}× Total Bet`),
     ),
+    paragraph(strong(`Highest Multiplier Symbol: ${highestMultiplierSymbol}×`)),
   );
 
   container.replaceChildren(
@@ -165,7 +226,7 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
     tumble,
     bathala,
     scatter,
-    freeGames,
+    freeSpins,
     multipliers,
     limits,
   );

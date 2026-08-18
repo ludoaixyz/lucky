@@ -962,6 +962,10 @@ describe('falling-board presentation behavior', () => {
         ...config.scatter,
         baseGameTrigger: { ...config.scatter.baseGameTrigger, freeGamesAwarded: 12 },
       },
+      multiplierValues: config.multiplierValues.map((entry, index) =>
+        index === config.multiplierValues.length - 1 ? { ...entry, value: 777 } : entry,
+      ),
+      limits: { ...config.limits, maximumWinMultiple: 12_345, maximumMultiplier: 777 },
     };
     const content = document.createElement('div');
     renderRulesContent(content, changed);
@@ -971,30 +975,37 @@ describe('falling-board presentation behavior', () => {
       'Symbols',
       'Paytable',
       'Tumble',
-      'Bathala',
+      'Bathala Skill',
       'Scatter',
-      'Free Games',
+      'Free Spins',
       'Multipliers',
+      'Max Win',
     ])
       expect(text).toContain(title);
-    expect(text).toContain('award 12 Free Games');
+    expect(text).toContain('awards 12 Free Spins');
     expect(text).toContain('999×');
     expect(
       [...content.querySelectorAll('.rules-paytable thead th')].map((element) =>
         element.textContent?.trim(),
       ),
-    ).toEqual(['Symbol', '8–9', '10–11', '12–30']);
+    ).toEqual(['Symbol', '8–9 Symbols', '10–11 Symbols', '12–30 Symbols']);
     expect(text).not.toMatch(/12–14|15–19|20–24|25–30/u);
     expect(
       [...content.querySelectorAll('.rules-paytable thead th')].map((element) =>
         element.textContent?.trim(),
       ),
-    ).toEqual(['Symbol', '8–9', '10–11', '12–30']);
+    ).toEqual(['Symbol', '8–9 Symbols', '10–11 Symbols', '12–30 Symbols']);
     expect(text).not.toMatch(/12–14|15–19|20–24|25–30/u);
     const l1 = content.querySelector<HTMLElement>('[data-symbol-id="L1"] .symbol-icon');
     expect(l1?.textContent).toBe(BATHALA_SYMBOL_VISUALS.L1.icon);
     expect(rulesReferenceText(config)).toContain(
-      `award ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Games`,
+      `awards ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Spins`,
     );
+    expect(text).toContain('12,345× Total Bet');
+    expect(text).toContain('Highest Multiplier Symbol: 777×');
+    expect(text).not.toMatch(
+      /count-pay|configured|configuration|safety limit|credited|normalized|instances|simulation|Free Games/u,
+    );
+    expect(content.querySelector('.rules-technical')).toBeNull();
   });
 });

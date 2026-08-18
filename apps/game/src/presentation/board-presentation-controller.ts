@@ -213,20 +213,26 @@ export class BoardPresentationController {
     await this.pause(timing.drop.postLandingHold, reduce, timing.win.stoppedHold);
   }
 
-  private async presentWinningRound(round: TumbleRound, speed: SpinSpeed): Promise<void> {
-    this.setState('winHighlight');
-    const groups = round.winningSymbols
-      .map(({ symbol, count }) => `${symbol} × ${count}`)
-      .join(' · ');
-    this.lastWinningGroups = groups;
-    this.board.classList.add('board--win-focus');
-    for (const occurrence of round.multiplierSymbols)
-      this.board
-        .querySelector<HTMLElement>(`.symbol[data-cell-id="${occurrence.id}"]`)
-        ?.classList.add('symbol--multiplier-active');
-    for (const win of round.winningSymbols) await this.presentWinningGroup(win, speed);
-    await this.presentCombinedWin(round, speed);
-  }
+	private async presentWinningRound(round: TumbleRound, speed: SpinSpeed): Promise<void> {
+	  this.setState('winHighlight');
+
+	  const groups = round.winningSymbols
+		.map(({ symbol, count }) => `${symbol} × ${count}`)
+		.join(' · ');
+
+	  this.lastWinningGroups = groups;
+	  this.board.classList.add('board--win-focus');
+
+	  for (const occurrence of round.multiplierSymbols) {
+		this.board
+		  .querySelector<HTMLElement>(`.symbol[data-cell-id="${occurrence.id}"]`)
+		  ?.classList.add('symbol--multiplier-active');
+	  }
+
+	  for (const win of round.winningSymbols) {
+		await this.presentWinningGroup(win, speed);
+	  }
+	}
 
   private async presentWinningGroup(win: SymbolWin, speed: SpinSpeed): Promise<void> {
     const timing = PRESENTATION_TIMINGS[speed].win;

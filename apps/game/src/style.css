@@ -95,6 +95,9 @@ main {
   font-weight: 800;
   overflow-wrap: anywhere;
 }
+.profile-status {
+  visibility: hidden;
+}
 .workspace {
   --game-column-width: 580px;
   display: grid;
@@ -454,7 +457,7 @@ main {
   gap: 0.45rem;
   margin-top: 0.75rem;
   width: 100%;
-  min-height: 3.4rem;
+  min-height: 3rem;
 }
 .resolution-metric {
   display: grid;
@@ -776,14 +779,14 @@ main {
 .speed-control {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.28rem;
-  margin: 0;
+  gap: 0.3rem;
+  margin: 1px;
   padding: 0;
   border: 0;
 }
 .speed-control legend {
   grid-column: 1/-1;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
   padding: 0;
   color: var(--muted);
   font-size: 0.7rem;
@@ -802,9 +805,9 @@ main {
 .speed-control span {
   display: grid;
   place-items: center;
-  min-height: 2.15rem;
+  min-height: 2.25rem;
   border: 1px solid #415678;
-  border-radius: 0.48rem;
+  border-radius: 0.5rem;
   color: #c6d2e6;
   background: #0b1423;
   font-size: 0.72rem;
@@ -1038,6 +1041,7 @@ button:disabled {
   scrollbar-width: thin;
 }
 .rules-section {
+  min-width: 0;
   padding: 0.8rem;
   border: 1px solid #2e4266;
   border-radius: 0.7rem;
@@ -1055,6 +1059,13 @@ button:disabled {
   color: #b5c2d8;
   font-size: 0.75rem;
   line-height: 1.55;
+}
+.rules-section p + p {
+  margin-top: 0.5rem;
+}
+.rules-section p strong {
+  color: #f4f7fb;
+  font-weight: 800;
 }
 .rules-section:has(.rules-table-wrap),
 .rules-section:has(.rules-symbol-grid) {
@@ -1094,6 +1105,7 @@ button:disabled {
   font-size: 0.52rem;
 }
 .rules-table-wrap {
+  max-width: 100%;
   overflow-x: auto;
 }
 .rules-caption {
@@ -1128,18 +1140,6 @@ button:disabled {
   background: #24183a;
   font-size: 0.65rem;
   font-weight: 800;
-}
-.rules-technical {
-  margin-top: 0.55rem;
-}
-.rules-technical summary {
-  color: var(--mint);
-  font-size: 0.68rem;
-  cursor: pointer;
-}
-.rules-technical p {
-  margin-top: 0.4rem;
-  overflow-wrap: anywhere;
 }
 @media (max-width: 1050px) {
   .workspace {

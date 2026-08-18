@@ -141,7 +141,7 @@ function historyRow(record: SpinRecord): HTMLElement {
         )
         .join('')}</section>`
     : '';
-  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>Bet ${formatCredits(record.bet)}</small></span><em>${compactOutcomes}</em></span><strong>${formatCredits(record.totalWin)}<small>${formatMultiplier(record.winMultiple)}</small></strong></span><span class="history-mechanics"><span><small>TUMBLES</small><b>${mechanics.tumbles}</b></span><span><small>BATHALA</small><b>${mechanics.bathala}</b></span><span><small>MULTIPLIER</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${formatCredits(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${formatCredits(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${mechanics.multiplier}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${formatMultiplier(record.endingFreeGameMultiplier ?? 0)}</dd></div>` : ''}</dl>${outcomeDetail}`;
+  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>Bet ${formatCredits(record.bet)}</small></span><em>${compactOutcomes}</em></span><strong>${formatCredits(record.totalWin)}<small>${record.winMultiple > 0 ? formatMultiplier(record.winMultiple) : '—'}</small></strong></span><span class="history-mechanics"><span><small>TUMBLES</small><b>${mechanics.tumbles}</b></span><span><small>BATHALA</small><b>${mechanics.bathala}</b></span><span><small>MULTIPLIER</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${formatCredits(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${formatCredits(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${mechanics.multiplier}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${formatMultiplier(record.endingFreeGameMultiplier ?? 0)}</dd></div>` : ''}</dl>${outcomeDetail}`;
   return details;
 }
 
@@ -185,15 +185,17 @@ async function boot(): Promise<void> {
   };
   const renderSession = (): void => {
     const stats = history.stats();
+	const currentBet = Number(controls.bet.value) || 1;
     byId('profile-name').textContent = active.metadata.profileName;
     byId('configuration-id').textContent = active.configurationId;
     byId('session-id').textContent = session.id;
     byId('balance').textContent = formatCredits(credits);
     byId('bet-display').textContent = formatCredits(Number(controls.bet.value));
     byId('win-credits').textContent = formatCredits(lastWin);
-    byId('win-multiple').textContent = formatMultiplier(
-      lastWin / (Number(controls.bet.value) || 1),
-    );
+	byId('win-multiple').textContent =
+	  lastWin > 0
+		? formatMultiplier(lastWin / currentBet)
+		: '—';
     byId('stat-spins').textContent = String(stats.spinCount);
     byId('stat-wagered').textContent = formatCredits(stats.totalWagered);
     byId('stat-won').textContent = formatCredits(stats.totalWon);
@@ -285,7 +287,7 @@ async function boot(): Promise<void> {
           presenter.complete();
           const featureStatus = byId('feature-status');
           featureStatus.hidden = false;
-          featureStatus.textContent = `FREE GAMES ${freeSpin.index} / ${result.feature?.totalSpinsPlayed ?? freeSpin.index} · MULTIPLIER ${formatMultiplier(freeSpin.accumulatedMultiplierAfter)}`;
+          featureStatus.textContent = `FREE GAMES ${freeSpin.index} / ${result.feature?.totalSpinsPlayed ?? freeSpin.index} · MULTIPLIER ${formatMultiplier(Math.max(1, freeSpin.accumulatedMultiplierAfter),)}`;
           await presenter.present(
             freeSpin.initialBoard ?? freeSpin.finalBoard,
             speed,
@@ -318,9 +320,13 @@ async function boot(): Promise<void> {
     const record = committedRecord;
     if (!record) throw new Error('Completed spin was not committed');
     presenter.retainCompletedWinPresentation(record.totalWin);
-    byId('message').textContent = record.featureTriggered
-      ? `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`
-      : `Spin #${next} complete · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`;
+	byId('message').textContent = record.featureTriggered
+	  ? record.totalWin > 0
+		? `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`
+		: `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won 0 credits.`
+	  : record.totalWin > 0
+		? `Spin #${next} complete · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`
+		: `Spin #${next} complete · Won 0 credits.`;
     renderSession();
     return true;
   };
