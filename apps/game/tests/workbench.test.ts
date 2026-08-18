@@ -437,6 +437,27 @@ describe('falling-board presentation behavior', () => {
     expect(speedLabel('x2')).toBe('x3');
   });
 
+  it('keeps Bathala focus, shake, removal, and post-hold readable at every speed', () => {
+    expect(PRESENTATION_TIMINGS.normal.win).toMatchObject({
+      bathalaFocus: 700,
+      bathalaShake: 450,
+      bathalaRemove: 350,
+      afterBathalaHold: 250,
+    });
+    expect(PRESENTATION_TIMINGS.x1.win).toMatchObject({
+      bathalaFocus: 400,
+      bathalaShake: 260,
+      bathalaRemove: 220,
+      afterBathalaHold: 150,
+    });
+    expect(PRESENTATION_TIMINGS.x2.win).toMatchObject({
+      bathalaFocus: 220,
+      bathalaShake: 150,
+      bathalaRemove: 140,
+      afterBathalaHold: 80,
+    });
+  });
+
   it('uses subtle coordinated column and row stagger within the advertised total', () => {
     const drop = PRESENTATION_TIMINGS.normal.drop;
     expect(drop.columnStagger).toBeGreaterThanOrEqual(45);
@@ -517,6 +538,190 @@ describe('falling-board presentation behavior', () => {
     expect(css).toMatch(/html\s*\{[^}]*scrollbar-gutter:\s*stable/su);
     expect(css).not.toContain('.board--spinning');
   });
+
+  it('styles Bathala as a distinct mint focus, shake, and removal sequence', async () => {
+    const css = await readFile(resolve(process.cwd(), 'apps/game/src/style.css'), 'utf8');
+    expect(css).toMatch(/\.board--bathala-focus[\s\S]*:not\(\.symbol--bathala-target\)/u);
+    expect(css).toMatch(/\.symbol--bathala-target\s*\{[^}]*brightness\(1\.42\)/su);
+    expect(css).toMatch(/@keyframes bathala-shake/u);
+    expect(css).toMatch(/@keyframes bathala-remove/u);
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.symbol--bathala-shaking[\s\S]*animation:\s*none/u,
+    );
+  });
+
+  it.each(['normal', 'x1', 'x2'] satisfies SpinSpeed[])(
+    'stages Bathala focus, shake, and removal at %s before rendering the next board',
+    async (speed) => {
+      vi.useFakeTimers();
+      const config = await baseline();
+      const resolved = resolveSpin(config, new SeededRandom(8848), true);
+      const boardBefore = (resolved.initialBoard ?? resolved.finalBoard).map((column) =>
+        column.map((cell) => (cell ? { ...cell } : null)),
+      );
+      const winningPosition = { column: 0, row: 0 };
+      const bathalaPositions = [
+        { column: 1, row: 0 },
+        { column: 2, row: 0 },
+      ];
+      boardBefore[0]![0] = { id: 'winning-cell', symbol: 'H1' };
+      boardBefore[1]![0] = { id: 'bathala-a', symbol: 'L3' };
+      boardBefore[2]![0] = { id: 'bathala-b', symbol: 'L3' };
+      const boardAfterRemoval = boardBefore.map((column) => column.map((cell) => cell));
+      boardAfterRemoval[0]![0] = null;
+      boardAfterRemoval[1]![0] = null;
+      boardAfterRemoval[2]![0] = null;
+      const round: TumbleRound = {
+        index: 0,
+        winningSymbols: [{ symbol: 'H1', count: 8, payout: 1, positions: [winningPosition] }],
+        baseWin: 1,
+        multiplierSymbols: [],
+        visibleMultiplierSum: 0,
+        newlyCollectedMultiplierSum: 0,
+        effectiveMultiplier: 1,
+        creditedWin: 1,
+        removedWinningCells: [winningPosition],
+        bathala: {
+          occurred: true,
+          targetSymbol: 'L3',
+          removedPositions: bathalaPositions,
+        },
+        boardBefore,
+        boardAfterRemoval,
+      };
+      document.body.innerHTML = `<div id="reels">${boardBefore
+        .map(() => '<div class="reel"><div class="reel-track"></div></div>')
+        .join('')}</div>`;
+      const animateDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'animate');
+      HTMLElement.prototype.animate = (() => ({
+        finished: Promise.resolve(),
+        cancel() {},
+        finish() {},
+      })) as unknown as typeof HTMLElement.prototype.animate;
+      try {
+        const board = document.querySelector<HTMLElement>('#reels')!;
+        const presenter = new BoardPresentationController(board, () => false);
+        const timing = PRESENTATION_TIMINGS[speed];
+        const presentation = presenter.present(boardBefore, speed, [round]);
+        await vi.advanceTimersByTimeAsync(timing.drop.postLandingHold);
+        await vi.advanceTimersByTimeAsync(timing.win.perGroupHold);
+        await vi.advanceTimersByTimeAsync(timing.win.remove);
+        await vi.advanceTimersByTimeAsync(timing.win.afterRemoveHold);
+
+        expect(presenter.state()).toBe('bathalaAnimating');
+        expect(board.classList.contains('board--bathala-focus')).toBe(true);
+        expect(board.dataset.bathalaRemoval).toBe('BATHALA · L3');
+        expect(board.querySelectorAll('.symbol--bathala-target')).toHaveLength(2);
+        expect(board.querySelectorAll('.symbol--bathala-shaking')).toHaveLength(0);
+
+        await vi.advanceTimersByTimeAsync(timing.win.bathalaFocus);
+        expect(board.dataset.bathalaRemoval).toBe('BATHALA · L3');
+        expect(board.querySelectorAll('.symbol--bathala-shaking')).toHaveLength(2);
+
+        await vi.advanceTimersByTimeAsync(timing.win.bathalaShake);
+        expect(board.dataset.bathalaRemoval).toBe('BATHALA · L3');
+        expect(board.querySelectorAll('.symbol--bathala-shaking')).toHaveLength(0);
+        expect(board.querySelectorAll('.symbol--bathala-removing')).toHaveLength(2);
+
+        await vi.advanceTimersByTimeAsync(timing.win.bathalaRemove);
+        expect(board.classList.contains('board--bathala-focus')).toBe(false);
+        expect(board.dataset.bathalaRemoval).toBeUndefined();
+        expect(
+          board.querySelectorAll(
+            '.symbol--bathala-target,.symbol--bathala-shaking,.symbol--bathala-removing',
+          ),
+        ).toHaveLength(0);
+        expect(board.querySelector('[data-cell-id="bathala-a"]')).toBeNull();
+
+        await vi.runAllTimersAsync();
+        await presentation;
+      } finally {
+        vi.useRealTimers();
+        if (animateDescriptor)
+          Object.defineProperty(HTMLElement.prototype, 'animate', animateDescriptor);
+        else delete (HTMLElement.prototype as Partial<HTMLElement>).animate;
+      }
+    },
+  );
+
+  it.each(['focus', 'shake', 'removal'] as const)(
+    'STOP during Bathala $phase clears every temporary class',
+    async (phase) => {
+      vi.useFakeTimers();
+      const config = await baseline();
+      const resolved = resolveSpin(config, new SeededRandom(8848), true);
+      const boardBefore = (resolved.initialBoard ?? resolved.finalBoard).map((column) =>
+        column.map((cell) => (cell ? { ...cell } : null)),
+      );
+      const winningPosition = { column: 0, row: 0 };
+      const bathalaPosition = { column: 1, row: 0 };
+      boardBefore[0]![0] = { id: 'winning-cell', symbol: 'H1' };
+      boardBefore[1]![0] = { id: 'bathala-target', symbol: 'L2' };
+      const boardAfterRemoval = boardBefore.map((column) => column.map((cell) => cell));
+      boardAfterRemoval[0]![0] = null;
+      boardAfterRemoval[1]![0] = null;
+      const round: TumbleRound = {
+        index: 0,
+        winningSymbols: [{ symbol: 'H1', count: 8, payout: 1, positions: [winningPosition] }],
+        baseWin: 1,
+        multiplierSymbols: [],
+        visibleMultiplierSum: 0,
+        newlyCollectedMultiplierSum: 0,
+        effectiveMultiplier: 1,
+        creditedWin: 1,
+        removedWinningCells: [winningPosition],
+        bathala: {
+          occurred: true,
+          targetSymbol: 'L2',
+          removedPositions: [bathalaPosition],
+        },
+        boardBefore,
+        boardAfterRemoval,
+      };
+      document.body.innerHTML = `<div id="reels">${boardBefore
+        .map(() => '<div class="reel"><div class="reel-track"></div></div>')
+        .join('')}</div>`;
+      const animateDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'animate');
+      HTMLElement.prototype.animate = (() => ({
+        finished: Promise.resolve(),
+        cancel() {},
+        finish() {},
+      })) as unknown as typeof HTMLElement.prototype.animate;
+      try {
+        const board = document.querySelector<HTMLElement>('#reels')!;
+        const presenter = new BoardPresentationController(board, () => false);
+        const presentation = presenter.present(boardBefore, 'normal', [round]);
+        await vi.advanceTimersByTimeAsync(PRESENTATION_TIMINGS.normal.drop.postLandingHold);
+        await vi.advanceTimersByTimeAsync(PRESENTATION_TIMINGS.normal.win.perGroupHold);
+        await vi.advanceTimersByTimeAsync(PRESENTATION_TIMINGS.normal.win.remove);
+        await vi.advanceTimersByTimeAsync(PRESENTATION_TIMINGS.normal.win.afterRemoveHold);
+        if (phase !== 'focus')
+          await vi.advanceTimersByTimeAsync(PRESENTATION_TIMINGS.normal.win.bathalaFocus);
+        if (phase === 'removal')
+          await vi.advanceTimersByTimeAsync(PRESENTATION_TIMINGS.normal.win.bathalaShake);
+
+        expect(presenter.state()).toBe('bathalaAnimating');
+        expect(board.classList.contains('board--bathala-focus')).toBe(true);
+        presenter.stop();
+        await vi.runAllTimersAsync();
+        await presentation;
+
+        expect(board.classList.contains('board--bathala-focus')).toBe(false);
+        expect(board.dataset.bathalaRemoval).toBeUndefined();
+        expect(
+          board.querySelectorAll(
+            '.symbol--bathala-target,.symbol--bathala-shaking,.symbol--bathala-removing',
+          ),
+        ).toHaveLength(0);
+        expect(board.querySelector('[data-cell-id="bathala-target"]')).toBeNull();
+      } finally {
+        vi.useRealTimers();
+        if (animateDescriptor)
+          Object.defineProperty(HTMLElement.prototype, 'animate', animateDescriptor);
+        else delete (HTMLElement.prototype as Partial<HTMLElement>).animate;
+      }
+    },
+  );
 
   it('presents count-pay groups sequentially, clears connectors, then combines them', async () => {
     vi.useFakeTimers();

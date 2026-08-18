@@ -112,12 +112,14 @@ export class BoardPresentationController {
   }
 
   complete(): void {
+    this.clearBathalaEmphasis();
     this.stopRequested = false;
     this.setState('idle');
   }
 
   clearPersistentWinPresentation(): void {
     this.connectors.clear();
+    this.clearBathalaEmphasis();
     this.board.classList.remove('board--completed-win', 'board--win-focus');
     this.board
       .querySelectorAll('.symbol--winning,.symbol--multiplier-active,.symbol--scatter-winning')
@@ -131,7 +133,6 @@ export class BoardPresentationController {
     delete this.board.dataset.winningGroups;
     delete this.board.dataset.scatterResult;
     delete this.board.dataset.completedWin;
-    delete this.board.dataset.bathalaRemoval;
     this.lastWinningGroups = '';
   }
 
@@ -213,26 +214,26 @@ export class BoardPresentationController {
     await this.pause(timing.drop.postLandingHold, reduce, timing.win.stoppedHold);
   }
 
-	private async presentWinningRound(round: TumbleRound, speed: SpinSpeed): Promise<void> {
-	  this.setState('winHighlight');
+  private async presentWinningRound(round: TumbleRound, speed: SpinSpeed): Promise<void> {
+    this.setState('winHighlight');
 
-	  const groups = round.winningSymbols
-		.map(({ symbol, count }) => `${symbol} × ${count}`)
-		.join(' · ');
+    const groups = round.winningSymbols
+      .map(({ symbol, count }) => `${symbol} × ${count}`)
+      .join(' · ');
 
-	  this.lastWinningGroups = groups;
-	  this.board.classList.add('board--win-focus');
+    this.lastWinningGroups = groups;
+    this.board.classList.add('board--win-focus');
 
-	  for (const occurrence of round.multiplierSymbols) {
-		this.board
-		  .querySelector<HTMLElement>(`.symbol[data-cell-id="${occurrence.id}"]`)
-		  ?.classList.add('symbol--multiplier-active');
-	  }
+    for (const occurrence of round.multiplierSymbols) {
+      this.board
+        .querySelector<HTMLElement>(`.symbol[data-cell-id="${occurrence.id}"]`)
+        ?.classList.add('symbol--multiplier-active');
+    }
 
-	  for (const win of round.winningSymbols) {
-		await this.presentWinningGroup(win, speed);
-	  }
-	}
+    for (const win of round.winningSymbols) {
+      await this.presentWinningGroup(win, speed);
+    }
+  }
 
   private async presentWinningGroup(win: SymbolWin, speed: SpinSpeed): Promise<void> {
     const timing = PRESENTATION_TIMINGS[speed].win;
@@ -279,6 +280,51 @@ export class BoardPresentationController {
       .forEach((symbol) => symbol.classList.remove('symbol--winning'));
   }
 
+  private clearBathalaEmphasis(): void {
+    this.board.classList.remove('board--bathala-focus');
+    this.board
+      .querySelectorAll(
+        '.symbol--bathala-target,.symbol--bathala-shaking,.symbol--bathala-removing',
+      )
+      .forEach((symbol) =>
+        symbol.classList.remove(
+          'symbol--bathala-target',
+          'symbol--bathala-shaking',
+          'symbol--bathala-removing',
+        ),
+      );
+    this.board.style.removeProperty('--bathala-focus-duration');
+    this.board.style.removeProperty('--bathala-shake-duration');
+    this.board.style.removeProperty('--bathala-remove-duration');
+    delete this.board.dataset.bathalaRemoval;
+  }
+
+  private async presentBathalaRemoval(
+    round: TumbleRound,
+    timing: (typeof PRESENTATION_TIMINGS)[SpinSpeed]['win'],
+    reduce: boolean,
+  ): Promise<void> {
+    if (!round.bathala?.occurred) return;
+    this.setState('bathalaAnimating');
+    this.board.dataset.bathalaRemoval = `BATHALA · ${round.bathala.targetSymbol ?? 'LOW SYMBOL'}`;
+    this.board.style.setProperty('--bathala-focus-duration', `${timing.bathalaFocus}ms`);
+    this.board.style.setProperty('--bathala-shake-duration', `${timing.bathalaShake}ms`);
+    this.board.style.setProperty('--bathala-remove-duration', `${timing.bathalaRemove}ms`);
+    this.board.classList.add('board--bathala-focus');
+    this.markPositions(round.bathala.removedPositions, 'symbol--bathala-target');
+
+    await this.pause(timing.bathalaFocus, reduce, timing.stoppedHold);
+    this.markPositions(round.bathala.removedPositions, 'symbol--bathala-shaking');
+
+    await this.pause(timing.bathalaShake, reduce, timing.stoppedHold);
+    this.board
+      .querySelectorAll('.symbol--bathala-shaking')
+      .forEach((symbol) => symbol.classList.remove('symbol--bathala-shaking'));
+    this.markPositions(round.bathala.removedPositions, 'symbol--bathala-removing');
+
+    await this.pause(timing.bathalaRemove, reduce, timing.stoppedHold);
+  }
+
   private async presentTumbles(rounds: readonly TumbleRound[], speed: SpinSpeed): Promise<void> {
     const timing = PRESENTATION_TIMINGS[speed].win;
     const reduce = this.reducedMotion();
@@ -298,15 +344,9 @@ export class BoardPresentationController {
         afterScoringRemoval[column]![row] = null;
       renderBoardCells(this.board, afterScoringRemoval);
       await this.pause(timing.afterRemoveHold, reduce, timing.stoppedHold);
-      if (round.bathala?.occurred) {
-        this.setState('bathalaAnimating');
-        this.board.style.setProperty('--bathala-remove-duration', `${timing.bathalaRemove}ms`);
-        this.board.dataset.bathalaRemoval = `BATHALA · ${round.bathala.targetSymbol ?? 'LOW SYMBOL'}`;
-        this.markPositions(round.bathala.removedPositions, 'symbol--bathala-removing');
-        await this.pause(timing.bathalaRemove, reduce, timing.stoppedHold);
-      }
+      await this.presentBathalaRemoval(round, timing, reduce);
       if (round.boardAfterRemoval) renderBoardCells(this.board, round.boardAfterRemoval);
-      delete this.board.dataset.bathalaRemoval;
+      this.clearBathalaEmphasis();
       if (round.bathala?.occurred)
         await this.pause(timing.afterBathalaHold, reduce, timing.stoppedHold);
       if (round.boardAfterCollapse)
