@@ -29,6 +29,7 @@ import {
   SPIN_SPEEDS,
   type SpinSpeed,
 } from '../src/presentation/board-presentation-controller.js';
+import { formatSpinProgress } from '../src/workbench/spin-progress.js';
 import { fallingSymbolKeyframes } from '../src/presentation/board-drop-presentation.js';
 import {
   minimumSpanningConnectorNetwork,
@@ -850,6 +851,50 @@ describe('falling-board presentation behavior', () => {
       expect(records).toHaveLength(3);
     },
   );
+
+  it('formats single-spin and Auto Spin progress without conflating their counters', () => {
+    expect(formatSpinProgress(6, 1, 1)).toBe('Spin #6 in progress');
+    expect(formatSpinProgress(8, 3, 5)).toBe('Spin 3 of 5 · Spin #8 in progress');
+  });
+
+  it('uses sequence current/total values and derives session numbers from committed spins', async () => {
+    let committedSpins = 5;
+    let stop = false;
+    const firstBatchMessages: string[] = [];
+    const firstCompleted = await runAutoSpinSequence(
+      5,
+      (current, total) => {
+        const nextSessionSpin = committedSpins + 1;
+        firstBatchMessages.push(formatSpinProgress(nextSessionSpin, current, total));
+        committedSpins += 1;
+        if (current === 2) stop = true;
+        return Promise.resolve(true);
+      },
+      () => stop,
+    );
+
+    expect(firstCompleted).toBe(2);
+    expect(firstBatchMessages).toEqual([
+      'Spin 1 of 5 · Spin #6 in progress',
+      'Spin 2 of 5 · Spin #7 in progress',
+    ]);
+
+    stop = false;
+    const nextBatchMessages: string[] = [];
+    await runAutoSpinSequence(
+      5,
+      (current, total) => {
+        nextBatchMessages.push(formatSpinProgress(committedSpins + 1, current, total));
+        return Promise.resolve(false);
+      },
+      () => stop,
+    );
+    expect(nextBatchMessages).toEqual(['Spin 1 of 5 · Spin #8 in progress']);
+
+    committedSpins = 0;
+    expect(formatSpinProgress(committedSpins + 1, 1, 1)).toBe('Spin #1 in progress');
+    expect(formatSpinProgress(committedSpins + 1, 1, 5)).toBe('Spin 1 of 5 · Spin #1 in progress');
+  });
 
   it('uses a structural compact-board token without an outer scale transform', async () => {
     const css = await readFile(resolve(process.cwd(), 'apps/game/src/style.css'), 'utf8');

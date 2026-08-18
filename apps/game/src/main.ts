@@ -16,6 +16,7 @@ import {
   serializeMathConfig,
 } from './workbench/math-config.js';
 import { createSpinRecord } from './workbench/spin-record.js';
+import { formatSpinProgress } from './workbench/spin-progress.js';
 import { recordMechanicValues, resultMechanicValues } from './workbench/mechanics-presentation.js';
 import {
   formatCredits,
@@ -30,7 +31,6 @@ import {
   BoardPresentationController,
   resolvePresentCommit,
   runAutoSpinSequence,
-  speedLabel,
   type SpinSpeed,
 } from './presentation/board-presentation-controller.js';
 
@@ -253,10 +253,10 @@ async function boot(): Promise<void> {
     byId('bathala-state').textContent = '—';
     byId('multiplier-state').textContent = '—';
     byId('feature-status').hidden = true;
-    byId('message').textContent = 'Fresh deterministic session ready.';
+    byId('message').textContent = 'New game session.';
     renderSession();
   };
-  const playOne = async (): Promise<boolean> => {
+  const playOne = async (currentAutoSpin: number, totalAutoSpins: number): Promise<boolean> => {
     const bet = Number(controls.bet.value);
     if (credits < bet) {
       byId('message').textContent = 'Auto spins stopped: insufficient balance.';
@@ -266,8 +266,8 @@ async function boot(): Promise<void> {
     presenter.clearPersistentWinPresentation();
     credits -= bet;
     renderSession();
-    byId('message').textContent = `Symbols falling · ${speedLabel(speed)} speed.`;
     const next = history.getAllSessionSpins().length + 1;
+    byId('message').textContent = formatSpinProgress(next, currentAutoSpin, totalAutoSpins);
     let committedRecord: SpinRecord | undefined;
     await resolvePresentCommit({
       resolve: () => resolveSpin(active, rng, true),

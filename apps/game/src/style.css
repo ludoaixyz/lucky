@@ -142,7 +142,7 @@ main {
 }
 .reel-toolbar .rules-button {
   min-width: 180px;
-  padding: 0.55rem 1rem;
+  padding: 0.5rem 1rem;
   color: #07120f;
 }
 .heading,
@@ -490,7 +490,7 @@ main {
   grid-column: 1 / -1;
   align-items: center;
   justify-content: center;
-  min-height: 2rem;
+  min-height: 1.5rem;
   margin: 0.75rem 0 0;
   color: #b8c6df;
   font-size: 0.88rem;
@@ -830,7 +830,7 @@ button {
   color: #172033;
   background: var(--gold);
   box-shadow: 0 4px 0 #9b631f;
-  padding: 0.7rem 1rem;
+  padding: 0.6rem 1rem;
   font-weight: 900;
   cursor: pointer;
 }
@@ -847,9 +847,9 @@ button:disabled {
   cursor: not-allowed;
 }
 .spin-button {
-  width: 190px;
-  min-width: 190px;
-  font-size: 1.1rem;
+  width: 180px;
+  min-width: 170px;
+  font-size: 1.0rem;
 }
 .spin-button.is-stop {
   color: #fff;
