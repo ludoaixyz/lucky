@@ -8,6 +8,12 @@ import type {
 } from '@lucky/shared-types';
 import './style.css';
 import { loadConfig } from './config/load-config.js';
+import { bindDomLocalization, createBrowserLocalization } from './i18n/index.js';
+import {
+  applyWorkbenchTranslations,
+  translateWorkbench,
+  type WorkbenchTranslationKey,
+} from './i18n/workbench.js';
 import { serializeSpinHistoryCsv, spinHistoryFilename } from './workbench/csv.js';
 import { HistoryStore } from './workbench/history.js';
 import {
@@ -16,7 +22,6 @@ import {
   serializeMathConfig,
 } from './workbench/math-config.js';
 import { createSpinRecord } from './workbench/spin-record.js';
-import { formatSpinProgress } from './workbench/spin-progress.js';
 import { recordMechanicValues, resultMechanicValues } from './workbench/mechanics-presentation.js';
 import {
   formatCredits,
@@ -33,6 +38,15 @@ import {
   runAutoSpinSequence,
   type SpinSpeed,
 } from './presentation/board-presentation-controller.js';
+
+const localization = createBrowserLocalization();
+const copy = (
+  key: WorkbenchTranslationKey,
+  values: Readonly<Record<string, string | number>> = {},
+): string => translateWorkbench(localization.locale, key, values);
+bindDomLocalization(localization);
+applyWorkbenchTranslations(localization.locale);
+localization.subscribe(() => applyWorkbenchTranslations(localization.locale));
 
 const byId = <T extends HTMLElement>(id: string): T => {
   const node = document.querySelector<T>(`#${id}`);
@@ -96,7 +110,10 @@ function summarizeResult(result: BathalaSpinResult): void {
   const featureStatus = byId('feature-status');
   featureStatus.hidden = !result.feature;
   featureStatus.textContent = result.feature
-    ? `FREE GAMES ${result.feature.totalSpinsPlayed} PLAYED · MULTIPLIER ${formatMultiplier(result.feature.endingMultiplier)}`
+    ? copy('featureSummary', {
+        count: result.feature.totalSpinsPlayed,
+        multiplier: formatMultiplier(result.feature.endingMultiplier),
+      })
     : '';
 }
 
@@ -104,10 +121,10 @@ function historyRow(record: SpinRecord): HTMLElement {
   const details = document.createElement('details');
   details.className = `history-row ${record.winning ? 'is-win' : 'is-loss'} ${record.featureTriggered ? 'is-feature' : ''} ${record.winMultiple >= 100 ? 'is-big-win' : ''}`;
   const badges = [
-    record.maximumTumbleDepth ? 'TUMBLE' : '',
-    record.bathalaActivations ? 'BATHALA' : '',
-    record.multiplierAppeared ? 'MULTI' : '',
-    record.featureTriggered ? 'FEATURE' : '',
+    record.maximumTumbleDepth ? copy('tumbleBadge') : '',
+    record.bathalaActivations ? copy('bathalaBadge') : '',
+    record.multiplierAppeared ? copy('multiBadge') : '',
+    record.featureTriggered ? copy('featureBadge') : '',
   ].filter(Boolean);
   const mechanics = recordMechanicValues(record);
   const compactOutcomes = record.winOutcomes.length
@@ -115,21 +132,29 @@ function historyRow(record: SpinRecord): HTMLElement {
         .slice(0, 2)
         .map((outcome) => `${outcome.symbolId}×${outcome.symbolCount}`)
         .join(' · ') +
-      (record.winOutcomes.length > 2 ? ` · +${record.winOutcomes.length - 2} more` : '')
+      (record.winOutcomes.length > 2
+        ? ` · ${copy('historyMore', { count: record.winOutcomes.length - 2 })}`
+        : '')
     : record.featureTriggered
-      ? `SCATTER×${record.scatterCount} · FEATURE`
+      ? `SCATTER×${record.scatterCount} · ${copy('historyFeature')}`
       : record.totalWin > 0
         ? `SCATTER×${record.scatterCount}`
-        : 'No winning outcomes';
+        : copy('noWinningOutcomes');
   const groups = new Map<string, typeof record.winOutcomes>();
   for (const outcome of record.winOutcomes) {
-    const phase = outcome.phase === 'base' ? 'Base Game' : `Free Game ${outcome.freeGameIndex}`;
-    const round = outcome.tumbleIndex === 0 ? 'Initial Board' : `Tumble ${outcome.tumbleIndex}`;
+    const phase =
+      outcome.phase === 'base'
+        ? copy('baseGame')
+        : copy('freeGameNumber', { index: outcome.freeGameIndex ?? 0 });
+    const round =
+      outcome.tumbleIndex === 0
+        ? copy('initialBoard')
+        : copy('tumbleNumber', { index: outcome.tumbleIndex });
     const key = `${phase} · ${round}`;
     groups.set(key, [...(groups.get(key) ?? []), outcome]);
   }
   const outcomeDetail = record.winOutcomes.length
-    ? `<section class="winning-outcomes"><h4>Winning Outcomes</h4>${[...groups.entries()]
+    ? `<section class="winning-outcomes"><h4>${copy('winningOutcomes')}</h4>${[...groups.entries()]
         .map(
           ([label, outcomes]) =>
             `<div class="outcome-round"><h5>${label}</h5>${outcomes
@@ -141,7 +166,7 @@ function historyRow(record: SpinRecord): HTMLElement {
         )
         .join('')}</section>`
     : '';
-  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>Bet ${formatCredits(record.bet)}</small></span><em>${compactOutcomes}</em></span><strong>${formatCredits(record.totalWin)}<small>${record.winMultiple > 0 ? formatMultiplier(record.winMultiple) : '—'}</small></strong></span><span class="history-mechanics"><span><small>TUMBLES</small><b>${mechanics.tumbles}</b></span><span><small>BATHALA</small><b>${mechanics.bathala}</b></span><span><small>MULTIPLIER</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>Base Win</dt><dd>${formatCredits(record.baseWin)}</dd></div><div><dt>Feature Win</dt><dd>${formatCredits(record.featureWin)}</dd></div><div><dt>Tumble Rounds</dt><dd>${record.baseTumbleRounds} base · ${record.freeGameTumbleRounds} free</dd></div><div><dt>Bathala</dt><dd>${record.bathalaActivations} activations · ${record.bathalaSymbolsRemoved} removed</dd></div><div><dt>Multipliers</dt><dd>${mechanics.multiplier}</dd></div><div><dt>Scatters</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>Free Games</dt><dd>${record.freeGamesAwarded} awarded · ${record.freeGamesPlayed} played</dd></div><div><dt>Retriggers</dt><dd>${record.retriggerCount}</dd></div><div><dt>Ending Multiplier</dt><dd>${formatMultiplier(record.endingFreeGameMultiplier ?? 0)}</dd></div>` : ''}</dl>${outcomeDetail}`;
+  details.innerHTML = `<summary><span class="history-summary-main"><span class="history-identity"><span><b>#${record.spinNumber}</b><small>${copy('historyBet', { value: formatCredits(record.bet) })}</small></span><em>${compactOutcomes}</em></span><strong>${formatCredits(record.totalWin)}<small>${record.winMultiple > 0 ? formatMultiplier(record.winMultiple) : '—'}</small></strong></span><span class="history-mechanics"><span><small>${copy('tumbles')}</small><b>${mechanics.tumbles}</b></span><span><small>${copy('bathala')}</small><b>${mechanics.bathala}</b></span><span><small>${copy('multiplier')}</small><b>${mechanics.multiplier}</b></span></span></summary><div class="badges">${badges.map((badge) => `<span>${badge}</span>`).join('')}</div><dl class="spin-detail"><div><dt>${copy('baseWin')}</dt><dd>${formatCredits(record.baseWin)}</dd></div><div><dt>${copy('featureWin')}</dt><dd>${formatCredits(record.featureWin)}</dd></div><div><dt>${copy('tumbleRounds')}</dt><dd>${copy('tumbleRoundValues', { base: record.baseTumbleRounds, free: record.freeGameTumbleRounds })}</dd></div><div><dt>${copy('bathala')}</dt><dd>${copy('bathalaDetail', { activations: record.bathalaActivations, removed: record.bathalaSymbolsRemoved })}</dd></div><div><dt>${copy('multipliers')}</dt><dd>${mechanics.multiplier}</dd></div><div><dt>${copy('scatters')}</dt><dd>${record.scatterCount}</dd></div>${record.featureTriggered ? `<div><dt>${copy('freeGames')}</dt><dd>${copy('freeGameDetail', { awarded: record.freeGamesAwarded, played: record.freeGamesPlayed })}</dd></div><div><dt>${copy('retriggers')}</dt><dd>${record.retriggerCount}</dd></div><div><dt>${copy('endingMultiplier')}</dt><dd>${formatMultiplier(record.endingFreeGameMultiplier ?? 0)}</dd></div>` : ''}</dl>${outcomeDetail}`;
   return details;
 }
 
@@ -155,7 +180,7 @@ async function boot(): Promise<void> {
   let running = false;
   let stopRequested = false;
   let lastWin = 0;
-  const presenter = new BoardPresentationController(byId('game'));
+  const presenter = new BoardPresentationController(byId('game'), undefined, copy);
   const rulesDialog = byId<HTMLDialogElement>('rules-dialog');
   const rulesButton = byId<HTMLButtonElement>('rules-button');
   const rulesContent = byId('rules-content');
@@ -165,6 +190,19 @@ async function boot(): Promise<void> {
     bet: byId<HTMLSelectElement>('bet-select'),
     auto: byId<HTMLSelectElement>('auto-select'),
     speed: [...document.querySelectorAll<HTMLInputElement>('input[name="spin-speed"]')],
+  };
+  let statusKey: WorkbenchTranslationKey = 'newGameSession';
+  let statusValues: Readonly<Record<string, string | number>> = {};
+  const renderStatus = (): void => {
+    byId('message').textContent = copy(statusKey, statusValues);
+  };
+  const setStatus = (
+    key: WorkbenchTranslationKey,
+    values: Readonly<Record<string, string | number>> = {},
+  ): void => {
+    statusKey = key;
+    statusValues = values;
+    renderStatus();
   };
   const selectedSpeed = (): SpinSpeed => {
     const selected = controls.speed.find((input) => input.checked)?.value;
@@ -209,20 +247,22 @@ async function boot(): Promise<void> {
     byId('stat-feature-rate').textContent =
       stats.featureEntrySpins === null
         ? '0.00%'
-        : `1 in ${formatDecimal(stats.featureEntrySpins, 1)}`;
+        : copy('oneIn', { value: formatDecimal(stats.featureEntrySpins, 1) });
     byId('history-list').replaceChildren(
       ...(history.getRecentSpins().length
         ? history.getRecentSpins().map(historyRow)
         : [
             Object.assign(document.createElement('p'), {
               className: 'empty-state',
-              textContent: 'Completed paid spins will appear here.',
+              textContent: copy('emptyHistory'),
             }),
           ]),
     );
     byId<HTMLButtonElement>('export-csv').disabled = stats.spinCount === 0;
-    byId('live-sample').textContent = `${stats.spinCount} spins`;
-    byId('live-target-rtp').textContent = `${formatPercent(active.references.targetRtp)} reference`;
+    byId('live-sample').textContent = copy('liveSample', { count: stats.spinCount });
+    byId('live-target-rtp').textContent = copy('targetReference', {
+      value: formatPercent(active.references.targetRtp),
+    });
     byId('live-rtp').textContent = stats.spinCount ? formatPercent(stats.sessionRtp) : '—';
     byId('live-multiplier').textContent = stats.spinCount
       ? formatPercent(stats.multiplierAppearance)
@@ -244,6 +284,11 @@ async function boot(): Promise<void> {
     byId<HTMLButtonElement>('discard-config').disabled = running;
     byId<HTMLButtonElement>('import-config').disabled = running;
     byId<HTMLButtonElement>('config-file').disabled = running;
+    controls.spin.textContent = running
+      ? stopRequested
+        ? copy('stopping')
+        : copy('stop')
+      : copy('spin');
   };
   const resetSession = (resetCredits = true): void => {
     presenter.clearPersistentWinPresentation();
@@ -257,13 +302,13 @@ async function boot(): Promise<void> {
     byId('bathala-state').textContent = '—';
     byId('multiplier-state').textContent = '—';
     byId('feature-status').hidden = true;
-    byId('message').textContent = 'New game session.';
+    setStatus('newGameSession');
     renderSession();
   };
   const playOne = async (currentAutoSpin: number, totalAutoSpins: number): Promise<boolean> => {
     const bet = Number(controls.bet.value);
     if (credits < bet) {
-      byId('message').textContent = 'Auto spins stopped: insufficient balance.';
+      setStatus('insufficientBalance');
       return false;
     }
     const speed = selectedSpeed();
@@ -271,7 +316,11 @@ async function boot(): Promise<void> {
     credits -= bet;
     renderSession();
     const next = history.getAllSessionSpins().length + 1;
-    byId('message').textContent = formatSpinProgress(next, currentAutoSpin, totalAutoSpins);
+    setStatus(totalAutoSpins > 1 ? 'spinProgress' : 'singleSpinProgress', {
+      spin: next,
+      current: currentAutoSpin,
+      total: totalAutoSpins,
+    });
     let committedRecord: SpinRecord | undefined;
     await resolvePresentCommit({
       resolve: () => resolveSpin(active, rng, true),
@@ -291,7 +340,11 @@ async function boot(): Promise<void> {
           presenter.complete();
           const featureStatus = byId('feature-status');
           featureStatus.hidden = false;
-          featureStatus.textContent = `FREE GAMES ${freeSpin.index} / ${result.feature?.totalSpinsPlayed ?? freeSpin.index} · MULTIPLIER ${formatMultiplier(Math.max(1, freeSpin.accumulatedMultiplierAfter),)}`;
+          featureStatus.textContent = copy('featureProgress', {
+            current: freeSpin.index,
+            total: result.feature?.totalSpinsPlayed ?? freeSpin.index,
+            multiplier: formatMultiplier(Math.max(1, freeSpin.accumulatedMultiplierAfter)),
+          });
           await presenter.present(
             freeSpin.initialBoard ?? freeSpin.finalBoard,
             speed,
@@ -324,13 +377,21 @@ async function boot(): Promise<void> {
     const record = committedRecord;
     if (!record) throw new Error('Completed spin was not committed');
     presenter.retainCompletedWinPresentation(record.totalWin);
-	byId('message').textContent = record.featureTriggered
-	  ? record.totalWin > 0
-		? `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`
-		: `Spin #${next} complete · Feature ${record.freeGamesPlayed} games · Won 0 credits.`
-	  : record.totalWin > 0
-		? `Spin #${next} complete · Won ${formatCredits(record.totalWin)} credits (${formatMultiplier(record.winMultiple)}).`
-		: `Spin #${next} complete · Won 0 credits.`;
+    setStatus(
+      record.featureTriggered
+        ? record.totalWin > 0
+          ? 'spinFeatureWin'
+          : 'spinFeatureNoWin'
+        : record.totalWin > 0
+          ? 'spinWin'
+          : 'spinNoWin',
+      {
+        spin: next,
+        games: record.freeGamesPlayed,
+        win: formatCredits(record.totalWin),
+        multiple: formatMultiplier(record.winMultiple),
+      },
+    );
     renderSession();
     return true;
   };
@@ -338,12 +399,12 @@ async function boot(): Promise<void> {
     if (running) {
       stopRequested = true;
       presenter.stop();
-      controls.spin.textContent = 'STOPPING…';
+      controls.spin.textContent = copy('stopping');
       return;
     }
     running = true;
     stopRequested = false;
-    controls.spin.textContent = 'STOP';
+    controls.spin.textContent = copy('stop');
     controls.spin.classList.add('is-stop');
     renderSession();
     const total = Number(controls.auto.value);
@@ -353,7 +414,7 @@ async function boot(): Promise<void> {
       if (presenter.state() !== 'idle') presenter.complete();
       running = false;
       stopRequested = false;
-      controls.spin.textContent = 'SPIN';
+      controls.spin.textContent = copy('spin');
       controls.spin.classList.remove('is-stop');
       renderSession();
     }
@@ -472,7 +533,7 @@ async function boot(): Promise<void> {
   };
   const refreshDirty = (): void => {
     const dirty = manager.isDirty();
-    byId('dirty-state').textContent = dirty ? 'UNAPPLIED CHANGES' : 'ACTIVE CONFIG';
+    byId('dirty-state').textContent = copy(dirty ? 'unappliedChanges' : 'activeConfig');
     byId('dirty-state').classList.toggle('dirty', dirty);
     byId<HTMLButtonElement>('apply-config').disabled = running || !dirty;
   };
@@ -481,7 +542,7 @@ async function boot(): Promise<void> {
       readDraft();
       byId('validation-errors').hidden = true;
     } catch (error) {
-      byId('dirty-state').textContent = 'UNAPPLIED CHANGES';
+      byId('dirty-state').textContent = copy('unappliedChanges');
       byId('dirty-state').classList.add('dirty');
       byId<HTMLButtonElement>('apply-config').disabled = false;
       const box = byId('validation-errors');
@@ -501,12 +562,12 @@ async function boot(): Promise<void> {
       if (issues.length)
         throw new Error(issues.map((issue) => `${issue.path}: ${issue.message}`).join('\n'));
       if (
-        !confirm('Configuration changed. Apply configuration and reset the mathematical session?')
+        !confirm(copy('confirmApply'))
       )
         return;
       stopRequested = true;
       active = manager.apply();
-      renderRulesContent(rulesContent, active);
+      renderRulesContent(rulesContent, active, localization.locale);
       refreshOptions();
       populateDraft();
       resetSession(true);
@@ -535,7 +596,9 @@ async function boot(): Promise<void> {
     } catch (error) {
       const box = byId('validation-errors');
       box.hidden = false;
-      box.textContent = `JSON formatting stopped: ${error instanceof Error ? error.message : String(error)}`;
+      box.textContent = copy('jsonFormattingStopped', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   });
   byId('import-config').addEventListener('click', () =>
@@ -563,15 +626,10 @@ async function boot(): Promise<void> {
     ),
   );
   byId('new-session').addEventListener('click', () => {
-    if (
-      confirm(
-        'Start a new session? Current in-memory history and session statistics will be cleared.',
-      )
-    )
-      resetSession(true);
+    if (confirm(copy('confirmNewSession'))) resetSession(true);
   });
   rulesButton.addEventListener('click', () => {
-    renderRulesContent(rulesContent, active);
+    renderRulesContent(rulesContent, active, localization.locale);
     rulesDialog.showModal();
   });
   byId('rules-close').addEventListener('click', () => rulesDialog.close());
@@ -586,13 +644,22 @@ async function boot(): Promise<void> {
   rulesDialog.addEventListener('close', () => rulesButton.focus());
   controls.spin.addEventListener('click', () => void run());
   controls.bet.addEventListener('change', renderSession);
+  localization.subscribe(() => {
+    presenter.refreshLocalizedPresentation();
+    renderRulesContent(rulesContent, active, localization.locale);
+    refreshDirty();
+    renderSession();
+    renderStatus();
+  });
   refreshOptions();
-  renderRulesContent(rulesContent, active);
+  renderRulesContent(rulesContent, active, localization.locale);
   populateDraft();
   resetSession(true);
 }
 
 boot().catch((error) => {
-  byId('message').textContent = error instanceof Error ? error.message : String(error);
+  byId('message').textContent = copy('configurationLoadFailed', {
+    error: error instanceof Error ? error.message : String(error),
+  });
   byId<HTMLButtonElement>('spin').disabled = true;
 });

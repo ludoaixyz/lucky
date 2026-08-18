@@ -11,34 +11,89 @@
     <main>
       <header class="topbar">
         <div class="brand">
-          <img src="/assets/images/lucky888-three-dragons.svg" alt="Lucky888 three dragons" />
+          <img
+            src="/assets/images/lucky888-three-dragons.svg"
+            alt="Lucky888 three dragons"
+            data-i18n-alt="mascotAlt"
+          />
           <div>
-            <p>MATH WORKBENCH</p>
+            <p data-workbench-i18n="mathWorkbench">MATH WORKBENCH</p>
             <h1>LUCKY888</h1>
           </div>
         </div>
-        <dl class="config-status">
-          <div class="profile-status">
-            <dt>PROFILE</dt>
-            <dd id="profile-name">—</dd>
-          </div>
-          <div>
-            <dt>CONFIG</dt>
-            <dd id="configuration-id">—</dd>
-          </div>
-          <div>
-            <dt>SESSION</dt>
-            <dd id="session-id">—</dd>
-          </div>
-        </dl>
+        <div class="topbar-actions">
+          <nav
+            class="language-selector"
+            aria-label="Language"
+            data-i18n-aria-label="languageSelector"
+          >
+            <button
+              type="button"
+              data-locale="en-US"
+              aria-label="English"
+              title="English"
+              aria-pressed="true"
+            >
+              <img src="%BASE_URL%assets/flags/gb.svg" alt="" /><span>English</span>
+            </button>
+            <button
+              type="button"
+              data-locale="pt-BR"
+              aria-label="Português (Brasil)"
+              title="Português (Brasil)"
+              aria-pressed="false"
+            >
+              <img src="%BASE_URL%assets/flags/br.svg" alt="" /><span>Português (Brasil)</span>
+            </button>
+            <button
+              type="button"
+              data-locale="zh-CN"
+              aria-label="简体中文"
+              title="简体中文"
+              aria-pressed="false"
+            >
+              <img src="%BASE_URL%assets/flags/cn.svg" alt="" /><span>简体中文</span>
+            </button>
+            <button
+              type="button"
+              data-locale="fil-PH"
+              aria-label="Filipino"
+              title="Filipino"
+              aria-pressed="false"
+            >
+              <img src="%BASE_URL%assets/flags/ph.svg" alt="" /><span>Filipino</span>
+            </button>
+          </nav>
+          <p id="language-announcement" class="visually-hidden" aria-live="polite"></p>
+          <dl class="config-status config-metadata">
+            <div class="profile-status">
+              <dt data-workbench-i18n="profile">PROFILE</dt>
+              <dd id="profile-name">—</dd>
+            </div>
+            <div>
+              <dt data-workbench-i18n="config">CONFIG</dt>
+              <dd id="configuration-id">—</dd>
+            </div>
+          </dl>
+          <dl class="config-status session-metadata">
+            <div>
+              <dt data-workbench-i18n="session">SESSION</dt>
+              <dd id="session-id">—</dd>
+            </div>
+          </dl>
+        </div>
       </header>
 
       <div class="workspace">
         <div class="game-column">
-          <section class="game-panel" aria-label="Lucky888 playable game">
+          <section
+            class="game-panel"
+            aria-label="Lucky888 playable game"
+            data-workbench-i18n-aria-label="gameAria"
+          >
             <div class="reel-toolbar">
               <button id="rules-button" class="secondary rules-button" type="button">
-                RULES &amp; PAYTABLE
+                <span data-workbench-i18n="rulesButton">RULES &amp; PAYTABLE</span>
               </button>
             </div>
             <div
@@ -46,44 +101,66 @@
               class="board"
               role="img"
               aria-label="Six-column by five-row Lucky888 board"
+              data-workbench-i18n-aria-label="boardAria"
             ></div>
             <div id="feature-status" class="feature-status" aria-live="polite" hidden></div>
             <div class="resolution-strip" aria-live="polite">
               <div class="resolution-metric">
-                <span>TUMBLES</span><strong id="tumble-state">—</strong>
+                <span data-workbench-i18n="tumbles">TUMBLES</span
+                ><strong id="tumble-state">—</strong>
               </div>
               <div class="resolution-metric">
-                <span>BATHALA</span><strong id="bathala-state">—</strong>
+                <span data-workbench-i18n="bathala">BATHALA</span
+                ><strong id="bathala-state">—</strong>
               </div>
               <div class="resolution-metric">
-                <span>MULTIPLIER</span><strong id="multiplier-state">—</strong>
+                <span data-workbench-i18n="multiplier">MULTIPLIER</span
+                ><strong id="multiplier-state">—</strong>
               </div>
             </div>
             <div class="spin-wrap game-spin-wrap">
-              <button id="spin" class="spin-button" type="button">SPIN</button>
+              <button id="spin" class="spin-button" type="button" data-workbench-i18n="spin">
+                SPIN
+              </button>
             </div>
-            <p id="message" class="message" aria-live="polite">Loading configuration…</p>
+            <p
+              id="message"
+              class="message"
+              aria-live="polite"
+              data-workbench-i18n="loadingConfiguration"
+            >
+              Loading configuration…
+            </p>
           </section>
 
-          <section class="player-controls" aria-label="Game controls">
+          <section
+            class="player-controls"
+            aria-label="Game controls"
+            data-workbench-i18n-aria-label="gameControlsAria"
+          >
             <dl class="credit-readout">
               <div>
-                <dt>BALANCE</dt>
+                <dt data-workbench-i18n="balance">BALANCE</dt>
                 <dd id="balance">0.00</dd>
               </div>
               <div>
-                <dt>BET</dt>
+                <dt data-workbench-i18n="bet">BET</dt>
                 <dd id="bet-display">1.00</dd>
               </div>
               <div>
-                <dt>WIN</dt>
+                <dt data-workbench-i18n="win">WIN</dt>
                 <dd><span id="win-credits">0.00</span><small id="win-multiple">0.00×</small></dd>
               </div>
             </dl>
-            <label>BET SIZE<select id="bet-select"></select></label
-            ><label>AUTO SPIN<select id="auto-select"></select></label>
+            <label
+              ><span data-workbench-i18n="betSize">BET SIZE</span
+              ><select id="bet-select"></select></label
+            ><label
+              ><span data-workbench-i18n="autoSpin">AUTO SPIN</span
+              ><select id="auto-select"></select
+            ></label>
             <fieldset class="speed-control">
-              <legend>SPEED</legend>
+              <legend data-workbench-i18n="speed">SPEED</legend>
               <label
                 ><input type="radio" name="spin-speed" value="normal" checked /><span
                   >x1</span
@@ -97,174 +174,253 @@
 
         <aside class="history-panel" aria-labelledby="history-title">
           <div class="panel-heading">
-            <h2 id="history-title">Spin History</h2>
+            <h2 id="history-title" data-workbench-i18n="spinHistory">Spin History</h2>
           </div>
-          <section class="session-summary" aria-label="Session observations">
+          <section
+            class="session-summary"
+            aria-label="Session observations"
+            data-workbench-i18n-aria-label="sessionObservationsAria"
+          >
             <div class="session-summary-column">
               <div class="session-stat">
-                <span>SESSION SPINS</span><strong id="stat-spins">0</strong>
+                <span data-workbench-i18n="sessionSpins">SESSION SPINS</span
+                ><strong id="stat-spins">0</strong>
               </div>
               <div class="session-stat">
-                <span>TOTAL WAGERED</span><strong id="stat-wagered">0</strong>
+                <span data-workbench-i18n="totalWagered">TOTAL WAGERED</span
+                ><strong id="stat-wagered">0</strong>
               </div>
-              <div class="session-stat"><span>TOTAL WON</span><strong id="stat-won">0</strong></div>
               <div class="session-stat">
-                 <span>FEATURES</span><strong id="stat-features">0</strong>
+                <span data-workbench-i18n="totalWon">TOTAL WON</span
+                ><strong id="stat-won">0</strong>
+              </div>
+              <div class="session-stat">
+                <span data-workbench-i18n="features">FEATURES</span
+                ><strong id="stat-features">0</strong>
               </div>
             </div>
             <div class="session-summary-column">
               <div class="session-stat">
-                <span>SESSION RTP</span><strong id="stat-rtp">0.00%</strong>
+                <span data-workbench-i18n="sessionRtp">SESSION RTP</span
+                ><strong id="stat-rtp">0.00%</strong>
               </div>
               <div class="session-stat">
-                <span>SESSION VOLATILITY</span><strong id="stat-volatility">0.00%</strong>
+                <span data-workbench-i18n="sessionVolatility">SESSION VOLATILITY</span
+                ><strong id="stat-volatility">0.00%</strong>
               </div>
               <div class="session-stat">
-				<span>WIN RATE</span><strong id="stat-win-rate">0.00%</strong>
+                <span data-workbench-i18n="winRate">WIN RATE</span
+                ><strong id="stat-win-rate">0.00%</strong>
               </div>
               <div class="session-stat">
-                <span>FEATURE RATE</span><strong id="stat-feature-rate">0.00%</strong>
+                <span data-workbench-i18n="featureRate">FEATURE RATE</span
+                ><strong id="stat-feature-rate">0.00%</strong>
               </div>
             </div>
           </section>
           <div id="history-list" class="history-list">
-            <p class="empty-state">Completed paid spins will appear here.</p>
+            <p class="empty-state" data-workbench-i18n="emptyHistory">
+              Completed paid spins will appear here.
+            </p>
           </div>
           <div class="history-actions">
-            <button id="export-csv" class="secondary" type="button" disabled>EXPORT CSV</button
-            ><button id="new-session" class="tertiary" type="button">NEW SESSION</button>
+            <button
+              id="export-csv"
+              class="secondary"
+              type="button"
+              disabled
+              data-workbench-i18n="exportCsv"
+            >
+              EXPORT CSV</button
+            ><button
+              id="new-session"
+              class="tertiary"
+              type="button"
+              data-workbench-i18n="newSession"
+            >
+              NEW SESSION
+            </button>
           </div>
         </aside>
       </div>
 
       <details class="live-math">
-        <summary>LIVE MATH <span>TAP TO OPEN/CLOSE</span></summary>
+        <summary>
+          <span data-workbench-i18n="liveMath">LIVE MATH</span>
+          <small data-workbench-i18n="tapOpenClose">TAP TO OPEN/CLOSE</small>
+        </summary>
         <div class="live-grid">
-          <div><span>Sample</span><strong id="live-sample">0 spins</strong></div>
-          <div><span>Target RTP</span><strong id="live-target-rtp">—</strong></div>
-          <div><span>Session RTP</span><strong id="live-rtp">—</strong></div>
-          <div><span>Multiplier Appearance</span><strong id="live-multiplier">—</strong></div>
-          <div><span>Average Multiplier</span><strong id="live-average-multiplier">—</strong></div>
-          <div><span>Average Tumble Depth</span><strong id="live-tumble">—</strong></div>
-          <div><span>Maximum Win</span><strong id="live-max-win">—</strong></div>
+          <div>
+            <span data-workbench-i18n="sample">Sample</span
+            ><strong id="live-sample">0 spins</strong>
+          </div>
+          <div>
+            <span data-workbench-i18n="targetRtp">Target RTP</span
+            ><strong id="live-target-rtp">—</strong>
+          </div>
+          <div>
+            <span data-workbench-i18n="sessionRtp">Session RTP</span
+            ><strong id="live-rtp">—</strong>
+          </div>
+          <div>
+            <span data-workbench-i18n="multiplierAppearance">Multiplier Appearance</span
+            ><strong id="live-multiplier">—</strong>
+          </div>
+          <div>
+            <span data-workbench-i18n="averageMultiplier">Average Multiplier</span
+            ><strong id="live-average-multiplier">—</strong>
+          </div>
+          <div>
+            <span data-workbench-i18n="averageTumbleDepth">Average Tumble Depth</span
+            ><strong id="live-tumble">—</strong>
+          </div>
+          <div>
+            <span data-workbench-i18n="maximumWin">Maximum Win</span
+            ><strong id="live-max-win">—</strong>
+          </div>
         </div>
       </details>
 
       <details class="math-lab" id="math-lab">
         <summary>
-          <span>MATH LAB <em id="dirty-state">ACTIVE CONFIG</em></span
-          ><small>TAP TO OPEN/CLOSE</small>
+          <span
+            ><span data-workbench-i18n="mathLab">MATH LAB</span>
+            <em id="dirty-state">ACTIVE CONFIG</em></span
+          ><small data-workbench-i18n="tapOpenClose">TAP TO OPEN/CLOSE</small>
         </summary>
         <div class="lab-body">
           <div id="validation-errors" class="validation-errors" role="alert" hidden></div>
           <form id="math-form">
             <fieldset>
-              <legend>Config Identity</legend>
-              <label>Configuration ID<input id="cfg-id" required /></label
-              ><label>Profile Name<input id="profile-input" required /></label
-              ><label>Version<input id="version-input" required /></label
+              <legend data-workbench-i18n="configIdentity">Config Identity</legend>
+              <label
+                ><span data-workbench-i18n="configurationId">Configuration ID</span
+                ><input id="cfg-id" required /></label
               ><label
-                >Volatility Profile<select id="volatility-input">
-                  <option value="stable">Stable</option>
-                  <option value="balanced">Balanced</option>
-                  <option value="high">High Volatility</option>
-                  <option value="custom">Custom</option>
+                ><span data-workbench-i18n="profileName">Profile Name</span
+                ><input id="profile-input" required /></label
+              ><label
+                ><span data-workbench-i18n="version">Version</span
+                ><input id="version-input" required /></label
+              ><label
+                ><span data-workbench-i18n="volatilityProfile">Volatility Profile</span
+                ><select id="volatility-input">
+                  <option value="stable" data-workbench-i18n="stable">Stable</option>
+                  <option value="balanced" data-workbench-i18n="balanced">Balanced</option>
+                  <option value="high" data-workbench-i18n="highVolatility">High Volatility</option>
+                  <option value="custom" data-workbench-i18n="custom">Custom</option>
                 </select></label
               ><label
-                >Target RTP <span class="reference">REFERENCE</span
+                ><span data-workbench-i18n="targetRtp">Target RTP</span>
+                <span class="reference" data-workbench-i18n="reference">REFERENCE</span
                 ><input id="target-rtp" type="number" min="0" step="0.01" /></label
               ><label
-                >Feature Entry <span class="reference">REFERENCE · 1 IN</span
+                ><span data-workbench-i18n="featureEntry">Feature Entry</span>
+                <span class="reference" data-workbench-i18n="referenceOneIn">REFERENCE · 1 IN</span
                 ><input id="feature-entry" type="number" min="1" step="1"
               /></label>
             </fieldset>
             <fieldset>
-              <legend>Betting Configs</legend>
-              <label>Bet Ladder <span>comma separated</span><input id="bet-ladder" /></label
+              <legend data-workbench-i18n="bettingConfigs">Betting Configs</legend>
+              <label
+                ><span data-workbench-i18n="betLadder">Bet Ladder</span>
+                <span data-workbench-i18n="commaSeparated">comma separated</span
+                ><input id="bet-ladder" /></label
               ><label
-                >Default Bet<input id="default-bet" type="number" min="0.01" step="0.01" /></label
+                ><span data-workbench-i18n="defaultBet">Default Bet</span
+                ><input id="default-bet" type="number" min="0.01" step="0.01" /></label
               ><label
-                >Starting Credits<input
-                  id="starting-credits"
-                  type="number"
-                  min="1"
-                  step="1" /></label
+                ><span data-workbench-i18n="startingCredits">Starting Credits</span
+                ><input id="starting-credits" type="number" min="1" step="1" /></label
               ><label
-                >Maximum Win <span>bet units</span
+                ><span data-workbench-i18n="maximumWin">Maximum Win</span>
+                <span data-workbench-i18n="betUnits">bet units</span
                 ><input id="max-win" type="number" min="1" step="1" /></label
               ><label
-                >Maximum Multiplier<input
-                  id="max-multiplier"
-                  type="number"
-                  min="1"
-                  step="1" /></label
+                ><span data-workbench-i18n="maximumMultiplier">Maximum Multiplier</span
+                ><input id="max-multiplier" type="number" min="1" step="1" /></label
               ><label
-                >Maximum Tumble Rounds<input id="max-tumbles" type="number" min="1" step="1"
+                ><span data-workbench-i18n="maximumTumbleRounds">Maximum Tumble Rounds</span
+                ><input id="max-tumbles" type="number" min="1" step="1"
               /></label>
             </fieldset>
             <fieldset>
-              <legend>Feature Configs</legend>
+              <legend data-workbench-i18n="featureConfigs">Feature Configs</legend>
               <label
-                >Base Scatter Weight<input
-                  id="base-scatter-weight"
-                  type="number"
-                  min="0"
-                  step="0.1" /></label
+                ><span data-workbench-i18n="baseScatterWeight">Base Scatter Weight</span
+                ><input id="base-scatter-weight" type="number" min="0" step="0.1" /></label
               ><label
-                >Free-Game Scatter Weight<input
-                  id="free-scatter-weight"
-                  type="number"
-                  min="0"
-                  step="0.1" /></label
+                ><span data-workbench-i18n="freeGameScatterWeight">Free-Game Scatter Weight</span
+                ><input id="free-scatter-weight" type="number" min="0" step="0.1" /></label
               ><label
-                >Base Multiplier Appearance Weight<input
-                  id="base-multiplier-weight"
-                  type="number"
-                  min="0"
-                  step="0.1" /></label
+                ><span data-workbench-i18n="baseMultiplierWeight"
+                  >Base Multiplier Appearance Weight</span
+                ><input id="base-multiplier-weight" type="number" min="0" step="0.1" /></label
               ><label
-                >Free Multiplier Appearance Weight<input
-                  id="free-multiplier-weight"
-                  type="number"
-                  min="0"
-                  step="0.1" /></label
+                ><span data-workbench-i18n="freeMultiplierWeight"
+                  >Free Multiplier Appearance Weight</span
+                ><input id="free-multiplier-weight" type="number" min="0" step="0.1" /></label
               ><label
-                >Initial Free Games<input
-                  id="initial-free-games"
-                  type="number"
-                  min="1"
-                  step="1" /></label
+                ><span data-workbench-i18n="initialFreeGames">Initial Free Games</span
+                ><input id="initial-free-games" type="number" min="1" step="1" /></label
               ><label
-                >Retrigger Award<input id="retrigger-award" type="number" min="1" step="1"
+                ><span data-workbench-i18n="retriggerAward">Retrigger Award</span
+                ><input id="retrigger-award" type="number" min="1" step="1"
               /></label>
             </fieldset>
             <fieldset class="advanced">
-              <legend>JSON Configs</legend>
+              <legend data-workbench-i18n="jsonConfigs">JSON Configs</legend>
               <label
-                >Base Symbol Weights <span>JSON array</span
+                ><span data-workbench-i18n="baseSymbolWeights">Base Symbol Weights</span>
+                <span data-workbench-i18n="jsonArray">JSON array</span
                 ><textarea id="base-weights" rows="7"></textarea></label
               ><label
-                >Free-Game Symbol Weights <span>JSON array</span
+                ><span data-workbench-i18n="freeGameSymbolWeights">Free-Game Symbol Weights</span>
+                <span data-workbench-i18n="jsonArray">JSON array</span
                 ><textarea id="free-weights" rows="7"></textarea></label
               ><label
-                >Multiplier Distribution <span>JSON array</span
+                ><span data-workbench-i18n="multiplierDistribution">Multiplier Distribution</span>
+                <span data-workbench-i18n="jsonArray">JSON array</span
                 ><textarea id="multiplier-values" rows="7"></textarea></label
               ><label
-                >Paytable <span>JSON array</span><textarea id="paytable" rows="7"></textarea>
+                ><span data-workbench-i18n="paytable">Paytable</span>
+                <span data-workbench-i18n="jsonArray">JSON array</span
+                ><textarea id="paytable" rows="7"></textarea>
               </label>
             </fieldset>
           </form>
           <div class="lab-actions">
-            <button id="format-json" class="tertiary" type="button">FORMAT JSON</button>
-            <button id="discard-config" class="tertiary" type="button">DISCARD CHANGES</button
-            ><button id="import-config" class="tertiary" type="button">IMPORT JSON</button
+            <button
+              id="format-json"
+              class="tertiary"
+              type="button"
+              data-workbench-i18n="formatJson"
+            >
+              FORMAT JSON
+            </button>
+            <button
+              id="discard-config"
+              class="tertiary"
+              type="button"
+              data-workbench-i18n="discardChanges"
+            >
+              DISCARD CHANGES</button
+            ><button
+              id="import-config"
+              class="tertiary"
+              type="button"
+              data-workbench-i18n="importJson"
+            >
+              IMPORT JSON</button
             ><input id="config-file" type="file" accept="application/json,.json" hidden /><button
               id="export-config"
               class="secondary"
               type="button"
             >
-              EXPORT CONFIG JSON</button
-            ><button id="apply-config" type="button" disabled>APPLY & RESET</button>
+              <span data-workbench-i18n="exportConfigJson">EXPORT CONFIG JSON</span></button
+            ><button id="apply-config" type="button" disabled data-workbench-i18n="applyReset">
+              APPLY & RESET
+            </button>
           </div>
         </div>
       </details>
@@ -279,17 +435,43 @@
       <div class="rules-modal">
         <header class="rules-header">
           <div>
-            <p class="eyebrow">GAME RULES</p>
-            <h2 id="rules-title">Rules &amp; Paytable</h2>
+            <p class="eyebrow" data-workbench-i18n="gameRules">GAME RULES</p>
+            <h2 id="rules-title" data-workbench-i18n="rulesTitle">Rules &amp; Paytable</h2>
           </div>
-          <button
-            id="rules-close"
-            class="tertiary"
-            type="button"
-            aria-label="Close Rules and Paytable"
-          >
-            CLOSE
-          </button>
+          <div class="rules-header-actions">
+            <nav
+              class="language-selector rules-language-selector"
+              aria-label="Language"
+              data-i18n-aria-label="languageSelector"
+            >
+              <button type="button" data-locale="en-US" aria-label="English" title="English">
+                <img src="%BASE_URL%assets/flags/gb.svg" alt="" /><span>English</span>
+              </button>
+              <button
+                type="button"
+                data-locale="pt-BR"
+                aria-label="Português (Brasil)"
+                title="Português (Brasil)"
+              >
+                <img src="%BASE_URL%assets/flags/br.svg" alt="" /><span>Português (Brasil)</span>
+              </button>
+              <button type="button" data-locale="zh-CN" aria-label="简体中文" title="简体中文">
+                <img src="%BASE_URL%assets/flags/cn.svg" alt="" /><span>简体中文</span>
+              </button>
+              <button type="button" data-locale="fil-PH" aria-label="Filipino" title="Filipino">
+                <img src="%BASE_URL%assets/flags/ph.svg" alt="" /><span>Filipino</span>
+              </button>
+            </nav>
+            <button
+              id="rules-close"
+              class="tertiary"
+              type="button"
+              aria-label="Close Rules and Paytable"
+              data-workbench-i18n-aria-label="closeRulesAria"
+            >
+              <span data-workbench-i18n="close">CLOSE</span>
+            </button>
+          </div>
         </header>
         <div id="rules-content" class="rules-content"></div>
       </div>

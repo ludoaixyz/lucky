@@ -52,6 +52,7 @@ export function resolveInitialLocale(
   savedLocale: string | null | undefined,
   browserLanguage: string | undefined,
 ): LocaleCode {
+  if (savedLocale === 'en') return DEFAULT_LOCALE;
   return isSupportedLocale(savedLocale) ? savedLocale : localeFromBrowser(browserLanguage);
 }
 

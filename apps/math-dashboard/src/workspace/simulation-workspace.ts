@@ -1,5 +1,6 @@
 import { normalizeImportedReport, type NormalizationResult } from '../reports/report-normalizer.js';
-import type { SimulationReport } from '../types/simulation-report.js';
+import { normalizeStoredWorkbenchAnalysis } from '../reports/spin-history-csv.js';
+import type { DashboardAnalysisReport } from '../types/simulation-report.js';
 
 export const SIMULATION_WORKSPACE_STORAGE_KEY = 'lucky888.dashboard.simulation-workspace.v1';
 export const MAX_SIMULATION_SETS = 3;
@@ -9,7 +10,7 @@ export type ImportStatus = 'loaded' | 'rejected' | null;
 export interface SimulationSet {
   readonly id: string;
   readonly label: string;
-  readonly report: SimulationReport | null;
+  readonly report: DashboardAnalysisReport | null;
   readonly sourceName?: string;
   readonly loadedAt?: string;
   readonly validationStatus: 'empty' | 'valid';
@@ -136,7 +137,7 @@ export interface SetWarning {
   readonly relatedSetIds: readonly string[];
 }
 
-const reportIdentity = (report: SimulationReport): string =>
+const reportIdentity = (report: DashboardAnalysisReport): string =>
   [
     report.metadata.configurationId,
     report.metadata.generatedAt,
@@ -146,7 +147,7 @@ const reportIdentity = (report: SimulationReport): string =>
 
 export function workspaceWarnings(workspace: SimulationWorkspace): SetWarning[] {
   const valid = workspace.sets.filter(
-    (set): set is SimulationSet & { report: SimulationReport } => set.report !== null,
+    (set): set is SimulationSet & { report: DashboardAnalysisReport } => set.report !== null,
   );
   const warnings: SetWarning[] = [];
   for (const set of valid) {
@@ -211,7 +212,10 @@ export function restoreWorkspace(
           : `Sim ${index + 1}`;
       restored = renameSet(restored, id, label);
       if (setRecord.report) {
-        const result = normalizeImportedReport(setRecord.report);
+        const result =
+          (setRecord.report as { sourceType?: unknown }).sourceType === 'workbench-session'
+            ? normalizeStoredWorkbenchAnalysis(setRecord.report)
+            : normalizeImportedReport(setRecord.report);
         const sourceName =
           typeof setRecord.sourceName === 'string' ? setRecord.sourceName : 'restored report';
         const loadedAt =

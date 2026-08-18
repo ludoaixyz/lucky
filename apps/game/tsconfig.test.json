@@ -11,6 +11,7 @@
   "include": [
     "src/main.ts",
     "src/config/load-config.ts",
+    "src/i18n/**/*.ts",
     "src/workbench/**/*.ts",
     "src/presentation/**/*.ts",
     "src/vite-env.d.ts",

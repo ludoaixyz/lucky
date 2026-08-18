@@ -50,6 +50,54 @@ main {
 .brand {
   gap: 0.9rem;
 }
+.topbar-actions {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: auto repeat(2, minmax(110px, 1fr));
+  align-items: center;
+  justify-content: end;
+  gap: 0.5rem;
+  max-width: 680px;
+}
+.language-selector {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 7px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #081720;
+}
+.language-selector button {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 32px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+}
+.language-selector button[aria-pressed='true'] {
+  border-color: var(--gold);
+  background: #3a3019;
+}
+.language-selector img {
+  width: 27px;
+  aspect-ratio: 5/3;
+  object-fit: cover;
+}
+.language-selector span,
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
 .brand img {
   width: 64px;
   filter: drop-shadow(0 8px 15px #000a);
@@ -70,9 +118,9 @@ main {
 }
 .config-status {
   display: grid;
-  grid-template-columns: repeat(2, minmax(110px, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: minmax(110px, 1fr);
   margin: 0;
+  min-width: 0;
 }
 
 .config-status div,
@@ -148,6 +196,9 @@ main {
   min-width: 180px;
   padding: 0.5rem 1rem;
   color: #07120f;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  white-space: normal;
 }
 .heading,
 .panel-heading {
@@ -977,7 +1028,7 @@ button:disabled {
   color: var(--gold);
   font-weight: 900;
 }
-.live-math summary span,
+.live-math summary small,
 .math-lab summary small {
   color: var(--muted);
   font-size: 0.68rem;
@@ -1116,10 +1167,19 @@ button:disabled {
   border-bottom: 1px solid #33486f;
   background: #111e34f5;
 }
+.rules-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+.rules-language-selector {
+  align-self: center;
+}
 .rules-header h2 {
   margin: 0.18rem 0 0;
 }
-.rules-header button {
+.rules-header #rules-close {
   padding: 0.48rem 0.8rem;
   font-size: 0.66rem;
 }
@@ -1268,6 +1328,15 @@ button:disabled {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+@media (max-width: 900px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+  .topbar-actions {
+    width: 100%;
+    max-width: none;
+  }
+}
 @media (max-width: 700px) {
   main {
     width: min(96vw, 620px);
@@ -1275,6 +1344,12 @@ button:disabled {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .topbar-actions {
+    grid-template-columns: auto repeat(2, minmax(0, 1fr));
+    justify-items: stretch;
+    width: 100%;
+    max-width: none;
   }
   .config-status {
     width: 100%;
@@ -1306,6 +1381,14 @@ button:disabled {
   .rules-content {
     grid-template-columns: 1fr;
   }
+  .rules-header {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .rules-header-actions {
+    justify-content: flex-end;
+    margin-left: auto;
+  }
   .rules-section:has(.rules-table-wrap),
   .rules-section:has(.rules-symbol-grid) {
     grid-column: 1;
@@ -1321,6 +1404,12 @@ button:disabled {
   }
 }
 @media (max-width: 420px) {
+  .topbar-actions {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .topbar-actions > .language-selector {
+    grid-row: 1 / span 2;
+  }
   .session-summary {
     grid-template-columns: 1fr;
   }

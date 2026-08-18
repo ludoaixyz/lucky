@@ -15,10 +15,8 @@ import {
 } from './i18n/index.js';
 import { bindLanguageButtons, languageButtons } from './i18n/language-selector.js';
 import type { DashboardLocale } from './i18n/types.js';
-import {
-  normalizeBundledReport,
-  parseImportedSimulationReport,
-} from './reports/report-normalizer.js';
+import { normalizeBundledReport } from './reports/report-normalizer.js';
+import { importAnalysisArtifact } from './reports/spin-history-csv.js';
 import type { LoadedReport, ReportIndexEntry } from './types/simulation-report.js';
 import {
   createWorkspace,
@@ -154,7 +152,7 @@ function bind(): void {
 }
 
 async function loadFileForSet(setId: string, file: File): Promise<void> {
-  const result = parseImportedSimulationReport(await file.text());
+  const result = importAnalysisArtifact(file.name, await file.text());
   commit(importIntoSet(workspace, setId, result, file.name));
 }
 

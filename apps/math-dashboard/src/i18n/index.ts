@@ -2,7 +2,7 @@ import { TRANSLATIONS } from './dictionaries.js';
 import { DASHBOARD_LOCALES, type DashboardLocale } from './types.js';
 export { TRANSLATIONS, DASHBOARD_LOCALES };
 export type { DashboardLocale, DashboardTranslations } from './types.js';
-export const DASHBOARD_LOCALE_STORAGE_KEY = 'lucky888.dashboard.locale';
+export const DASHBOARD_LOCALE_STORAGE_KEY = 'lucky888.locale';
 export const isDashboardLocale = (v: unknown): v is DashboardLocale =>
   typeof v === 'string' && DASHBOARD_LOCALES.includes(v as DashboardLocale);
 export const browserDashboardLocale = (v?: string): DashboardLocale => {
@@ -23,6 +23,7 @@ export const readStoredLocale = (
 ): DashboardLocale | null => {
   try {
     const x = storage?.getItem(DASHBOARD_LOCALE_STORAGE_KEY);
+    if (x === 'en-US') return 'en';
     return isDashboardLocale(x) ? x : null;
   } catch {
     return null;
@@ -33,7 +34,7 @@ export const persistDashboardLocale = (
   locale: DashboardLocale,
 ): void => {
   try {
-    storage?.setItem(DASHBOARD_LOCALE_STORAGE_KEY, locale);
+    storage?.setItem(DASHBOARD_LOCALE_STORAGE_KEY, locale === 'en' ? 'en-US' : locale);
   } catch {
     /* Preference storage is optional. */
   }

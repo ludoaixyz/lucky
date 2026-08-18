@@ -1,4 +1,5 @@
 import type { Board, Position, SymbolWin, TumbleRound } from '@lucky/shared-types';
+import { translateWorkbench, type WorkbenchTranslationKey } from '../i18n/workbench.js';
 import { formatCredits } from '../workbench/number-format.js';
 import {
   cellDropMotion,
@@ -67,10 +68,17 @@ export class BoardPresentationController {
   private lastWinningGroups = '';
   private activePauseReleases = new Set<() => void>();
   private readonly connectors: WinConnectorLayer;
+  private completedWinCredits = 0;
+  private bathalaTarget: string | null = null;
+  private scatterResult: ScatterPresentationResult | null = null;
 
   constructor(
     private readonly board: HTMLElement,
     private readonly reducedMotion: () => boolean = () => false,
+    private readonly localizedCopy: (
+      key: WorkbenchTranslationKey,
+      values?: Readonly<Record<string, string | number>>,
+    ) => string = (key, values) => translateWorkbench('en-US', key, values),
   ) {
     this.connectors = new WinConnectorLayer(board);
     this.setState('idle');
@@ -134,13 +142,29 @@ export class BoardPresentationController {
     delete this.board.dataset.scatterResult;
     delete this.board.dataset.completedWin;
     this.lastWinningGroups = '';
+    this.completedWinCredits = 0;
+    this.bathalaTarget = null;
+    this.scatterResult = null;
   }
 
   retainCompletedWinPresentation(winCredits: number): void {
     if (winCredits <= 0) return;
+    this.completedWinCredits = winCredits;
     this.board.classList.add('board--completed-win');
-    this.board.dataset.completedWin = `${formatCredits(winCredits)} CREDIT WIN`;
+    this.board.dataset.completedWin = this.localizedCopy('creditWin', {
+      value: formatCredits(winCredits),
+    });
     if (this.lastWinningGroups) this.board.dataset.winningGroups = this.lastWinningGroups;
+  }
+
+  refreshLocalizedPresentation(): void {
+    if (this.completedWinCredits > 0)
+      this.board.dataset.completedWin = this.localizedCopy('creditWin', {
+        value: formatCredits(this.completedWinCredits),
+      });
+    if (this.bathalaTarget !== null)
+      this.board.dataset.bathalaRemoval = `BATHALA · ${this.bathalaTarget || this.localizedCopy('lowSymbol')}`;
+    if (this.scatterResult) this.renderScatterStatus(this.scatterResult);
   }
 
   destroy(): void {
@@ -297,6 +321,7 @@ export class BoardPresentationController {
     this.board.style.removeProperty('--bathala-shake-duration');
     this.board.style.removeProperty('--bathala-remove-duration');
     delete this.board.dataset.bathalaRemoval;
+    this.bathalaTarget = null;
   }
 
   private async presentBathalaRemoval(
@@ -306,7 +331,8 @@ export class BoardPresentationController {
   ): Promise<void> {
     if (!round.bathala?.occurred) return;
     this.setState('bathalaAnimating');
-    this.board.dataset.bathalaRemoval = `BATHALA · ${round.bathala.targetSymbol ?? 'LOW SYMBOL'}`;
+    this.bathalaTarget = round.bathala.targetSymbol ?? '';
+    this.board.dataset.bathalaRemoval = `BATHALA · ${this.bathalaTarget || this.localizedCopy('lowSymbol')}`;
     this.board.style.setProperty('--bathala-focus-duration', `${timing.bathalaFocus}ms`);
     this.board.style.setProperty('--bathala-shake-duration', `${timing.bathalaShake}ms`);
     this.board.style.setProperty('--bathala-remove-duration', `${timing.bathalaRemove}ms`);
@@ -440,11 +466,8 @@ export class BoardPresentationController {
     this.setState('scatterPresentation');
     this.board.classList.add('board--win-focus');
     this.markPositions(positions, 'symbol--scatter-winning');
-    const status = [`SCATTER × ${result.count}`];
-    if ((result.freeGames ?? 0) > 0) status.push(`${result.freeGames} FREE GAMES`);
-    if ((result.retriggeredSpins ?? 0) > 0) status.push(`+${result.retriggeredSpins} FREE GAMES`);
-    if (result.payout > 0) status.push(`${formatCredits(result.payout)} CREDITS`);
-    this.board.dataset.scatterResult = status.join(' · ');
+    this.scatterResult = result;
+    this.renderScatterStatus(result);
     const timing = PRESENTATION_TIMINGS[speed].win;
     await Promise.all(
       this.connectors.drawGroup(
@@ -455,6 +478,21 @@ export class BoardPresentationController {
       ),
     );
     await this.pause(timing.perGroupHold, this.reducedMotion(), timing.stoppedHold);
+  }
+
+  private renderScatterStatus(result: ScatterPresentationResult): void {
+    const status = [`SCATTER × ${result.count}`];
+    if ((result.freeGames ?? 0) > 0)
+      status.push(this.localizedCopy('freeGamesCount', { count: result.freeGames ?? 0 }));
+    if ((result.retriggeredSpins ?? 0) > 0)
+      status.push(
+        this.localizedCopy('additionalFreeGamesCount', {
+          count: result.retriggeredSpins ?? 0,
+        }),
+      );
+    if (result.payout > 0)
+      status.push(this.localizedCopy('creditsCount', { count: formatCredits(result.payout) }));
+    this.board.dataset.scatterResult = status.join(' · ');
   }
 
   private cellAt({ column, row }: Position): HTMLElement | null {

@@ -1,4 +1,6 @@
 import type { ActiveGameConfig, CountPayAward, SymbolCell } from '@lucky/shared-types';
+import { translateWorkbench, type WorkbenchTranslationKey } from '../i18n/workbench.js';
+import type { LocaleCode } from '../i18n/types.js';
 import { createSymbolElement, symbolVisual } from './symbol-visuals.js';
 
 function node<K extends keyof HTMLElementTagNameMap>(
@@ -36,18 +38,27 @@ function payoutRange(award: CountPayAward): string {
     : `${award.minCount}–${award.maxCount}`;
 }
 
-export function renderRulesContent(container: HTMLElement, config: ActiveGameConfig): void {
-  const howToWin = section('How to Win');
+export function renderRulesContent(
+  container: HTMLElement,
+  config: ActiveGameConfig,
+  locale: LocaleCode = 'en-US',
+): void {
+  const copy = (
+    key: WorkbenchTranslationKey,
+    values: Readonly<Record<string, string | number>> = {},
+  ): string => translateWorkbench(locale, key, values);
+
+  const howToWin = section(copy('rulesHowToWin'));
   howToWin.append(
     paragraph(
-      'Land ',
-      strong(`${config.minimumWinCount} or more matching Pay Symbols`),
-      ` anywhere on the ${config.columns}×${config.rows} grid to win. More matching symbols award higher payouts. `,
-      strong('No paylines are used.'),
+      copy('rulesHowToWinLead'),
+      strong(copy('rulesHowToWinStrong', { minimum: config.minimumWinCount })),
+      copy('rulesHowToWinTail', { columns: config.columns, rows: config.rows }),
+      strong(copy('rulesNoPaylines')),
     ),
   );
 
-  const symbols = section('Symbols');
+  const symbols = section(copy('rulesSymbols'));
   const symbolGrid = node('div', 'rules-symbol-grid');
   for (const id of config.symbols) {
     const visual = symbolVisual(id);
@@ -61,21 +72,23 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
           }
         : { id: `rules-${id}`, symbol: id };
     card.append(createSymbolElement(sample));
-    const copy = node('span');
-    copy.append(node('strong', undefined, id), node('small', undefined, visual.tier.toUpperCase()));
-    card.append(copy);
+    const label = node('span');
+    const tierKey =
+      visual.tier === 'low' ? 'tierLow' : visual.tier === 'high' ? 'tierHigh' : 'tierSpecial';
+    label.append(node('strong', undefined, id), node('small', undefined, copy(tierKey)));
+    card.append(label);
     symbolGrid.append(card);
   }
   symbols.append(symbolGrid);
 
-  const paytable = section('Paytable');
+  const paytable = section(copy('rulesPaytable'));
   const tableWrap = node('div', 'rules-table-wrap');
   const table = node('table', 'rules-paytable');
   const ranges = [...new Set(config.paytable.map(payoutRange))];
   const header = node('tr');
   header.append(
-    node('th', undefined, 'Symbol'),
-    ...ranges.map((range) => node('th', undefined, `${range} Symbols`)),
+    node('th', undefined, copy('rulesSymbol')),
+    ...ranges.map((range) => node('th', undefined, copy('rulesSymbolCount', { range }))),
   );
   const thead = node('thead');
   thead.append(header);
@@ -93,21 +106,17 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
   }
   table.append(thead, tbody);
   tableWrap.append(table);
-  const paytableCaption = paragraph(strong('All payouts are shown as multiples of the Total Bet.'));
+  const paytableCaption = paragraph(strong(copy('rulesPayoutCaption')));
   paytableCaption.className = 'rules-caption';
   paytable.append(paytableCaption, tableWrap);
 
-  const tumble = section('Tumble');
+  const tumble = section(copy('rulesTumble'));
   tumble.append(
-    paragraph(
-      'After a win, the ',
-      strong('winning symbols are removed'),
-      '. Remaining symbols fall into place and new symbols drop in from above. The grid is then checked again for another win.',
-    ),
-    paragraph(strong('Tumbles continue until no new win is formed.')),
+    paragraph(copy('rulesTumbleLead'), strong(copy('rulesTumbleStrong')), copy('rulesTumbleTail')),
+    paragraph(strong(copy('rulesTumbleContinue'))),
   );
 
-  const bathala = section('Bathala Skill');
+  const bathala = section(copy('rulesBathala'));
   const firstEligibleSymbol = config.bathala.eligibleSymbols[0] ?? '';
   const lastEligibleSymbol = config.bathala.eligibleSymbols.at(-1) ?? '';
   const eligibleSymbolRange =
@@ -116,107 +125,97 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
       : `${firstEligibleSymbol}–${lastEligibleSymbol}`;
   const removal =
     config.bathala.removeMode === 'all_instances'
-      ? 'all symbols of that type from the grid'
-      : `${config.bathala.randomCount?.minimum ?? 0}–${config.bathala.randomCount?.maximum ?? 0} symbols of that type from the grid`;
+      ? copy('rulesRemoveAll')
+      : copy('rulesRemoveRandom', {
+          minimum: config.bathala.randomCount?.minimum ?? 0,
+          maximum: config.bathala.randomCount?.maximum ?? 0,
+        });
   bathala.append(
     ...(config.bathala.enabled
       ? [
-          paragraph(
-            'After each winning Tumble, ',
-            strong(
-              `Bathala randomly selects one Low Pay Symbol (${eligibleSymbolRange}) and removes ${removal}.`,
-            ),
-          ),
-          paragraph(
-            "Bathala's removal does not award a payout by itself. Remaining symbols fall into place, new symbols drop in, and the next Tumble is evaluated.",
-          ),
-          ...(config.bathala.allowNoEligibleTarget
-            ? [paragraph('If no Low Pay Symbols remain, Bathala does not activate.')]
-            : []),
+          paragraph(strong(copy('rulesBathalaSelection', { range: eligibleSymbolRange, removal }))),
+          paragraph(copy('rulesBathalaFollowup')),
+          ...(config.bathala.allowNoEligibleTarget ? [paragraph(copy('rulesNoEligible'))] : []),
         ]
-      : [paragraph('The Bathala Skill is not active.')]),
+      : [paragraph(copy('rulesBathalaInactive'))]),
   );
 
-  const scatter = section('Scatter');
-  scatter.append(paragraph('Scatter Symbols pay anywhere on the grid.'));
+  const scatter = section(copy('rulesScatter'));
+  scatter.append(paragraph(copy('rulesScatterPays')));
   const scatterPayouts = Object.entries(config.scatter.payouts).sort(
     ([left], [right]) => Number(left) - Number(right),
   );
   for (const [index, [count, payout]] of scatterPayouts.entries()) {
     scatter.append(
       paragraph(
-        strong(`${count}${index === scatterPayouts.length - 1 ? '+' : ''} Scatters:`),
-        ` ${payout}× Total Bet`,
+        strong(
+          copy('rulesScatterCount', {
+            count: `${count}${index === scatterPayouts.length - 1 ? '+' : ''}`,
+          }),
+        ),
+        ` ${copy('rulesTotalBet', { value: payout })}`,
       ),
     );
   }
   scatter.append(
     paragraph(
-      'Landing ',
       strong(
-        `${config.scatter.baseGameTrigger.minimumScatters} or more Scatters in the Base Game awards ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Spins.`,
+        copy('rulesScatterTrigger', {
+          minimum: config.scatter.baseGameTrigger.minimumScatters,
+          count: config.scatter.baseGameTrigger.freeGamesAwarded,
+        }),
       ),
     ),
   );
   if (config.scatter.evaluationTiming === 'final_board')
     scatter.append(
-      paragraph('Scatter Symbols are evaluated ', strong('after all Tumbles have finished.')),
+      paragraph(copy('rulesScatterTimingLead'), strong(copy('rulesScatterTimingStrong'))),
     );
 
-  const freeSpins = section('Free Spins');
+  const freeSpins = section(copy('rulesFreeSpins'));
   freeSpins.append(
     paragraph(
-      'Landing ',
       strong(
-        `${config.scatter.baseGameTrigger.minimumScatters} or more Scatters in the Base Game awards ${config.scatter.baseGameTrigger.freeGamesAwarded} Free Spins.`,
+        copy('rulesScatterTrigger', {
+          minimum: config.scatter.baseGameTrigger.minimumScatters,
+          count: config.scatter.baseGameTrigger.freeGamesAwarded,
+        }),
       ),
     ),
     paragraph(
-      'Landing ',
       strong(
-        `${config.scatter.freeGameRetrigger.minimumScatters} or more Scatters during Free Spins awards ${config.scatter.freeGameRetrigger.additionalFreeGames} additional Free Spins.`,
+        copy('rulesRetrigger', {
+          minimum: config.scatter.freeGameRetrigger.minimumScatters,
+          count: config.scatter.freeGameRetrigger.additionalFreeGames,
+        }),
       ),
     ),
-    paragraph(
-      'Multipliers collected from winning Tumbles are ',
-      strong('added together and carried forward for the remainder of the Free Spins feature.'),
-    ),
+    paragraph(strong(copy('rulesFreeMultiplier'))),
   );
 
-  const multipliers = section('Multipliers');
+  const multipliers = section(copy('rulesMultipliers'));
   multipliers.append(
-    paragraph(
-      'When a winning Tumble contains one or more ',
-      strong('Multiplier Symbols'),
-      ', their values are added together and applied to the win.',
-    ),
-    paragraph(
-      'During ',
-      strong('Free Spins'),
-      ', collected multipliers are added to the ',
-      strong('current feature multiplier'),
-      ' and remain active for subsequent winning Tumbles.',
-    ),
+    paragraph(copy('rulesMultiplierBase')),
+    paragraph(copy('rulesMultiplierFree')),
   );
   if (config.freeGameMultiplierCollectionTrigger === 'winning_round')
-    multipliers.append(
-      paragraph(
-        'Multiplier Symbols are collected ',
-        strong('only when they appear on a winning Tumble.'),
-      ),
-    );
+    multipliers.append(paragraph(strong(copy('rulesMultiplierTiming'))));
   const multiplierGrid = node('div', 'rules-multiplier-grid');
   for (const entry of config.multiplierValues)
     multiplierGrid.append(node('span', undefined, `${entry.value}×`));
   multipliers.append(multiplierGrid);
 
-  const limits = section('Max Win');
+  const limits = section(copy('rulesMaxWin'));
   const highestMultiplierSymbol = Math.max(...config.multiplierValues.map(({ value }) => value));
   limits.append(
     paragraph(
-      strong(`Maximum Win: ${config.limits.maximumWinMultiple.toLocaleString('en-US')}× Total Bet`),
+      strong(
+        copy('rulesMaximumWin', {
+          value: config.limits.maximumWinMultiple.toLocaleString('en-US'),
+        }),
+      ),
     ),
-    paragraph(strong(`Highest Multiplier Symbol: ${highestMultiplierSymbol}×`)),
+    paragraph(strong(copy('rulesHighestMultiplier', { value: highestMultiplierSymbol }))),
   );
 
   container.replaceChildren(
@@ -232,8 +231,8 @@ export function renderRulesContent(container: HTMLElement, config: ActiveGameCon
   );
 }
 
-export function rulesReferenceText(config: ActiveGameConfig): string {
+export function rulesReferenceText(config: ActiveGameConfig, locale: LocaleCode = 'en-US'): string {
   const container = document.createElement('div');
-  renderRulesContent(container, config);
+  renderRulesContent(container, config, locale);
   return container.textContent ?? '';
 }

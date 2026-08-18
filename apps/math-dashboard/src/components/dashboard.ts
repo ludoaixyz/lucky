@@ -14,14 +14,14 @@ import {
   formatPercent,
   formatPercentRange,
 } from '../i18n/format.js';
-import type { ProfileStatus, SimulationReport, Status } from '../types/simulation-report.js';
-import {
-  dataQualityIssues,
-  evaluateTargets,
-  overallStatus,
-  reconcileReport,
-  type TargetEvaluation,
-} from '../reports/analysis.js';
+import type {
+  DashboardAnalysisReport,
+  ProfileStatus,
+  SimulationReport,
+  Status,
+  WorkbenchSessionReport,
+} from '../types/simulation-report.js';
+import { evaluateTargets, reconcileReport, type TargetEvaluation } from '../reports/analysis.js';
 import { simulationAssessment, type AssessmentFinding } from '../reports/assessment.js';
 import { deriveAnalytics, tailAt } from '../reports/derived.js';
 import {
@@ -70,7 +70,7 @@ function value(
 }
 
 function metricValue(
-  report: SimulationReport,
+  report: DashboardAnalysisReport,
   id: MetricId,
   locale: DashboardLocale,
   l: Labels,
@@ -106,7 +106,7 @@ function deltaText(item: TargetEvaluation, locale: DashboardLocale, l: Labels): 
 }
 
 function kpi(
-  report: SimulationReport,
+  report: DashboardAnalysisReport,
   id: MetricId,
   locale: DashboardLocale,
   l: Labels,
@@ -115,7 +115,7 @@ function kpi(
 ): string {
   const d = metricDefinition(id);
   const target = evaluation?.target ?? null;
-  return `<article class="kpi-card"><h3>${tip(label(l, d.labelKey), d.descriptionKey ? label(l, d.descriptionKey) : undefined)}</h3><strong>${metricValue(report, id, locale, l)}</strong>${extra ? `<p>${extra}</p>` : ''}${evaluation ? `<div class="kpi-target"><span>${esc(l.target)}: ${targetText(target, locale, l, d.unit)}</span>${badge(evaluation.status, l)}</div>` : ''}</article>`;
+  return `<article class="kpi-card"><h3>${tip(label(l, d.labelKey), d.descriptionKey ? label(l, d.descriptionKey) : undefined)}</h3><strong>${metricValue(report, id, locale, l)}</strong>${extra ? `<p>${extra}</p>` : ''}${evaluation?.target ? `<div class="kpi-target"><span>${esc(l.target)}: ${targetText(target, locale, l, d.unit)}</span>${badge(evaluation.status, l)}</div>` : ''}</article>`;
 }
 
 function section(title: string, content: string, classes = ''): string {
@@ -124,30 +124,6 @@ function section(title: string, content: string, classes = ''): string {
 
 function comparisonTable(headers: string[], rows: string[][], classes = ''): string {
   return `<div class="table-scroll ${classes}"><table><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell, i) => `<${i === 0 ? 'th' : 'td'}>${cell}</${i === 0 ? 'th' : 'td'}>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-}
-
-function health(
-  report: SimulationReport,
-  locale: DashboardLocale,
-  l: Labels,
-  targets: ManagementTargets,
-): string {
-  const ids: MetricId[] = [
-    'rtp',
-    'featureFrequency',
-    'winningSpinFrequency',
-    'maximumObservedWin',
-    'coefficientOfVariation',
-    'freeGameWinContribution',
-  ];
-  const evaluations = new Map(evaluateTargets(report, targets).map((x) => [x.key, x]));
-  const cards = ids.map((id) => kpi(report, id, locale, l, evaluations.get(id))).join('');
-  const status = overallStatus(report, targets);
-  return section(
-    l.mathematicalHealth,
-    `<div class="health-heading"><div><span>${esc(l.profileStatus)}</span>${badge(status, l)}</div><p>${esc(status === 'UNCALIBRATED' ? l.uncalibratedNote : l.calibratedNote)}</p></div><div class="health-grid">${cards}</div>`,
-    'health-section',
-  );
 }
 
 function assessmentText(
@@ -181,18 +157,14 @@ function assessmentText(
   );
 }
 
-function assessment(
+function assessmentContent(
   report: SimulationReport,
   locale: DashboardLocale,
   l: Labels,
   targets: ManagementTargets,
 ): string {
   const findings = simulationAssessment(report, targets);
-  return section(
-    l.simulationAssessment,
-    `<ol class="findings">${findings.map((f) => `<li class="finding-${f.status.toLowerCase()}">${esc(assessmentText(f, report, locale, l))}</li>`).join('')}</ol>`,
-    'assessment-section',
-  );
+  return `<ol class="findings">${findings.map((f) => `<li class="finding-${f.status.toLowerCase()}">${esc(assessmentText(f, report, locale, l))}</li>`).join('')}</ol>`;
 }
 
 const componentRows = (
@@ -275,7 +247,7 @@ function rtpComposition(report: SimulationReport, locale: DashboardLocale, l: La
   );
 }
 
-function baseFeature(report: SimulationReport, locale: DashboardLocale, l: Labels): string {
+function baseFeatureTable(report: SimulationReport, locale: DashboardLocale, l: Labels): string {
   const m = report.metrics,
     d = deriveAnalytics(report);
   const rows = [
@@ -310,10 +282,61 @@ function baseFeature(report: SimulationReport, locale: DashboardLocale, l: Label
       formatAdaptivePercent(d.freeScatterRtp, locale),
     ],
   ].map((r) => r.map(esc));
+  return comparisonTable([l.metric, l.baseGame, l.freeGame], rows);
+}
+
+function executiveSubsection(title: string, content: string, classes = ''): string {
+  return `<section class="executive-subsection ${classes}"><h3>${esc(title)}</h3>${content}</section>`;
+}
+
+function executiveSummary(
+  report: SimulationReport,
+  locale: DashboardLocale,
+  l: Labels,
+  configured: ManagementTargets,
+): string {
+  const healthIds: MetricId[] = [
+    'rtp',
+    'featureFrequency',
+    'winningSpinFrequency',
+    'maximumObservedWin',
+    'coefficientOfVariation',
+    'freeGameWinContribution',
+  ];
+  const profileIds: MetricId[] = [
+    'rtp',
+    'winningSpinFrequency',
+    'featureFrequency',
+    'maximumObservedWin',
+    'baseGameWinContribution',
+    'freeGameWinContribution',
+    'bathalaToNextWinConversionRate',
+    'multiplierRtpContribution',
+  ];
+  const evaluations = new Map(evaluateTargets(report, configured).map((item) => [item.key, item]));
+  const profile = comparisonTable(
+    [l.dimension, l.result],
+    profileIds.map((id) => {
+      const definition = metricDefinition(id);
+      return [
+        tip(
+          label(l, definition.labelKey),
+          definition.descriptionKey ? label(l, definition.descriptionKey) : undefined,
+        ),
+        metricValue(report, id, locale, l),
+      ];
+    }),
+  );
+  const analysis = `<div class="executive-analysis-grid">${executiveSubsection(l.profileDiagnosis, profile, 'simulation-profile-subsection')}${executiveSubsection(l.baseVsFeature, baseFeatureTable(report, locale, l), 'base-feature-subsection')}</div>`;
+  const assessment = executiveSubsection(
+    l.simulationAssessment,
+    assessmentContent(report, locale, l, configured),
+    'assessment-subsection',
+  );
   return section(
-    l.baseVsFeature,
-    comparisonTable([l.metric, l.baseGame, l.freeGame], rows),
-    'base-feature-section',
+    l.overview,
+    `<div class="executive-strip">${healthIds.map((id) => kpi(report, id, locale, l, evaluations.get(id))).join('')}</div>${analysis}${assessment}`,
+    'executive-section',
   );
 }
 
@@ -427,14 +450,8 @@ function targets(
   locale: DashboardLocale,
   l: Labels,
   configured: ManagementTargets,
-  compactWhenUnconfigured = false,
 ): string {
-  if (compactWhenUnconfigured && Object.keys(configured).length === 0)
-    return section(
-      l.targets,
-      `<div class="management-target-summary"><strong>${esc(statusLabel('UNCALIBRATED', l))}</strong><p>${esc(l.uncalibratedNote)}</p></div>`,
-      'targets-section targets-collapsed',
-    );
+  if (Object.keys(configured).length === 0) return '';
   const rows = evaluateTargets(report, configured).map((item) => {
     const d = metricDefinition(item.key);
     return [
@@ -515,13 +532,9 @@ function validation(report: SimulationReport, locale: DashboardLocale, l: Labels
   ]
     .map(([key, val]) => `<div><dt>${esc(label(l, key!))}</dt><dd>${esc(val)}</dd></div>`)
     .join('')}</dl></article>`;
-  const issues = dataQualityIssues(report);
-  const quality = issues.length
-    ? `<article class="quality-warnings"><h3>${esc(l.dataQuality)}</h3><ul>${issues.map((x) => `<li>${badge(x.severity, l)} ${esc(label(l, x.key))}</li>`).join('')}</ul></article>`
-    : `<article><h3>${esc(l.dataQuality)}</h3><p>${badge('PASS', l)} ${esc(l.noDataQualityIssues)}</p></article>`;
   return section(
     l.validationAndMetadata,
-    `<div class="validation-grid">${checks}${quality}${metadata}</div>`,
+    `<div class="validation-grid">${checks}${metadata}</div>`,
     'validation-section',
   );
 }
@@ -532,66 +545,181 @@ export interface RenderDashboardOptions {
   readonly targets?: ManagementTargets;
 }
 
-export function renderDashboard(report: SimulationReport, options: RenderDashboardOptions): string {
-  const { locale, labels: l } = options;
-  const configured = options.targets ?? MANAGEMENT_TARGETS;
-  const evaluation = new Map(evaluateTargets(report, configured).map((x) => [x.key, x]));
-  const executiveIds: MetricId[] = [
-    'rtp',
-    'winningSpinFrequency',
-    'featureFrequency',
-    'maximumObservedWin',
-    'baseGameWinContribution',
-    'freeGameWinContribution',
-  ];
-  const identity = `<section class="identity-card"><div><p class="eyebrow">${esc(l.activeReport)}</p><h2>${esc(report.metadata.gameName)} — ${esc(report.metadata.configurationId)}</h2><p>${esc(l.gameVersion)}: ${esc(report.metadata.gameVersion)} · ${esc(l.calibration)}: ${esc(report.metadata.calibrationProfile ?? l.na)}</p></div><time>${esc(formatDate(report.metadata.generatedAt, locale))}</time></section>`;
-  const executive = section(
-    l.overview,
-    `<div class="executive-strip">${executiveIds.map((id) => kpi(report, id, locale, l, evaluation.get(id), id === 'featureFrequency' ? formatAdaptivePercent(report.metrics.featureFrequency, locale) : '')).join('')}</div><h3 class="subheading">${esc(l.profileDiagnosis)}</h3>${comparisonTable(
-      [l.dimension, l.result, l.target, l.status],
-      executiveIds
-        .concat(['bathalaToNextWinConversionRate', 'multiplierRtpContribution'])
-        .map((id) => {
-          const x = evaluation.get(id)!;
-          const d = metricDefinition(id);
-          return [
-            tip(label(l, d.labelKey), d.descriptionKey ? label(l, d.descriptionKey) : undefined),
-            metricValue(report, id, locale, l),
-            targetText(x.target, locale, l, d.unit),
-            badge(x.status, l),
-          ];
-        }),
-    )}`,
-    'executive-section',
-  );
-  return `<main id="dashboard-content">${identity}<div class="report-page report-page-one">${health(report, locale, l, configured)}${executive}${assessment(report, locale, l, configured)}${rtpComposition(report, locale, l)}${baseFeature(report, locale, l)}${mechanicOverview(report, locale, l)}</div><div class="report-page report-page-two">${targets(report, locale, l, configured)}${tailPerformance(report, locale, l)}${featureLength(report, locale, l)}${diagnostics(report, locale, l)}${validation(report, locale, l)}</div><footer>${esc(l.footer)}</footer></main>`;
+function nullableNumber(
+  amount: number | null,
+  formatter: (value: number) => string,
+  l: Labels,
+): string {
+  return amount === null ? esc(l.na) : esc(formatter(amount));
 }
 
-function exportPageFooter(l: Labels, page: number, total: number): string {
-  return `<footer class="export-page-footer"><span>${esc(l.footer)}</span><span>${esc(l.page)} ${page} / ${total}</span></footer>`;
-}
-
-export function renderDetailedExportDocument(
-  report: SimulationReport,
+function renderWorkbenchDashboard(
+  report: WorkbenchSessionReport,
   options: RenderDashboardOptions,
 ): string {
   const { locale, labels: l } = options;
-  const configured = options.targets ?? MANAGEMENT_TARGETS;
-  const evaluation = new Map(evaluateTargets(report, configured).map((x) => [x.key, x]));
-  const executiveIds: MetricId[] = [
+  const m = report.metrics;
+  const totalBet = m.totalBet ?? 0;
+  const coverageValues = Object.values(report.metricAvailability);
+  const covered = coverageValues.filter((availability) => availability !== 'unavailable').length;
+  const identity = `<section class="identity-card analysis-source-card"><div><p class="eyebrow">${esc(label(l, 'workbenchSession'))}</p><h2>${esc(report.metadata.gameName)} — ${esc(report.metadata.configurationId)}</h2><p>${esc(label(l, 'source'))}: ${esc(label(l, 'workbenchCsv'))} · ${formatInteger(report.simulation.spins, locale)} ${esc(label(l, 'sessionSpins').toLowerCase())} · ${esc(label(l, 'partialData'))}</p></div><div class="analysis-coverage"><strong>${covered} / ${coverageValues.length}</strong><span>${esc(label(l, 'metricsAvailable'))}</span></div></section>`;
+  const visibleWarnings = report.analysisWarnings.filter(
+    (warning) => warning !== 'limitedSampleWarning',
+  );
+  const warnings = visibleWarnings.length
+    ? `<div class="analysis-warning">${visibleWarnings.map((warning) => `<p>${esc(label(l, warning))}</p>`).join('')}</div>`
+    : '';
+  const coreIds: MetricId[] = [
     'rtp',
     'winningSpinFrequency',
-    'featureFrequency',
+    'averageWinPerWinningSpin',
     'maximumObservedWin',
-    'baseGameWinContribution',
-    'freeGameWinContribution',
+    'coefficientOfVariation',
+    'featureFrequency',
   ];
-  const executive = section(
-    l.overview,
-    `<div class="executive-strip">${executiveIds.map((id) => kpi(report, id, locale, l, evaluation.get(id))).join('')}</div>`,
+  const sessionLabels = { ...l, creditedRtp: l.sessionRtp };
+  const core = section(
+    label(l, 'sessionOverview'),
+    `<div class="executive-strip">${coreIds.map((id) => kpi(report, id, locale, sessionLabels)).join('')}</div>`,
     'executive-section',
   );
+  const rows = (
+    items: readonly [string, number | null, 'integer' | 'decimal' | 'percent' | 'multiplier'][],
+  ): string =>
+    comparisonTable(
+      [l.metric, l.result],
+      items.map(([key, amount, format]) => [
+        esc(label(l, key)),
+        nullableNumber(
+          amount,
+          (value) =>
+            format === 'integer'
+              ? formatInteger(value, locale)
+              : format === 'percent'
+                ? formatAdaptivePercent(value, locale)
+                : format === 'multiplier'
+                  ? formatMultiplier(value, locale)
+                  : formatDecimal(value, locale, 4),
+          l,
+        ),
+      ]),
+    );
+  const mechanics = section(
+    l.mechanicHealth,
+    rows([
+      ['roundsPerSpin', m.tumbleRoundsPerPaidSpin, 'decimal'],
+      ['overallTumbleFrequency', m.tumbleTriggerFrequency, 'percent'],
+      ['averageRoundsTriggeringSpin', m.averageTumbleRoundsPerTriggeringSpin, 'decimal'],
+      ['maxDepth', m.maximumObservedTumbleDepth, 'integer'],
+      ['bathalaActivations', m.bathalaActivations, 'integer'],
+      ['bathalaFrequency', m.bathalaActivationFrequency, 'percent'],
+      ['averageRemoved', m.averageSymbolsRemoved, 'decimal'],
+      ['bathalaConversion', m.bathalaToNextWinConversionRate, 'percent'],
+      ['multiplierFrequency', m.multiplierAppearanceFrequency, 'percent'],
+      ['averageMultiplier', m.averageMultiplierValue, 'multiplier'],
+      ['effectiveMultiplier', m.averageSummedMultiplierOnMultipliedWins, 'multiplier'],
+      ['maximumMultiplier', m.maximumSummedMultiplier, 'multiplier'],
+    ]),
+  );
+  const feature = section(
+    l.freeGames,
+    rows([
+      ['triggerCount', m.freeGameTriggerCount, 'integer'],
+      ['featureFrequency', m.featureFrequency, 'percent'],
+      ['averageFreeGames', m.averageFreeGamesPlayed, 'decimal'],
+      ['initialFreeGames', m.averageInitiallyAwardedFreeGames, 'decimal'],
+      ['maximumObservedFeatureLength', m.maximumObservedFeatureLength, 'integer'],
+      ['retriggerCount', m.retriggerCount, 'integer'],
+      ['averageRetriggers', m.averageRetriggersPerFeature, 'decimal'],
+      ['endingMultiplier', m.averageEndingFreeGameMultiplier, 'multiplier'],
+    ]),
+  );
+  const componentItems: readonly [string, number | null][] = report.capabilities
+    .rtpCompositionDetailed
+    ? [
+        ['baseRegular', m.components.baseGameRegularPayout],
+        ['baseScatter', m.components.baseGameScatterPayout],
+        ['baseMultiplier', m.components.baseGameMultiplierUplift],
+        ['freeRegular', m.components.freeGameRegularPayout],
+        ['freeScatter', m.components.freeGameScatterPayout],
+        ['freeMultiplier', m.components.freeGameMultiplierUplift],
+      ]
+    : [
+        [
+          'baseGame',
+          m.baseGameWinContribution === null ? null : m.baseGameWinContribution * totalBet,
+        ],
+        [
+          'freeGame',
+          m.freeGameWinContribution === null ? null : m.freeGameWinContribution * totalBet,
+        ],
+      ];
+  const composition = section(
+    l.rtpComposition,
+    comparisonTable(
+      [l.dimension, l.payoutCredits, l.rtpContribution],
+      componentItems.map(([key, credits]) => [
+        esc(label(l, key)),
+        nullableNumber(
+          credits,
+          (value) => formatCredits(value, locale).replace('credits', l.credits),
+          l,
+        ),
+        nullableNumber(
+          credits === null || totalBet <= 0 ? null : credits,
+          (value) => formatAdaptivePercent(value / totalBet, locale),
+          l,
+        ),
+      ]),
+    ),
+  );
+  const diagnostics = section(
+    l.diagnostics,
+    rows([
+      ['mean', m.meanWinPerPaidSpin, 'multiplier'],
+      ['variance', m.variance, 'decimal'],
+      ['sessionVolatility', m.standardDeviation, 'multiplier'],
+      ['cv', m.coefficientOfVariation, 'decimal'],
+      ['se', m.standardError, 'decimal'],
+    ]),
+  );
+  const tails = section(
+    l.tails,
+    comparisonTable(
+      [l.threshold, l.count, l.frequency],
+      m.tails.map((tail) => [
+        formatMultiplier(tail.threshold, locale, 0),
+        formatInteger(tail.count, locale),
+        formatAdaptivePercent(tail.frequency, locale),
+      ]),
+    ),
+  );
+  return `<main id="dashboard-content" class="workbench-analysis">${identity}${warnings}<div class="report-page report-page-one">${core}${composition}${mechanics}${feature}</div><div class="report-page report-page-two">${diagnostics}${tails}</div></main>`;
+}
+
+export function renderDashboard(
+  report: DashboardAnalysisReport,
+  options: RenderDashboardOptions,
+): string {
+  if (report.sourceType === 'workbench-session') return renderWorkbenchDashboard(report, options);
+  const { locale, labels: l } = options;
+  const configured = options.targets ?? MANAGEMENT_TARGETS;
+  const identity = `<section class="identity-card"><div><p class="eyebrow">${esc(l.activeReport)}</p><h2>${esc(report.metadata.gameName)} — ${esc(report.metadata.configurationId)}</h2><p>${esc(l.gameVersion)}: ${esc(report.metadata.gameVersion)} · ${esc(l.calibration)}: ${esc(report.metadata.calibrationProfile ?? l.na)}</p></div><time>${esc(formatDate(report.metadata.generatedAt, locale))}</time></section>`;
+  return `<main id="dashboard-content">${identity}<div class="report-page report-page-one">${executiveSummary(report, locale, l, configured)}${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}</div><div class="report-page report-page-two">${targets(report, locale, l, configured)}${tailPerformance(report, locale, l)}${featureLength(report, locale, l)}${diagnostics(report, locale, l)}${validation(report, locale, l)}</div></main>`;
+}
+
+function exportPageFooter(l: Labels, page: number, total: number): string {
+  return `<footer class="export-page-footer"><span>${esc(l.page)} ${page} / ${total}</span></footer>`;
+}
+
+export function renderDetailedExportDocument(
+  report: DashboardAnalysisReport,
+  options: RenderDashboardOptions,
+): string {
+  if (report.sourceType === 'workbench-session') return renderWorkbenchDashboard(report, options);
+  const { locale, labels: l } = options;
+  const configured = options.targets ?? MANAGEMENT_TARGETS;
   const identity = `<section class="identity-card"><div><p class="eyebrow">${esc(l.activeReport)}</p><h2>${esc(report.metadata.gameName)} \u2014 ${esc(report.metadata.configurationId)}</h2><p>${esc(l.gameVersion)}: ${esc(report.metadata.gameVersion)}</p></div><time>${esc(formatDate(report.metadata.generatedAt, locale))}</time></section>`;
   const header = `<header class="export-report-header"><p class="eyebrow">Lucky888</p><h1>${esc(l.title)}</h1><strong>${esc(l.detailedReport)}</strong></header>`;
-  return `<main class="export-report detailed-export-document"><section class="export-page detailed-export-executive">${header}${identity}${health(report, locale, l, configured)}${executive}${assessment(report, locale, l, configured)}${baseFeature(report, locale, l)}${exportPageFooter(l, 1, 3)}</section><section class="export-page detailed-export-mechanics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.mechanicHealth)}</h2></header>${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}${featureLength(report, locale, l)}${exportPageFooter(l, 2, 3)}</section><section class="export-page detailed-export-diagnostics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.diagnostics)}</h2></header>${tailPerformance(report, locale, l)}${diagnostics(report, locale, l)}${targets(report, locale, l, configured, true)}${validation(report, locale, l)}${exportPageFooter(l, 3, 3)}</section></main>`;
+  return `<main class="export-report detailed-export-document"><section class="export-page detailed-export-executive">${header}${identity}${executiveSummary(report, locale, l, configured)}${exportPageFooter(l, 1, 3)}</section><section class="export-page detailed-export-mechanics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.mechanicHealth)}</h2></header>${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}${featureLength(report, locale, l)}${exportPageFooter(l, 2, 3)}</section><section class="export-page detailed-export-diagnostics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.diagnostics)}</h2></header>${tailPerformance(report, locale, l)}${diagnostics(report, locale, l)}${targets(report, locale, l, configured)}${validation(report, locale, l)}${exportPageFooter(l, 3, 3)}</section></main>`;
 }

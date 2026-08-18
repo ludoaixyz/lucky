@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { renderDetailedExportDocument } from '../src/components/dashboard.js';
+import { renderDashboard, renderDetailedExportDocument } from '../src/components/dashboard.js';
 import {
   renderCompareDashboard,
   renderCompareExportDocument,
@@ -142,17 +142,47 @@ describe('portrait export document structure', () => {
     expect(chartsPage).not.toContain('economy-comparison');
   });
 
-  it('renders three detailed pages and collapses an unconfigured target profile', () => {
-    const html = renderDetailedExportDocument(reportFixture(), {
-      locale: 'en',
-      labels: TRANSLATIONS.en.labels,
-      targets: {},
-    });
-    expect(html.match(/class="export-page /gu)).toHaveLength(3);
-    expect(html).toContain('Detailed Report');
-    expect(html).toContain('UNCALIBRATED');
-    expect(html).toContain('No management targets are configured');
-    expect(html).not.toContain('<section class="report-section targets-section"><');
+  it('uses the consolidated Executive Summary hierarchy in live and exported detail', () => {
+    const report = reportFixture();
+    const options = { locale: 'en' as const, labels: TRANSLATIONS.en.labels, targets: {} };
+    const renders = [
+      renderDashboard(report, options),
+      renderDetailedExportDocument(report, options),
+    ];
+    expect(renders[1]?.match(/class="export-page /gu)).toHaveLength(3);
+
+    for (const html of renders) {
+      const host = document.createElement('div');
+      host.innerHTML = html;
+      const executive = host.querySelector('.executive-section');
+      const analysis = executive?.querySelector('.executive-analysis-grid');
+      const subsections = analysis?.querySelectorAll('.executive-subsection');
+      const profileHeaders = [
+        ...(executive?.querySelectorAll('.simulation-profile-subsection thead th') ?? []),
+      ].map((node) => node.textContent?.trim());
+
+      expect(executive?.querySelector('.section-heading h2')?.textContent).toBe(
+        'Executive Summary',
+      );
+      expect(executive?.querySelectorAll('.executive-strip .kpi-card')).toHaveLength(6);
+      expect(subsections).toHaveLength(2);
+      expect(subsections?.[0]?.querySelector('h3')?.textContent).toBe('Simulation Profile');
+      expect(subsections?.[1]?.querySelector('h3')?.textContent).toBe('Base vs Feature');
+      expect(profileHeaders).toEqual(['Dimension', 'Result']);
+      expect(executive?.querySelector('.assessment-subsection h3')?.textContent).toBe(
+        'Simulation Assessment',
+      );
+      expect(host.querySelector('.validation-grid')?.children).toHaveLength(2);
+      expect(host.textContent).not.toContain('Mathematical Health');
+      expect(host.textContent).not.toContain('Profile Status');
+      expect(host.textContent).not.toContain('UNCALIBRATED');
+      expect(host.textContent).not.toContain('No management targets are configured');
+      expect(host.textContent).not.toContain('No Target');
+      expect(host.textContent).not.toContain('Data Quality');
+      expect(host.textContent).not.toContain(
+        'Lucky888 Bathala count-pay tumble simulation · Internal analytical report',
+      );
+    }
   });
 
   it('keeps fixed comparison columns in the live dashboard', () => {

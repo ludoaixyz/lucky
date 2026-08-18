@@ -1,4 +1,8 @@
-import type { BathalaMetrics, SimulationReport } from '../types/simulation-report.js';
+import type {
+  BathalaMetrics,
+  DashboardAnalysisReport,
+  SimulationReport,
+} from '../types/simulation-report.js';
 import {
   finite,
   identifySchema,
@@ -10,6 +14,8 @@ import {
 export const SUPPORTED_REPORT_SCHEMA_VERSIONS = new Set(['2.0.0'] as const);
 export type NormalizationMode = 'strict-import' | 'bundled-compatibility';
 export type NormalizationResult =
+  { ok: true; report: DashboardAnalysisReport } | { ok: false; errors: ValidationIssue[] };
+export type SimulationNormalizationResult =
   { ok: true; report: SimulationReport } | { ok: false; errors: ValidationIssue[] };
 
 const metricNumbers = [
@@ -85,7 +91,7 @@ const componentNames = [
   'freeGameMultiplierUplift',
 ] as const;
 
-function unsupportedSchema(schema: string | null): NormalizationResult {
+function unsupportedSchema(schema: string | null): SimulationNormalizationResult {
   const shown = schema === null ? 'missing' : `"${schema}"`;
   return {
     ok: false,
@@ -131,9 +137,26 @@ function requiredString(
   return undefined;
 }
 
-function normalize(value: unknown, mode: NormalizationMode): NormalizationResult {
+function normalize(value: unknown, mode: NormalizationMode): SimulationNormalizationResult {
   if (!isRecord(value))
     return { ok: false, errors: [{ field: '$', message: 'report must be a JSON object' }] };
+  const configSignals = ['configurationId', 'baseSymbolWeights', 'paytable', 'scatter', 'bathala'];
+  const appearsToBeGameConfig =
+    !('metadata' in value) &&
+    !('simulation' in value) &&
+    !('metrics' in value) &&
+    configSignals.filter((field) => field in value).length >= 3;
+  if (mode === 'strict-import' && appearsToBeGameConfig)
+    return {
+      ok: false,
+      errors: [
+        {
+          field: '$',
+          message:
+            'This file appears to be a Lucky888 game configuration, not a Math Dashboard simulation report. Game configuration JSON files should be imported through the Math Workbench CONFIG workflow.',
+        },
+      ],
+    };
   const schema = identifySchema(value);
   if (schema === null || !SUPPORTED_REPORT_SCHEMA_VERSIONS.has(schema as '2.0.0'))
     return unsupportedSchema(schema);
@@ -284,6 +307,7 @@ function normalize(value: unknown, mode: NormalizationMode): NormalizationResult
   return {
     ok: true,
     report: {
+      sourceType: 'monte-carlo',
       metadata: metadata as SimulationReport['metadata'],
       simulation: {
         methodology: methodology as 'deterministic-streaming-monte-carlo',
@@ -291,15 +315,19 @@ function normalize(value: unknown, mode: NormalizationMode): NormalizationResult
         spins: spins as number,
       },
       metrics: { ...metricsRaw, components } as unknown as BathalaMetrics,
+      metricAvailability: Object.fromEntries(
+        [...metricNumbers, ...componentNames].map((name) => [name, 'available'] as const),
+      ),
+      analysisWarnings: [],
     },
   };
 }
 
-export const normalizeBundledReport = (value: unknown): NormalizationResult =>
+export const normalizeBundledReport = (value: unknown): SimulationNormalizationResult =>
   normalize(value, 'bundled-compatibility');
-export const normalizeImportedReport = (value: unknown): NormalizationResult =>
+export const normalizeImportedReport = (value: unknown): SimulationNormalizationResult =>
   normalize(value, 'strict-import');
-export function parseImportedSimulationReport(json: string): NormalizationResult {
+export function parseImportedSimulationReport(json: string): SimulationNormalizationResult {
   const parsed = parseRawReport(json);
   return parsed.ok ? normalizeImportedReport(parsed.value) : parsed;
 }

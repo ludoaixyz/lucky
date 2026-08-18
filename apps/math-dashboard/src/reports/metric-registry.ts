@@ -1,5 +1,4 @@
-import type { SimulationReport } from '../types/simulation-report.js';
-import { deriveAnalytics } from './derived.js';
+import type { DashboardAnalysisReport } from '../types/simulation-report.js';
 
 export type MetricUnit = 'percent' | 'multiplier' | 'credits' | 'count' | 'frequency' | 'decimal';
 
@@ -10,7 +9,7 @@ export interface MetricDefinition {
   readonly unit: MetricUnit;
   readonly precision?: number;
   readonly source: string;
-  readonly getter: (report: SimulationReport) => number | null;
+  readonly getter: (report: DashboardAnalysisReport) => number | null;
 }
 
 const metric = (
@@ -128,7 +127,14 @@ export const METRIC_REGISTRY = Object.freeze({
     'totalMultiplierRtp',
     'percent',
     'derived: multiplier component payouts / totalBet',
-    (r) => deriveAnalytics(r).totalMultiplierRtp,
+    (r) => {
+      const base = r.metrics.components.baseGameMultiplierUplift;
+      const free = r.metrics.components.freeGameMultiplierUplift;
+      const totalBet = r.metrics.totalBet;
+      return base === null || free === null || totalBet === null || totalBet <= 0
+        ? null
+        : (base + free) / totalBet;
+    },
     'tipMultiplierRtp',
   ),
   maximumObservedWin: metric(

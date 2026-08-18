@@ -38,6 +38,17 @@ import {
 import { formatCredits, formatInteger, formatMultiplier } from '../src/workbench/number-format.js';
 import { BATHALA_SYMBOL_IDS, BATHALA_SYMBOL_VISUALS } from '../src/presentation/symbol-visuals.js';
 import { renderRulesContent, rulesReferenceText } from '../src/presentation/rules-dialog.js';
+import {
+  LOCALE_STORAGE_KEY,
+  Localization,
+  resolveInitialLocale,
+  SUPPORTED_LOCALES,
+} from '../src/i18n/index.js';
+import {
+  applyWorkbenchTranslations,
+  translateWorkbench,
+  WORKBENCH_TRANSLATIONS,
+} from '../src/i18n/workbench.js';
 
 async function baseline(): Promise<ActiveGameConfig> {
   const text = await readFile(resolve(process.cwd(), 'math/generated/runtime-config.json'), 'utf8');
@@ -56,19 +67,32 @@ const record = (spinNumber: number, overrides: Partial<SpinRecord> = {}): SpinRe
   bet: 1,
   baseWin: 0,
   featureWin: 0,
+  baseRegularWin: 0,
+  baseScatterWin: 0,
+  baseMultiplierUplift: 0,
+  featureRegularWin: 0,
+  featureScatterWin: 0,
+  featureMultiplierUplift: 0,
   totalWin: 0,
   winMultiple: 0,
   winning: false,
   winOutcomes: [],
   totalTumbleRounds: 0,
+  totalTumbleTriggers: 0,
   baseTumbleRounds: 0,
   freeGameTumbleRounds: 0,
+  freeGameTumbleTriggers: 0,
   maximumTumbleDepth: 0,
+  maximumBaseTumbleDepth: 0,
+  maximumFreeGameTumbleDepth: 0,
   bathalaActivations: 0,
   bathalaSymbolsRemoved: 0,
+  bathalaNextWinConversions: 0,
   multiplierAppeared: false,
   multiplierValues: [],
   summedMultiplier: 0,
+  multipliedTumbleRounds: 0,
+  summedEffectiveMultipliers: 0,
   scatterCount: 0,
   featureTriggered: false,
   freeGamesAwarded: 0,
@@ -76,6 +100,135 @@ const record = (spinNumber: number, overrides: Partial<SpinRecord> = {}): SpinRe
   retriggerCount: 0,
   maximumWinApplied: false,
   ...overrides,
+});
+
+function memoryStorage(): Storage {
+  const values = new Map<string, string>();
+  return {
+    get length() {
+      return values.size;
+    },
+    clear: () => values.clear(),
+    getItem: (key) => values.get(key) ?? null,
+    key: (index) => [...values.keys()][index] ?? null,
+    removeItem: (key) => values.delete(key),
+    setItem: (key, value) => values.set(key, value),
+  };
+}
+
+describe('workbench localization', () => {
+  it('provides four complete dictionaries with safe English fallback and interpolation', () => {
+    expect(SUPPORTED_LOCALES).toEqual(['en-US', 'pt-BR', 'zh-CN', 'fil-PH']);
+    const required = [
+      'spin',
+      'balance',
+      'bet',
+      'win',
+      'sessionSpins',
+      'totalWagered',
+      'totalWon',
+      'winRate',
+      'sessionRtp',
+      'sessionVolatility',
+      'features',
+      'featureRate',
+      'spinHistory',
+      'rulesButton',
+    ] as const;
+    for (const locale of SUPPORTED_LOCALES)
+      for (const key of required) expect(WORKBENCH_TRANSLATIONS[locale][key]).toBeTruthy();
+
+    expect(translateWorkbench('unsupported', 'spin')).toBe('SPIN');
+    expect(translateWorkbench('zh-CN', 'freeGamesCount', { count: 15 })).toBe('15 次免费旋转');
+  });
+
+  it('persists every selectable locale and accepts the dashboard English code', () => {
+    const storage = memoryStorage();
+    const localization = new Localization('en-US', storage);
+    for (const locale of SUPPORTED_LOCALES) {
+      localization.setLocale(locale);
+      expect(localization.locale).toBe(locale);
+      if (locale !== 'en-US') expect(storage.getItem(LOCALE_STORAGE_KEY)).toBe(locale);
+    }
+    expect(resolveInitialLocale('en', 'zh-CN')).toBe('en-US');
+  });
+
+  it('renders the dashboard-style flag selector and translates static workbench labels', async () => {
+    const html = await readFile(resolve(process.cwd(), 'apps/game/index.html'), 'utf8');
+    document.body.innerHTML = html;
+    applyWorkbenchTranslations('zh-CN');
+
+    expect(
+      [
+        ...document.querySelectorAll<HTMLButtonElement>(
+          '.topbar-actions > .language-selector [data-locale]',
+        ),
+      ].map((button) => button.dataset.locale),
+    ).toEqual(SUPPORTED_LOCALES);
+    expect(document.querySelector('[data-workbench-i18n="balance"]')?.textContent).toBe('余额');
+    expect(document.querySelector('#rules-title')?.textContent).toBe('游戏规则与赔付表');
+    expect(html).toContain('%BASE_URL%assets/flags/gb.svg');
+  });
+
+  it('keeps the language, config, and session groups aligned as header siblings', async () => {
+    const html = await readFile(resolve(process.cwd(), 'apps/game/index.html'), 'utf8');
+    const css = await readFile(resolve(process.cwd(), 'apps/game/src/style.css'), 'utf8');
+    document.body.innerHTML = html;
+    const groups = [...document.querySelector('.topbar-actions')!.children].filter(
+      (node) => !node.classList.contains('visually-hidden'),
+    );
+
+    expect(groups.map((node) => node.className)).toEqual([
+      'language-selector',
+      'config-status config-metadata',
+      'config-status session-metadata',
+    ]);
+    expect(css).toMatch(
+      /\.topbar-actions\s*\{[^}]*grid-template-columns:\s*auto repeat\(2, minmax\(110px, 1fr\)\)/su,
+    );
+    expect(css).toMatch(/\.rules-header #rules-close\s*\{/u);
+    expect(css).not.toMatch(/\.rules-header button\s*\{/u);
+  });
+
+  it('uses the refined Portuguese, Chinese, and Filipino terminology', () => {
+    expect(translateWorkbench('pt-BR', 'mathWorkbench')).toBe('PAINEL MATEMÁTICO');
+    expect(translateWorkbench('pt-BR', 'featureRate')).toBe('FREQUÊNCIA DO RECURSO ESPECIAL');
+    expect(translateWorkbench('pt-BR', 'retriggerAward')).toBe('Prêmio de Retrigger');
+    expect(translateWorkbench('zh-CN', 'features')).toBe('特色功能次数');
+    expect(translateWorkbench('zh-CN', 'profileName')).toBe('配置方案名称');
+    expect(translateWorkbench('fil-PH', 'spinHistory')).toBe('Spin History');
+    expect(translateWorkbench('fil-PH', 'discardChanges')).toBe('HUWAG ILAPAT ANG MGA PAGBABAGO');
+  });
+
+  it('updates an open rules view immediately and retains the locale when reopened', async () => {
+    const config = await baseline();
+    const localization = new Localization('en-US');
+    const container = document.createElement('div');
+    const render = (): void => renderRulesContent(container, config, localization.locale);
+    const unsubscribe = localization.subscribe(render);
+
+    render();
+    expect(container.textContent).toContain('How to Win');
+    localization.setLocale('zh-CN');
+    expect(container.textContent).toContain('如何获胜');
+    container.replaceChildren();
+    render();
+    expect(container.textContent).toContain('最高赢金');
+    localization.setLocale('pt-BR');
+    expect(container.textContent).toContain('Como Ganhar');
+    localization.setLocale('fil-PH');
+    expect(container.textContent).toContain('Paano Manalo');
+    unsubscribe();
+  });
+
+  it('does not affect deterministic gameplay output', async () => {
+    const config = await baseline();
+    const results = SUPPORTED_LOCALES.map((locale) => {
+      translateWorkbench(locale, 'spin');
+      return resolveSpin(config, new SeededRandom(888), true);
+    });
+    for (const result of results.slice(1)) expect(result).toEqual(results[0]);
+  });
 });
 
 describe('math configuration lifecycle', () => {
@@ -155,8 +308,8 @@ describe('normalized bet scaling and paid-spin telemetry', () => {
       'FEATURES',
       'FEATURE RATE',
     ]);
-    expect(document.querySelector('#stat-volatility')?.textContent).toBe('N/A');
-    expect(document.querySelector('#stat-feature-rate')?.textContent).toBe('N/A');
+    expect(document.querySelector('#stat-volatility')?.textContent).toBe('0.00%');
+    expect(document.querySelector('#stat-feature-rate')?.textContent).toBe('0.00%');
   });
 
   it('keeps a complete feature attached to one paid spin', async () => {
@@ -169,12 +322,12 @@ describe('normalized bet scaling and paid-spin telemetry', () => {
       scatterPayout: 3,
       freeGamesAwarded: 15,
       components: {
-        baseGameRegularPayout: 0,
-        baseGameScatterPayout: 0,
-        baseGameMultiplierUplift: 0,
-        freeGameRegularPayout: 0,
-        freeGameScatterPayout: 0,
-        freeGameMultiplierUplift: 0,
+        baseGameRegularPayout: 1,
+        baseGameScatterPayout: 1,
+        baseGameMultiplierUplift: 0.5,
+        freeGameRegularPayout: 4,
+        freeGameScatterPayout: 2,
+        freeGameMultiplierUplift: 6,
       },
       feature: {
         initialAward: 15,
@@ -200,6 +353,12 @@ describe('normalized bet scaling and paid-spin telemetry', () => {
       bet: 2,
       baseWin: 5,
       featureWin: 24,
+      baseRegularWin: 2,
+      baseScatterWin: 2,
+      baseMultiplierUplift: 1,
+      featureRegularWin: 8,
+      featureScatterWin: 4,
+      featureMultiplierUplift: 12,
       totalWin: 29,
       winMultiple: 14.5,
       featureTriggered: true,
@@ -430,8 +589,15 @@ describe('history, statistics, and CSV', () => {
         freeGameTumbleRounds: 4,
         bathalaActivations: 2,
         bathalaSymbolsRemoved: 7,
+        bathalaNextWinConversions: 1,
         multiplierAppeared: true,
         multiplierValues: [2, 5, 10],
+        baseRegularWin: 4,
+        baseScatterWin: 2,
+        baseMultiplierUplift: 3,
+        featureRegularWin: 5,
+        featureScatterWin: 1,
+        featureMultiplierUplift: 6,
         winOutcomes: [
           {
             phase: 'base',
@@ -457,8 +623,19 @@ describe('history, statistics, and CSV', () => {
       'bathala_symbols_removed',
       'multiplier_appeared',
       'multiplier_values',
+      'base_regular_win',
+      'base_scatter_win',
+      'base_multiplier_uplift',
+      'feature_regular_win',
+      'feature_scatter_win',
+      'feature_multiplier_uplift',
+      'bathala_next_win_conversions',
+      'maximum_base_tumble_depth',
+      'maximum_free_game_tumble_depth',
     ])
       expect(SPIN_HISTORY_HEADERS).toContain(header);
+    for (const aggregate of ['session_rtp', 'session_volatility', 'feature_frequency', 'win_rate'])
+      expect(SPIN_HISTORY_HEADERS).not.toContain(aggregate);
     expect(csv).toContain('winning_outcomes');
     expect(csv).toContain('""symbolId"":""H2""');
     expect(csv.trim().split('\r\n')).toHaveLength(2);
@@ -1208,16 +1385,17 @@ describe('falling-board presentation behavior', () => {
     document.body.innerHTML = html;
     expect(document.querySelector('.brand p')?.textContent).toBe('MATH WORKBENCH');
     expect(document.querySelector('#history-title')?.textContent).toBe('Spin History');
-    expect(document.querySelector('.live-math summary span')?.textContent).toBe(
-      'TAP TO OPEN/CLOSE',
-    );
+    expect(
+      document.querySelector('.live-math summary small[data-workbench-i18n="tapOpenClose"]')
+        ?.textContent,
+    ).toBe('TAP TO OPEN/CLOSE');
     expect(document.querySelector('.math-lab summary small')?.textContent).toBe(
       'TAP TO OPEN/CLOSE',
     );
     for (const label of ['TUMBLES', 'BATHALA', 'MULTIPLIER'])
       expect(document.querySelector('.resolution-strip')?.textContent).toContain(label);
     expect(mainSource).toMatch(
-      /<span class="history-mechanics">.*TUMBLES.*BATHALA.*MULTIPLIER.*<\/span>/su,
+      /<span class="history-mechanics">.*copy\('tumbles'\).*copy\('bathala'\).*copy\('multiplier'\).*<\/span>/su,
     );
     for (const removed of [
       'INTERACTIVE MATH WORKBENCH',

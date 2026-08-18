@@ -10,9 +10,8 @@ import {
   formatPercentRange,
 } from '../i18n/format.js';
 import type { DashboardLocale } from '../i18n/types.js';
-import { deriveAnalytics } from '../reports/derived.js';
 import { metricDefinition, type MetricId, type MetricUnit } from '../reports/metric-registry.js';
-import type { LoadedReport, SimulationReport } from '../types/simulation-report.js';
+import type { DashboardAnalysisReport, LoadedReport } from '../types/simulation-report.js';
 import {
   findSet,
   workspaceWarnings,
@@ -144,7 +143,16 @@ export function renderSetManager(
     .map((set) => {
       const selected = set.id === workspace.selectedSetId;
       const setWarnings = warnings.filter((warning) => warning.setId === set.id);
-      return `<article class="simulation-set-card ${selected ? 'is-selected' : ''}" data-set-card="${set.id}"><div class="set-card-heading"><button data-select-set="${set.id}"><strong>${esc(set.label)}</strong>${setStatus(set, l)}</button><input data-rename-set="${set.id}" value="${esc(set.label)}" aria-label="${esc(l.renameSet)}"></div><dl><div><dt>${esc(l.configuration)}</dt><dd>${esc(set.report?.metadata.configurationId ?? l.na)}</dd></div><div><dt>${esc(l.gameVersion)}</dt><dd>${esc(set.report?.metadata.gameVersion ?? l.na)}</dd></div><div><dt>${esc(l.sourceFile)}</dt><dd>${esc(set.sourceName ?? l.na)}</dd></div><div><dt>${esc(l.spins)}</dt><dd>${set.report ? formatInteger(set.report.simulation.spins, locale) : l.na}</dd></div><div><dt>${esc(l.creditedRtp)}</dt><dd>${set.report ? formatAdaptivePercent(set.report.metrics.rtp, locale) : l.na}</dd></div><div><dt>${esc(l.generated)}</dt><dd>${set.report ? formatDate(set.report.metadata.generatedAt, locale) : l.na}</dd></div><div><dt>${esc(l.validationState)}</dt><dd>${set.report ? l.validReport : l.noReport}</dd></div></dl>${setWarnings.map((w) => `<p class="set-warning">${esc(label(l, w.kind))}</p>`).join('')}<label class="set-report-select">${esc(l.loadBundledReport)}<select data-catalog-report="${set.id}"><option value="">${esc(l.chooseBuiltIn)}</option>${catalog.map((report) => `<option value="${esc(report.id)}">${esc(report.label)}</option>`).join('')}</select></label><div class="set-drop-zone" data-drop-set="${set.id}" tabindex="0"><strong>${esc(set.report ? l.replaceReport : l.dropReportHere)}</strong><span>${esc(l.browseFile)}</span><input data-file-set="${set.id}" type="file" accept="application/json,.json"></div><div class="set-actions"><button data-select-set="${set.id}" data-detail-set="${set.id}">${esc(l.viewReportMetadata)}</button><button data-remove-set="${set.id}" ${set.report ? '' : 'disabled'}>${esc(l.removeReport)}</button></div>${
+      const sourceStatus =
+        set.report?.sourceType === 'workbench-session' ? l.workbenchCsv : l.validReport;
+      const spinsLabel = set.report?.sourceType === 'workbench-session' ? l.sessionSpins : l.spins;
+      const rtpLabel =
+        set.report?.sourceType === 'workbench-session' ? l.sessionRtp : l.creditedRtp;
+      const generated =
+        set.report && Number.isFinite(Date.parse(set.report.metadata.generatedAt))
+          ? formatDate(set.report.metadata.generatedAt, locale)
+          : l.na;
+      return `<article class="simulation-set-card ${selected ? 'is-selected' : ''}" data-set-card="${set.id}"><div class="set-card-heading"><button data-select-set="${set.id}"><strong>${esc(set.label)}</strong>${setStatus(set, l)}</button><input data-rename-set="${set.id}" value="${esc(set.label)}" aria-label="${esc(l.renameSet)}"></div><dl><div><dt>${esc(l.configuration)}</dt><dd>${esc(set.report?.metadata.configurationId ?? l.na)}</dd></div><div><dt>${esc(l.gameVersion)}</dt><dd>${esc(set.report?.metadata.gameVersion ?? l.na)}</dd></div><div><dt>${esc(l.sourceFile)}</dt><dd>${esc(set.sourceName ?? l.na)}</dd></div><div><dt>${esc(spinsLabel)}</dt><dd>${set.report ? formatInteger(set.report.simulation.spins, locale) : l.na}</dd></div><div><dt>${esc(rtpLabel)}</dt><dd>${set.report && set.report.metrics.rtp !== null ? formatAdaptivePercent(set.report.metrics.rtp, locale) : l.na}</dd></div><div><dt>${esc(l.generated)}</dt><dd>${esc(generated)}</dd></div><div><dt>${esc(l.validationState)}</dt><dd>${set.report ? sourceStatus : l.noReport}</dd></div></dl>${setWarnings.map((w) => `<p class="set-warning">${esc(label(l, w.kind))}</p>`).join('')}<label class="set-report-select">${esc(l.loadBundledReport)}<select data-catalog-report="${set.id}"><option value="">${esc(l.chooseBuiltIn)}</option>${catalog.map((report) => `<option value="${esc(report.id)}">${esc(report.label)}</option>`).join('')}</select></label><div class="set-drop-zone" data-drop-set="${set.id}" tabindex="0"><strong>${esc(set.report ? l.replaceReport : l.dropReportHere)}</strong><span>${esc(l.browseFile)}</span><input data-file-set="${set.id}" type="file" accept="application/json,.json,text/csv,.csv"></div><div class="set-actions"><button data-select-set="${set.id}" data-detail-set="${set.id}">${esc(l.viewReportMetadata)}</button><button data-remove-set="${set.id}" ${set.report ? '' : 'disabled'}>${esc(l.removeReport)}</button></div>${
         set.lastImportStatus === 'rejected'
           ? `<div class="set-import-message import-rejected"><strong>${esc(l.reportRejected)}</strong><span>${esc(l.importPreserved)}</span><ul>${set.validationErrors
               .slice(0, 3)
@@ -187,7 +195,7 @@ function comparisonTable(
   const baseline = workspace.baselineSetId ? findSet(workspace, workspace.baselineSetId) : null;
   const specialRows = options.executive
     ? [
-        `<tr><th>${esc(l.simulationSpins)}</th>${workspace.sets.map((set) => `<td><strong>${set.report ? formatInteger(set.report.simulation.spins, locale) : naValue(l)}</strong></td>`).join('')}</tr>`,
+        `<tr><th>${esc(workspace.sets.some((set) => set.report?.sourceType === 'workbench-session') ? l.sessionSpins : l.simulationSpins)}</th>${workspace.sets.map((set) => `<td><strong>${set.report ? formatInteger(set.report.simulation.spins, locale) : naValue(l)}</strong></td>`).join('')}</tr>`,
         `<tr><th>${esc(l.rtpConfidenceInterval95)}</th>${workspace.sets.map((set) => `<td class="comparison-ci"><strong>${set.report ? formatPercentRange(set.report.metrics.confidenceInterval95[0], set.report.metrics.confidenceInterval95[1], locale) : naValue(l)}</strong></td>`).join('')}</tr>`,
       ].join('')
     : '';
@@ -211,31 +219,44 @@ function comparisonTable(
 }
 
 const RTP_COMPONENTS = [
-  ['baseRegular', (r: SimulationReport) => deriveAnalytics(r).baseRegularRtp],
-  ['baseScatter', (r: SimulationReport) => deriveAnalytics(r).baseScatterRtp],
-  ['baseMultiplier', (r: SimulationReport) => deriveAnalytics(r).baseMultiplierRtp],
-  ['freeRegular', (r: SimulationReport) => deriveAnalytics(r).freeRegularRtp],
-  ['freeScatter', (r: SimulationReport) => deriveAnalytics(r).freeScatterRtp],
-  ['freeMultiplier', (r: SimulationReport) => deriveAnalytics(r).freeMultiplierRtp],
+  ['baseRegular', 'baseGameRegularPayout'],
+  ['baseScatter', 'baseGameScatterPayout'],
+  ['baseMultiplier', 'baseGameMultiplierUplift'],
+  ['freeRegular', 'freeGameRegularPayout'],
+  ['freeScatter', 'freeGameScatterPayout'],
+  ['freeMultiplier', 'freeGameMultiplierUplift'],
 ] as const;
+
+const analysisComponentRtp = (
+  report: DashboardAnalysisReport,
+  key: (typeof RTP_COMPONENTS)[number][1],
+): number | null => {
+  const amount = report.metrics.components[key];
+  const totalBet = report.metrics.totalBet;
+  return amount === null || totalBet === null || totalBet <= 0 ? null : amount / totalBet;
+};
 
 function comparisonRtp(workspace: SimulationWorkspace, locale: DashboardLocale, l: Labels): string {
   const valid = workspace.sets.filter(
-    (set): set is SimulationSet & { report: SimulationReport } => set.report !== null,
+    (set): set is SimulationSet & { report: DashboardAnalysisReport } => set.report !== null,
   );
   const max = Math.max(
-    ...valid.flatMap((set) => RTP_COMPONENTS.map(([, getter]) => getter(set.report))),
+    ...valid.flatMap((set) =>
+      RTP_COMPONENTS.map(([, key]) => analysisComponentRtp(set.report, key)).filter(
+        (value): value is number => value !== null,
+      ),
+    ),
     0.0001,
   );
   return `<section class="report-section comparison-chart-section"><div class="section-heading"><h2>${esc(l.comparisonRtpComposition)}</h2></div>${
     valid.length
       ? `<div class="grouped-bars" role="img" aria-label="${esc(l.comparisonRtpComposition)}">${RTP_COMPONENTS.map(
-          ([key, getter]) =>
+          ([key, componentKey]) =>
             `<div class="grouped-row"><span>${esc(label(l, key))}</span><div>${valid
               .map((set) => {
-                const amount = getter(set.report);
+                const amount = analysisComponentRtp(set.report, componentKey);
                 const series = seriesNumberForSet(set.id);
-                return `<div class="grouped-series-row"><em>${esc(set.label)}</em><i><b class="series-${series}" style="width:${Math.max(0.4, (amount / max) * 100)}%"></b></i><strong>${formatAdaptivePercent(amount, locale)}</strong></div>`;
+                return `<div class="grouped-series-row"><em>${esc(set.label)}</em><i>${amount === null ? '' : `<b class="series-${series}" style="width:${Math.max(0.4, (amount / max) * 100)}%"></b>`}</i><strong>${amount === null ? esc(l.na) : formatAdaptivePercent(amount, locale)}</strong></div>`;
               })
               .join('')}</div></div>`,
         ).join('')}</div>`
@@ -249,7 +270,7 @@ function comparisonTail(
   l: Labels,
 ): string {
   const valid = workspace.sets.filter(
-    (set): set is SimulationSet & { report: SimulationReport } => set.report !== null,
+    (set): set is SimulationSet & { report: DashboardAnalysisReport } => set.report !== null,
   );
   const frequencies = valid.flatMap((set) =>
     set.report.metrics.tails.filter((t) => t.frequency > 0).map((t) => t.frequency),
@@ -348,17 +369,21 @@ function comparisonTail(
 
 function economySplit(workspace: SimulationWorkspace, locale: DashboardLocale, l: Labels): string {
   const rows = [
-    ['baseContribution', (r: SimulationReport) => r.metrics.baseGameWinContribution],
-    ['freeContribution', (r: SimulationReport) => r.metrics.freeGameWinContribution],
+    ['baseContribution', (r: DashboardAnalysisReport) => r.metrics.baseGameWinContribution],
+    ['freeContribution', (r: DashboardAnalysisReport) => r.metrics.freeGameWinContribution],
     [
       'baseShare',
-      (r: SimulationReport) =>
-        r.metrics.rtp > 0 ? r.metrics.baseGameWinContribution / r.metrics.rtp : null,
+      (r: DashboardAnalysisReport) =>
+        r.metrics.rtp !== null && r.metrics.rtp > 0 && r.metrics.baseGameWinContribution !== null
+          ? r.metrics.baseGameWinContribution / r.metrics.rtp
+          : null,
     ],
     [
       'featureShare',
-      (r: SimulationReport) =>
-        r.metrics.rtp > 0 ? r.metrics.freeGameWinContribution / r.metrics.rtp : null,
+      (r: DashboardAnalysisReport) =>
+        r.metrics.rtp !== null && r.metrics.rtp > 0 && r.metrics.freeGameWinContribution !== null
+          ? r.metrics.freeGameWinContribution / r.metrics.rtp
+          : null,
     ],
   ] as const;
   return `<section class="report-section economy-comparison"><div class="section-heading"><h2>${esc(l.economySplit)}</h2></div><div class="table-scroll"><table class="comparison-grid-table economy-table">${COMPARISON_COLGROUP}<thead><tr><th>${esc(l.metric)}</th>${workspace.sets.map((set) => `<th>${esc(set.label)}</th>`).join('')}</tr></thead><tbody>${rows

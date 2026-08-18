@@ -9,6 +9,7 @@ export interface ReportMetadata {
   configurationId: string;
   generatedAt: string;
   calibrationProfile?: string;
+  profileName?: string;
 }
 export interface ReportSimulation {
   methodology: 'deterministic-streaming-monte-carlo';
@@ -86,12 +87,57 @@ export interface BathalaMetrics {
   featurePayoutHistogram?: readonly { bucket: string; count: number }[];
 }
 export interface SimulationReport {
+  sourceType?: 'monte-carlo';
   metadata: ReportMetadata;
   simulation: ReportSimulation;
   metrics: BathalaMetrics;
   dashboardLocale?: DashboardLocale;
   simulationCheckpoints?: readonly SimulationCheckpoint[];
+  metricAvailability?: Readonly<Record<string, MetricAvailability>>;
+  analysisWarnings?: readonly string[];
 }
+
+export type MetricAvailability = 'available' | 'derived' | 'unavailable';
+export type AnalysisSourceType = 'monte-carlo' | 'workbench-session';
+type NullableNumbers<T> = {
+  readonly [Key in keyof T]: T[Key] extends number ? number | null : T[Key];
+};
+export type WorkbenchAnalysisMetrics = Omit<
+  NullableNumbers<BathalaMetrics>,
+  'components' | 'featureLengthPercentiles' | 'tails'
+> & {
+  readonly components: NullableNumbers<ReportComponents>;
+  readonly featureLengthPercentiles: NullableNumbers<BathalaMetrics['featureLengthPercentiles']>;
+  readonly tails: readonly TailMetric[];
+};
+export interface CsvCapabilities {
+  readonly core: true;
+  readonly mechanics: boolean;
+  readonly tumble: boolean;
+  readonly bathala: boolean;
+  readonly multiplier: boolean;
+  readonly feature: boolean;
+  readonly rtpCompositionSimplified: boolean;
+  readonly rtpCompositionDetailed: boolean;
+}
+export interface WorkbenchSessionReport {
+  readonly sourceType: 'workbench-session';
+  readonly metadata: ReportMetadata;
+  readonly simulation: {
+    readonly methodology: 'workbench-interactive-session';
+    readonly seed: number | null;
+    readonly spins: number;
+  };
+  readonly metrics: WorkbenchAnalysisMetrics;
+  readonly metricAvailability: Readonly<Record<string, MetricAvailability>>;
+  readonly capabilities: CsvCapabilities;
+  readonly analysisWarnings: readonly string[];
+  readonly dashboardLocale?: DashboardLocale;
+}
+export type DashboardAnalysisReport = SimulationReport | WorkbenchSessionReport;
+
+export const analysisSourceType = (report: DashboardAnalysisReport): AnalysisSourceType =>
+  report.sourceType === 'workbench-session' ? 'workbench-session' : 'monte-carlo';
 export interface ReportIndexEntry {
   file: string;
   label: string;
@@ -101,7 +147,7 @@ export interface LoadedReport {
   id: string;
   label: string;
   source: 'built-in' | 'upload';
-  report: SimulationReport;
+  report: DashboardAnalysisReport;
 }
 export type Status = 'PASS' | 'WARN' | 'FAIL' | 'N/A';
 export type ProfileStatus = Exclude<Status, 'N/A'> | 'UNCALIBRATED';
