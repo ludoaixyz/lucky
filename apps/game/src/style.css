@@ -598,20 +598,25 @@ main {
 }
 .session-summary {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
   padding: 0.6rem;
   border: 1px solid #293a59;
   border-radius: 0.75rem;
   background: #0a1220;
 }
-.session-summary div {
+.session-summary-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.session-stat {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
-}
-.session-summary .wide {
-  grid-column: 1/-1;
+  min-width: 0;
 }
 .session-summary span {
   color: var(--muted);
@@ -1316,6 +1321,9 @@ button:disabled {
   }
 }
 @media (max-width: 420px) {
+  .session-summary {
+    grid-template-columns: 1fr;
+  }
   .player-controls {
     grid-template-columns: 1fr;
   }

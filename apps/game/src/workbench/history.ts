@@ -5,6 +5,7 @@ export interface SessionStats {
   readonly totalWagered: number;
   readonly totalWon: number;
   readonly sessionRtp: number;
+  readonly sessionVolatility: number | null;
   readonly winningSpinFrequency: number;
   readonly featureCount: number;
   readonly featureFrequency: number;
@@ -14,6 +15,21 @@ export interface SessionStats {
   readonly multiplierAppearance: number;
   readonly averageMultiplier: number;
   readonly averageTumbleDepth: number;
+}
+
+function populationStandardDeviation(values: readonly number[]): number | null {
+  if (values.length === 0) return null;
+
+  let mean = 0;
+  let squaredDifferenceTotal = 0;
+  values.forEach((value, index) => {
+    const count = index + 1;
+    const difference = value - mean;
+    mean += difference / count;
+    squaredDifferenceTotal += difference * (value - mean);
+  });
+
+  return Math.sqrt(Math.max(0, squaredDifferenceTotal / values.length));
 }
 
 export function deriveSessionStats(records: readonly SpinRecord[]): SessionStats {
@@ -31,6 +47,7 @@ export function deriveSessionStats(records: readonly SpinRecord[]): SessionStats
     totalWagered,
     totalWon,
     sessionRtp: ratio(totalWon, totalWagered),
+    sessionVolatility: populationStandardDeviation(records.map((record) => record.winMultiple)),
     winningSpinFrequency: ratio(winners.length, spinCount),
     featureCount: features.length,
     featureFrequency: ratio(features.length, spinCount),

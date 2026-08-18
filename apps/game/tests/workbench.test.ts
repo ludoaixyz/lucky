@@ -135,6 +135,30 @@ describe('normalized bet scaling and paid-spin telemetry', () => {
     expect(formatMultiplier(1.25)).toBe('1.25×');
   });
 
+  it('groups eight session metrics into explicit left and right columns', async () => {
+    const html = await readFile(resolve(process.cwd(), 'apps/game/index.html'), 'utf8');
+    document.body.innerHTML = html;
+    const columns = [...document.querySelectorAll('.session-summary-column')];
+    const labels = (column: Element): (string | null)[] =>
+      [...column.querySelectorAll('.session-stat > span')].map((label) => label.textContent);
+
+    expect(columns).toHaveLength(2);
+    expect(labels(columns[0]!)).toEqual([
+      'SESSION SPINS',
+      'TOTAL WAGERED',
+      'TOTAL WON',
+      'WIN RATE',
+    ]);
+    expect(labels(columns[1]!)).toEqual([
+      'SESSION RTP',
+      'SESSION VOLATILITY',
+      'FEATURES',
+      'FEATURE RATE',
+    ]);
+    expect(document.querySelector('#stat-volatility')?.textContent).toBe('N/A');
+    expect(document.querySelector('#stat-feature-rate')?.textContent).toBe('N/A');
+  });
+
   it('keeps a complete feature attached to one paid spin', async () => {
     const config = await baseline();
     const result = {
@@ -355,6 +379,47 @@ describe('history, statistics, and CSV', () => {
     expect(stats.totalWon).toBe(3);
     expect(stats.sessionRtp).toBe(1.5);
     expect(stats.featureEntrySpins).toBeNull();
+  });
+
+  it('reports no observed session volatility before a paid spin is committed', () => {
+    expect(deriveSessionStats([]).sessionVolatility).toBeNull();
+  });
+
+  it('reports zero volatility for one zero return and for identical returns', () => {
+    expect(deriveSessionStats([record(1)]).sessionVolatility).toBe(0);
+    expect(
+      deriveSessionStats([
+        record(1, { winMultiple: 2 }),
+        record(2, { winMultiple: 2 }),
+        record(3, { winMultiple: 2 }),
+      ]).sessionVolatility,
+    ).toBe(0);
+  });
+
+  it('includes losing paid spins in the population standard deviation', () => {
+    const stats = deriveSessionStats([
+      record(1, { winMultiple: 0 }),
+      record(2, { winMultiple: 0 }),
+      record(3, { winMultiple: 2, winning: true }),
+      record(4, { winMultiple: 4, winning: true }),
+    ]);
+
+    expect(stats.sessionVolatility).toBeCloseTo(Math.sqrt(2.75), 12);
+  });
+
+  it('counts a feature paid spin final return multiple exactly once', () => {
+    const stats = deriveSessionStats([
+      record(1, { winMultiple: 0 }),
+      record(2, {
+        winMultiple: 6,
+        winning: true,
+        featureTriggered: true,
+        featureWin: 6,
+        totalWin: 6,
+      }),
+    ]);
+
+    expect(stats.sessionVolatility).toBe(3);
   });
 
   it('serializes deterministic analysis-ready CSV with quoted comma fields and pipe arrays', () => {

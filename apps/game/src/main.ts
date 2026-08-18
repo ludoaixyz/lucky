@@ -201,10 +201,14 @@ async function boot(): Promise<void> {
     byId('stat-won').textContent = formatCredits(stats.totalWon);
     byId('stat-rtp').textContent = formatPercent(stats.sessionRtp);
     byId('stat-win-rate').textContent = formatPercent(stats.winningSpinFrequency);
+    byId('stat-volatility').textContent =
+      stats.sessionVolatility === null
+        ? '0.00%'
+        : formatPercent(stats.sessionVolatility);
     byId('stat-features').textContent = String(stats.featureCount);
     byId('stat-feature-rate').textContent =
       stats.featureEntrySpins === null
-        ? 'Not observed'
+        ? '0.00%'
         : `1 in ${formatDecimal(stats.featureEntrySpins, 1)}`;
     byId('history-list').replaceChildren(
       ...(history.getRecentSpins().length

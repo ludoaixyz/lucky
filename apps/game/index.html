@@ -100,14 +100,31 @@
             <h2 id="history-title">Spin History</h2>
           </div>
           <section class="session-summary" aria-label="Session observations">
-            <div><span>Spins</span><strong id="stat-spins">0</strong></div>
-            <div><span>Wagered</span><strong id="stat-wagered">0.00</strong></div>
-            <div><span>Won</span><strong id="stat-won">0.00</strong></div>
-            <div><span>Session RTP</span><strong id="stat-rtp">0.00%</strong></div>
-            <div><span>Win Rate</span><strong id="stat-win-rate">0.00%</strong></div>
-            <div><span>Features</span><strong id="stat-features">0</strong></div>
-            <div class="wide">
-              <span>Feature Rate</span><strong id="stat-feature-rate">Not observed</strong>
+            <div class="session-summary-column">
+              <div class="session-stat">
+                <span>SESSION SPINS</span><strong id="stat-spins">0</strong>
+              </div>
+              <div class="session-stat">
+                <span>TOTAL WAGERED</span><strong id="stat-wagered">0</strong>
+              </div>
+              <div class="session-stat"><span>TOTAL WON</span><strong id="stat-won">0</strong></div>
+              <div class="session-stat">
+                 <span>FEATURES</span><strong id="stat-features">0</strong>
+              </div>
+            </div>
+            <div class="session-summary-column">
+              <div class="session-stat">
+                <span>SESSION RTP</span><strong id="stat-rtp">0.00%</strong>
+              </div>
+              <div class="session-stat">
+                <span>SESSION VOLATILITY</span><strong id="stat-volatility">0.00%</strong>
+              </div>
+              <div class="session-stat">
+				<span>WIN RATE</span><strong id="stat-win-rate">0.00%</strong>
+              </div>
+              <div class="session-stat">
+                <span>FEATURE RATE</span><strong id="stat-feature-rate">0.00%</strong>
+              </div>
             </div>
           </section>
           <div id="history-list" class="history-list">
