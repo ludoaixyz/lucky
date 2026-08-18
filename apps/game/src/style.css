@@ -70,10 +70,11 @@ main {
 }
 .config-status {
   display: grid;
-  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
   gap: 0.5rem;
   margin: 0;
 }
+
 .config-status div,
 .credit-readout div {
   padding: 0.55rem 0.75rem;
@@ -81,12 +82,14 @@ main {
   border-radius: 0.65rem;
   background: #0c1423;
 }
+
 .config-status dt,
 .credit-readout dt {
   color: var(--muted);
   font-size: 0.62rem;
   letter-spacing: 0.12em;
 }
+
 .config-status dd,
 .credit-readout dd {
   margin: 0.18rem 0 0;
@@ -95,8 +98,9 @@ main {
   font-weight: 800;
   overflow-wrap: anywhere;
 }
+
 .profile-status {
-  visibility: hidden;
+  display: none;
 }
 .workspace {
   --game-column-width: 580px;
