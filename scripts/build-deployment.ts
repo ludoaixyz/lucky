@@ -6,7 +6,8 @@ import { resolveDeploymentBases } from './lib/deployment-base.js';
 const repositoryRoot = resolve(import.meta.dirname, '..');
 const gameDist = resolve(repositoryRoot, 'apps/game/dist');
 const dashboardDist = resolve(repositoryRoot, 'apps/math-dashboard/dist');
-const assembledDashboard = resolve(gameDist, 'dashboard');
+const pagesDist = resolve(repositoryRoot, 'dist-pages');
+const assembledDashboard = resolve(pagesDist, 'dashboard');
 const npmCli = process.env.npm_execpath;
 const bases = resolveDeploymentBases(process.env.VITE_BASE_PATH);
 
@@ -65,19 +66,21 @@ try {
   });
   requirePath(dashboardDist, 'directory', 'Dashboard production bundle');
 
-  console.info('[deploy] Assembling dashboard at apps/game/dist/dashboard');
-  rmSync(assembledDashboard, { force: true, recursive: true });
+  console.info('[deploy] Assembling Pages artifact at dist-pages');
+  rmSync(pagesDist, { force: true, recursive: true });
+  cpSync(gameDist, pagesDist, { recursive: true });
   cpSync(dashboardDist, assembledDashboard, { recursive: true });
+  requirePath(pagesDist, 'directory', 'Combined Pages artifact');
   requirePath(assembledDashboard, 'directory', 'Assembled dashboard bundle');
 
-  const gameIndex = resolve(gameDist, 'index.html');
+  const gameIndex = resolve(pagesDist, 'index.html');
   const dashboardIndex = resolve(assembledDashboard, 'index.html');
   requirePath(gameIndex, 'file', 'Game entry point');
   requirePath(dashboardIndex, 'file', 'Dashboard entry point');
   verifyHtmlBase(gameIndex, bases.game, 'Game entry point');
   verifyHtmlBase(dashboardIndex, bases.dashboard, 'Dashboard entry point');
 
-  console.info('[deploy] Deployment bundle ready at apps/game/dist');
+  console.info('[deploy] Deployment bundle ready at dist-pages');
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`[deploy] Build failed: ${message}`);

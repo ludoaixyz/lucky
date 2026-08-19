@@ -66,17 +66,30 @@ For a project-path build equivalent to the default Pages URL, run:
 VITE_BASE_PATH=/lucky/ npm run deploy:build
 ```
 
-The repository is `https://github.com/ludoaixyz/lucky`. GitHub Actions builds and
-uploads `apps/game/dist` as one Pages artifact, with the dashboard nested at
-`/dashboard/`.
+The repository is `https://github.com/ludoaixyz/lucky`. The deployment build creates
+one Pages artifact in `dist-pages`: the game build is copied to its root and the
+complete dashboard build is copied to `dist-pages/dashboard/`.
+
+```text
+dist-pages/
+|-- index.html
+|-- assets/
+`-- dashboard/
+    |-- index.html
+    |-- assets/
+    |-- flags/
+    `-- reports/
+```
 
 The default Pages URL is `https://ludoaixyz.github.io/lucky/`, with its dashboard at
 `https://ludoaixyz.github.io/lucky/dashboard/`. The configured custom domain is
 `https://lucky888.ludoai.xyz/`, and its dashboard is available at
 `https://lucky888.ludoai.xyz/dashboard/`.
 
-The workflow uses GitHub Pages metadata to select `/lucky/` for the project URL or
-`/` for the custom domain. Build output remains uncommitted.
+The workflow passes GitHub Pages' configured base path to the deployment build. For
+the configured custom domain this is `/`, so the game is built for `/` and the
+dashboard is built for `/dashboard/`. A project-site build can still use `/lucky/`
+and `/lucky/dashboard/`. Build output remains uncommitted.
 
 Only `lucky888.ludoai.xyz` requires a DNS record. `/dashboard/` is a path on the
 same hostname and does not require a separate DNS record.
