@@ -648,8 +648,8 @@ main {
 .history-panel {
   display: flex;
   flex-direction: column;
-  height: min(803px, calc(100vh - 105px));
-  max-height: 803px;
+  height: min(850px, calc(100vh - 105px));
+  max-height: 850px;
   padding: 1rem;
   min-height: 0;
 }

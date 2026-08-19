@@ -81,7 +81,7 @@ export class HistoryStore {
     this.records.push(record);
   }
 
-  getRecentSpins(count = 10): readonly SpinRecord[] {
+  getRecentSpins(count = 50): readonly SpinRecord[] {
     return this.records.slice(-count).reverse();
   }
 
