@@ -67,7 +67,7 @@ const en = {
   na: 'N/A',
   informational: 'Informational',
   credits: 'credits',
-  payoutCredits: 'Payout',
+  payoutCredits: 'Credit Payout',
   rtpPoints: 'RTP contribution',
   notObserved: 'Not observed',
   maximum: 'MAX',

@@ -130,7 +130,7 @@ const componentRows = (
     ['freeMultiplier', c.freeGameMultiplierUplift, d.freeMultiplierRtp],
   ].map(([key, credits, rtp]) => [
     esc(label(l, String(key))),
-    esc(`${formatInteger(Math.round(Number(credits)), locale)} ${l.credits}`),
+    esc(`${formatInteger(Math.round(Number(credits)), locale)}`),
     esc(formatAdaptivePercent(Number(rtp), locale)),
   ]);
 };
@@ -395,8 +395,7 @@ function tailChart(report: SimulationReport, locale: DashboardLocale, l: Labels)
 }
 
 function tailPerformance(report: SimulationReport, locale: DashboardLocale, l: Labels): string {
-  const m = report.metrics,
-    d = deriveAnalytics(report);
+  const m = report.metrics;
   const rows = m.tails.map((x) =>
     [
       `${formatInteger(x.threshold, locale)}×+`,
@@ -405,44 +404,14 @@ function tailPerformance(report: SimulationReport, locale: DashboardLocale, l: L
       x.count === 0 ? l.notObserved : formatOneIn(x.frequency, locale, l.oneIn),
     ].map(esc),
   );
-  const summary = [
-    ['maximumWin', formatMultiplier(m.maximumObservedWin, locale)],
-    [
-      'tail100',
-      tailAt(report, 100)?.count
-        ? formatOneIn(tailAt(report, 100)!.frequency, locale, l.oneIn)
-        : l.notObserved,
-    ],
-    [
-      'tail250',
-      tailAt(report, 250)?.count
-        ? formatOneIn(tailAt(report, 250)!.frequency, locale, l.oneIn)
-        : l.notObserved,
-    ],
-    [
-      'tail500',
-      tailAt(report, 500)?.count
-        ? formatOneIn(tailAt(report, 500)!.frequency, locale, l.oneIn)
-        : l.notObserved,
-    ],
-    [
-      'tail1000',
-      tailAt(report, 1000)?.count
-        ? formatOneIn(tailAt(report, 1000)!.frequency, locale, l.oneIn)
-        : l.notObserved,
-    ],
-    [
-      'highestObserved',
-      d.highestObservedTailThreshold === null
-        ? l.notObserved
-        : `${formatInteger(d.highestObservedTailThreshold, locale)}×+ (${formatInteger(d.highestObservedTailCount, locale)})`,
-    ],
-  ];
-  return section(
-    l.tails,
-    `<div class="tail-summary">${summary.map(([key, val]) => `<div><span>${esc(label(l, key!))}</span><strong>${esc(val)}</strong></div>`).join('')}</div><div class="split-panel">${tailChart(report, locale, l)}${comparisonTable([l.threshold, l.count, l.frequency, l.odds], rows)}</div>`,
-    'tail-section',
-  );
+	return section(
+	  l.tails,
+	  `<div class="split-panel">
+		${tailChart(report, locale, l)}
+		${comparisonTable([l.threshold, l.count, l.frequency, l.odds], rows)}
+	  </div>`,
+	  'tail-section',
+	);
 }
 
 function targets(
