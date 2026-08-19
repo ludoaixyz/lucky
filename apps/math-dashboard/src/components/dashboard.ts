@@ -22,7 +22,7 @@ import type {
   WorkbenchSessionReport,
 } from '../types/simulation-report.js';
 import { evaluateTargets, reconcileReport, type TargetEvaluation } from '../reports/analysis.js';
-import { deriveAnalytics, tailAt } from '../reports/derived.js';
+import { deriveAnalytics } from '../reports/derived.js';
 import { metricDefinition, type MetricId, type MetricUnit } from '../reports/metric-registry.js';
 
 type Labels = DashboardLabels;
@@ -194,22 +194,22 @@ function rtpComposition(report: SimulationReport, locale: DashboardLocale, l: La
   const d = deriveAnalytics(report);
   const rows = componentRows(report, locale, l);
   rows.push([
-    `<strong>${esc(l.baseTotal)}</strong>`,
+    `<strong class="accent">${esc(l.baseTotal)}</strong>`,
     esc(
-      `${formatInteger(Math.round(report.metrics.baseGameWinContribution * report.metrics.totalBet), locale)} ${l.credits}`,
+      `${formatInteger(Math.round(report.metrics.baseGameWinContribution * report.metrics.totalBet), locale)}`,
     ),
     `<strong>${esc(formatAdaptivePercent(report.metrics.baseGameWinContribution, locale))}</strong>`,
   ]);
   rows.push([
-    `<strong>${esc(l.featureTotal)}</strong>`,
+    `<strong class="accent">${esc(l.featureTotal)}</strong>`,
     esc(
-      `${formatInteger(Math.round(report.metrics.freeGameWinContribution * report.metrics.totalBet), locale)} ${l.credits}`,
+      `${formatInteger(Math.round(report.metrics.freeGameWinContribution * report.metrics.totalBet), locale)}`,
     ),
     `<strong>${esc(formatAdaptivePercent(report.metrics.freeGameWinContribution, locale))}</strong>`,
   ]);
   rows.push([
-    `<strong>${esc(l.totalRtp)}</strong>`,
-    esc(`${formatInteger(Math.round(report.metrics.totalCreditedWin), locale)} ${l.credits}`),
+    `<strong class="accent">${esc(l.totalRtp)}</strong>`,
+    esc(`${formatInteger(Math.round(report.metrics.totalCreditedWin), locale)}`),
     `<strong>${esc(formatAdaptivePercent(report.metrics.rtp, locale))}</strong>`,
   ]);
   const sourceMix = `<div class="source-mix">${[
@@ -314,17 +314,30 @@ function mechanicOverview(report: SimulationReport, locale: DashboardLocale, l: 
   const m = report.metrics,
     d = deriveAnalytics(report);
   const tumble = `<article><h3>${esc(l.tumble)}</h3><dl><div><dt>${esc(l.roundsPerSpin)}</dt><dd>${formatDecimal(m.tumbleRoundsPerPaidSpin, locale)}</dd></div><div><dt>${esc(l.overallTumbleFrequency)}</dt><dd>${formatAdaptivePercent(m.tumbleTriggerFrequency, locale)}</dd></div><div><dt>${esc(l.averageRoundsTriggeringSpin)}</dt><dd>${formatDecimal(m.averageTumbleRoundsPerTriggeringSpin, locale)}</dd></div><div><dt>${esc(l.maxDepth)}</dt><dd>${formatInteger(m.maximumObservedTumbleDepth, locale)}</dd></div></dl></article>`;
-  const bathala = `<article><h3>${esc(l.bathala)}</h3><dl><div><dt>${esc(l.bathalaActivations)}</dt><dd>${formatInteger(m.bathalaActivations, locale)}</dd></div><div><dt>${esc(l.bathalaConversion)}</dt><dd class="accent">${formatAdaptivePercent(m.bathalaToNextWinConversionRate, locale)}</dd></div><div><dt>${esc(l.activationsPaidSpin)}</dt><dd>${formatDecimal(d.bathalaActivationsPerPaidSpin, locale, 3)}</dd></div><div><dt>${esc(l.symbolsRemovedPaidSpin)}</dt><dd>${formatDecimal(d.bathalaSymbolsRemovedPerPaidSpin, locale, 3)}</dd></div></dl></article>`;
-  const mult = `<article><h3>${esc(l.multiplier)}</h3><dl><div><dt>${esc(l.multiplierFrequency)}</dt><dd>${formatAdaptivePercent(m.multiplierAppearanceFrequency, locale)}</dd></div><div><dt>${esc(l.averageMultiplier)}</dt><dd>${formatMultiplier(m.averageMultiplierValue, locale)}</dd></div><div><dt>${esc(l.effectiveMultiplier)}</dt><dd>${formatMultiplier(m.averageSummedMultiplierOnMultipliedWins, locale)}</dd></div><div><dt>${esc(l.maximumMultiplier)}</dt><dd>${formatMultiplier(m.maximumSummedMultiplier, locale, 0)}</dd></div><div><dt>${esc(l.totalMultiplierRtp)}</dt><dd class="accent">${formatAdaptivePercent(d.totalMultiplierRtp, locale)}</dd></div></dl></article>`;
-  const feature = `<article><h3>${esc(l.freeGames)}</h3><dl><div><dt>${esc(l.triggerCount)}</dt><dd>${formatInteger(m.freeGameTriggerCount, locale)}</dd></div><div><dt>${esc(l.featureFrequency)}</dt><dd>${formatAdaptivePercent(m.featureFrequency, locale)} · ${formatOneIn(m.featureFrequency, locale, l.oneIn)}</dd></div><div><dt>${esc(l.averageFreeGames)}</dt><dd>${formatDecimal(m.averageFreeGamesPlayed, locale)}</dd></div><div><dt>${esc(l.freeContribution)}</dt><dd class="accent">${formatAdaptivePercent(m.freeGameWinContribution, locale)}</dd></div></dl></article>`;
+  const bathala = `<article><h3>${esc(l.bathala)}</h3><dl><div><dt>${esc(l.bathalaActivations)}</dt><dd>${formatInteger(m.bathalaActivations, locale)}</dd></div><div><dt>${esc(l.bathalaConversion)}</dt><dd>${formatAdaptivePercent(m.bathalaToNextWinConversionRate, locale)}</dd></div><div><dt>${esc(l.activationsPaidSpin)}</dt><dd>${formatDecimal(d.bathalaActivationsPerPaidSpin, locale, 3)}</dd></div><div><dt>${esc(l.symbolsRemovedPaidSpin)}</dt><dd>${formatDecimal(d.bathalaSymbolsRemovedPerPaidSpin, locale, 3)}</dd></div></dl></article>`;
+  const mult = `<article><h3>${esc(l.multiplier)}</h3><dl><div><dt>${esc(l.multiplierFrequency)}</dt><dd>${formatAdaptivePercent(m.multiplierAppearanceFrequency, locale)}</dd></div><div><dt>${esc(l.averageMultiplier)}</dt><dd>${formatMultiplier(m.averageMultiplierValue, locale)}</dd></div><div><dt>${esc(l.effectiveMultiplier)}</dt><dd>${formatMultiplier(m.averageSummedMultiplierOnMultipliedWins, locale)}</dd></div><div><dt>${esc(l.maximumMultiplier)}</dt><dd>${formatMultiplier(m.maximumSummedMultiplier, locale, 0)}</dd></div><div><dt>${esc(l.totalMultiplierRtp)}</dt><dd>${formatAdaptivePercent(d.totalMultiplierRtp, locale)}</dd></div></dl></article>`;
+  const feature = `<article><h3>${esc(l.freeGames)}</h3><dl><div><dt>${esc(l.triggerCount)}</dt><dd>${formatInteger(m.freeGameTriggerCount, locale)}</dd></div><div><dt>${esc(l.featureFrequency)}</dt><dd>${formatAdaptivePercent(m.featureFrequency, locale)} · ${formatOneIn(m.featureFrequency, locale, l.oneIn)}</dd></div><div><dt>${esc(l.averageFreeGames)}</dt><dd>${formatDecimal(m.averageFreeGamesPlayed, locale)}</dd></div><div><dt>${esc(l.freeContribution)}</dt><dd>${formatAdaptivePercent(m.freeGameWinContribution, locale)}</dd></div></dl></article>`;
   return section(
     l.mechanicHealth,
-    `<div class="mechanic-grid">${tumble}${bathala}${mult}${feature}</div><div class="mechanic-detail-grid">${volatilityPanel(report, locale, l)}${scatterPanel(report, locale, l)}</div>`,
-    'mechanic-section',
+	  `<div class="mechanic-grid">${tumble}${bathala}${mult}${scatterPanel(report, locale, l)}${feature}${featureActivationsPanel(report, locale, l)}${payoutPercentilesPanel(report, locale, l)}${volatilityPanel(report, locale, l)}</div>`,
+	  'mechanic-section',
   );
 }
 
-function featureLength(report: SimulationReport, locale: DashboardLocale, l: Labels): string {
+function featureActivationsPanel(
+  report: SimulationReport,
+  locale: DashboardLocale,
+  l: Labels,
+): string {
+  const m = report.metrics;
+  return `<article><h3>${esc(l.featureActivations)}</h3><dl><div><dt>${esc(l.initialFreeGames)}</dt><dd>${formatDecimal(m.averageInitiallyAwardedFreeGames, locale)}</dd></div><div><dt>${esc(l.retriggerCount)}</dt><dd>${formatInteger(m.retriggerCount, locale)}</dd></div><div><dt>${esc(l.averageRetriggers)}</dt><dd>${formatDecimal(m.averageRetriggersPerFeature, locale, 3)}</dd></div><div><dt>${esc(l.endingMultiplier)}</dt><dd>${formatMultiplier(m.averageEndingFreeGameMultiplier, locale)}</dd></div></dl></article>`;
+}
+
+function payoutPercentilesPanel(
+  report: SimulationReport,
+  locale: DashboardLocale,
+  l: Labels,
+): string {
   const p = report.metrics.featureLengthPercentiles;
   const values = [
     ['P50', p.p50],
@@ -335,11 +348,7 @@ function featureLength(report: SimulationReport, locale: DashboardLocale, l: Lab
     [l.maximum, report.metrics.maximumObservedFeatureLength],
   ] as const;
   const max = Math.max(...values.map(([, v]) => v), 1);
-  return section(
-    l.featureLength,
-    `<div class="percentile-chart" role="img" aria-label="${esc(l.featureLength)}">${values.map(([key, v]) => `<div><span>${esc(key)}</span><i><b style="width:${(v / max) * 100}%"></b></i><strong>${formatInteger(v, locale)}</strong></div>`).join('')}</div><div class="compact-grid"><div><span>${esc(l.initialFreeGames)}</span><strong>${formatDecimal(report.metrics.averageInitiallyAwardedFreeGames, locale)}</strong></div><div><span>${esc(l.retriggerCount)}</span><strong>${formatInteger(report.metrics.retriggerCount, locale)}</strong></div><div><span>${esc(l.averageRetriggers)}</span><strong>${formatDecimal(report.metrics.averageRetriggersPerFeature, locale, 3)}</strong></div><div><span>${esc(l.endingMultiplier)}</span><strong>${formatMultiplier(report.metrics.averageEndingFreeGameMultiplier, locale)}</strong></div></div>`,
-    'feature-length-section',
-  );
+  return `<article class="percentile-panel"><h3>${esc(l.payoutPercentiles)}</h3><div class="percentile-chart" role="img" aria-label="${esc(l.payoutPercentiles)}">${values.map(([key, v]) => `<div><span>${esc(key)}</span><i><b style="width:${(v / max) * 100}%"></b></i><strong>${formatInteger(v, locale)}</strong></div>`).join('')}</div></article>`;
 }
 
 function tailChart(report: SimulationReport, locale: DashboardLocale, l: Labels): string {
@@ -368,7 +377,7 @@ function tailChart(report: SimulationReport, locale: DashboardLocale, l: Labels)
     .map((tick) => {
       const y = top + ((max - tick) / Math.max(0.0001, max - min)) * (height - top - bottom);
       if (y < top - 1 || y > height - bottom + 1) return '';
-		return `
+      return `
 		  <line
 			class="grid-line"
 			x1="${left}"
@@ -404,14 +413,14 @@ function tailPerformance(report: SimulationReport, locale: DashboardLocale, l: L
       x.count === 0 ? l.notObserved : formatOneIn(x.frequency, locale, l.oneIn),
     ].map(esc),
   );
-	return section(
-	  l.tails,
-	  `<div class="split-panel">
+  return section(
+    l.tails,
+    `<div class="split-panel">
 		${tailChart(report, locale, l)}
 		${comparisonTable([l.threshold, l.count, l.frequency, l.odds], rows)}
 	  </div>`,
-	  'tail-section',
-	);
+    'tail-section',
+  );
 }
 
 function targets(
@@ -441,11 +450,11 @@ function targets(
 function volatilityPanel(report: SimulationReport, locale: DashboardLocale, l: Labels): string {
   const m = report.metrics;
   return `<article><h3>${esc(l.volatilityProfile)}</h3><dl>${[
-    ['mean', formatDecimal(m.meanWinPerPaidSpin, locale, 6)],
-    ['variance', formatDecimal(m.variance, locale, 6)],
-    ['sd', formatDecimal(m.standardDeviation, locale, 6)],
-    ['cv', formatDecimal(m.coefficientOfVariation, locale, 4)],
-    ['maximumWin', formatMultiplier(m.maximumObservedWin, locale)],
+    ['mean', formatDecimal(m.meanWinPerPaidSpin, locale, 3)],
+    ['variance', formatDecimal(m.variance, locale, 2)],
+    ['sd', formatDecimal(m.standardDeviation, locale, 2)],
+    ['cv', formatDecimal(m.coefficientOfVariation, locale, 2)],
+    ['maximumWin', formatMultiplier(m.maximumObservedWin, locale, 0)],
   ]
     .map(([key, val]) => `<div><dt>${esc(label(l, key!))}</dt><dd>${val}</dd></div>`)
     .join('')}</dl></article>`;
@@ -502,7 +511,7 @@ function validation(report: SimulationReport, locale: DashboardLocale, l: Labels
     .join('')}</dl></article>`;
   return section(
     l.validationAndMetadata,
-    `<div class="validation-grid">${checks}${metadata}${confidencePanel(report, locale, l)}</div>`,
+    `<div class="validation-grid">${confidencePanel(report, locale, l)}${checks}${metadata}</div>`,
     'validation-section',
   );
 }
@@ -672,7 +681,7 @@ export function renderDashboard(
   const { locale, labels: l } = options;
   const configured = options.targets ?? MANAGEMENT_TARGETS;
   const identity = `<section class="identity-card"><div><p class="eyebrow">${esc(l.activeReport)}</p><h2>${esc(report.metadata.gameName)} — ${esc(report.metadata.configurationId)}</h2><p>${esc(l.gameVersion)}: ${esc(report.metadata.gameVersion)} · ${esc(l.calibration)}: ${esc(report.metadata.calibrationProfile ?? l.na)}</p></div><time>${esc(formatDate(report.metadata.generatedAt, locale))}</time></section>`;
-  return `<main id="dashboard-content">${identity}<div class="report-page report-page-one">${executiveSummary(report, locale, l, configured)}${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}${featureLength(report, locale, l)}</div><div class="report-page report-page-two">${targets(report, locale, l, configured)}${tailPerformance(report, locale, l)}${validation(report, locale, l)}</div></main>`;
+  return `<main id="dashboard-content">${identity}<div class="report-page report-page-one">${executiveSummary(report, locale, l, configured)}${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}</div><div class="report-page report-page-two">${targets(report, locale, l, configured)}${tailPerformance(report, locale, l)}${validation(report, locale, l)}</div></main>`;
 }
 
 function exportPageFooter(l: Labels, page: number, total: number): string {
@@ -688,5 +697,5 @@ export function renderDetailedExportDocument(
   const configured = options.targets ?? MANAGEMENT_TARGETS;
   const identity = `<section class="identity-card"><div><p class="eyebrow">${esc(l.activeReport)}</p><h2>${esc(report.metadata.gameName)} \u2014 ${esc(report.metadata.configurationId)}</h2><p>${esc(l.gameVersion)}: ${esc(report.metadata.gameVersion)}</p></div><time>${esc(formatDate(report.metadata.generatedAt, locale))}</time></section>`;
   const header = `<header class="export-report-header"><p class="eyebrow">Lucky888</p><h1>${esc(l.title)}</h1><strong>${esc(l.detailedReport)}</strong></header>`;
-  return `<main class="export-report detailed-export-document"><section class="export-page detailed-export-executive">${header}${identity}${executiveSummary(report, locale, l, configured)}${exportPageFooter(l, 1, 3)}</section><section class="export-page detailed-export-mechanics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.mechanicHealth)}</h2></header>${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}${featureLength(report, locale, l)}${exportPageFooter(l, 2, 3)}</section><section class="export-page detailed-export-diagnostics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.tails)}</h2></header>${tailPerformance(report, locale, l)}${targets(report, locale, l, configured)}${validation(report, locale, l)}${exportPageFooter(l, 3, 3)}</section></main>`;
+  return `<main class="export-report detailed-export-document"><section class="export-page detailed-export-executive">${header}${identity}${executiveSummary(report, locale, l, configured)}${exportPageFooter(l, 1, 3)}</section><section class="export-page detailed-export-mechanics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.mechanicHealth)}</h2></header>${rtpComposition(report, locale, l)}${mechanicOverview(report, locale, l)}${exportPageFooter(l, 2, 3)}</section><section class="export-page detailed-export-diagnostics"><header class="export-section-header"><span>Lucky888</span><h2>${esc(l.tails)}</h2></header>${tailPerformance(report, locale, l)}${targets(report, locale, l, configured)}${validation(report, locale, l)}${exportPageFooter(l, 3, 3)}</section></main>`;
 }

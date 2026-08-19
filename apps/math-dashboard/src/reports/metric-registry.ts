@@ -143,6 +143,8 @@ export const METRIC_REGISTRY = Object.freeze({
     'multiplier',
     'metrics.maximumObservedWin',
     (r) => r.metrics.maximumObservedWin,
+	undefined,
+	0,	
   ),
   coefficientOfVariation: metric(
     'coefficientOfVariation',

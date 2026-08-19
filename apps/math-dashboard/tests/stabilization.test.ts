@@ -172,9 +172,29 @@ describe('portrait export document structure', () => {
       expect(executive?.textContent).not.toContain('Bathala Tumble → Next Win Activation');
       expect(executive?.querySelector('.assessment-subsection')).toBeNull();
       expect(host.querySelector('.pie-chart')?.querySelectorAll('.pie-slice')).toHaveLength(6);
-      expect(host.querySelector('.mechanic-detail-grid')?.children).toHaveLength(2);
-      expect(host.querySelector('.mechanic-section')?.textContent).toContain('Volatility Profile');
-      expect(host.querySelector('.mechanic-section')?.textContent).toContain('Scatter Performance');
+      const mechanicPanels = [...host.querySelectorAll('.mechanic-grid > article')];
+      expect(mechanicPanels).toHaveLength(8);
+      expect(mechanicPanels.map((panel) => panel.querySelector('h3')?.textContent)).toEqual([
+        'Tumble',
+        'Bathala Elimination',
+        'Multipliers',
+        'Scatter Activations',
+        'Free Game',
+        'Volatility Profile',
+        'Feature Activations',
+        'Payout Percentiles',
+      ]);
+      expect(
+        [...(mechanicPanels[6]?.querySelectorAll('dt') ?? [])].map((row) => row.textContent),
+      ).toEqual([
+        'Initially Awarded Free Games',
+        'Total Retriggers',
+        'Avg Retriggers / Feature',
+        'Avg Ending Free Game Multiplier',
+      ]);
+      expect(mechanicPanels[7]?.querySelectorAll('.percentile-chart > div')).toHaveLength(6);
+      expect(host.querySelector('.feature-length-section')).toBeNull();
+      expect(host.querySelector('.mechanic-detail-grid')).toBeNull();
       expect(host.querySelector('.validation-grid')?.children).toHaveLength(3);
       expect(host.querySelector('.validation-section')?.textContent).toContain(
         'Simulation Confidence',

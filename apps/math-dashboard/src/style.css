@@ -970,8 +970,7 @@ tbody tr:last-child > * {
   gap: 8px;
 }
 .source-mix div,
-.tail-summary div,
-.compact-grid div {
+.tail-summary div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -982,14 +981,12 @@ tbody tr:last-child > * {
   background: #091a25;
 }
 .source-mix span,
-.tail-summary span,
-.compact-grid span {
+.tail-summary span {
   color: var(--muted);
   font-size: 0.67rem;
 }
 .source-mix strong,
-.tail-summary strong,
-.compact-grid strong {
+.tail-summary strong {
   color: var(--gold-soft);
   font-size: 0.92rem;
 }
@@ -999,7 +996,6 @@ tbody tr:last-child > * {
   gap: 9px;
 }
 .mechanic-grid article,
-.mechanic-detail-grid article,
 .validation-grid article {
   padding: 11px;
   border: 1px solid var(--line);
@@ -1007,7 +1003,6 @@ tbody tr:last-child > * {
   background: #091a25;
 }
 .mechanic-grid h3,
-.mechanic-detail-grid h3,
 .validation-grid h3 {
   margin: 0 0 8px;
   color: var(--gold-soft);
@@ -1041,7 +1036,7 @@ dd {
 }
 .accent {
   color: var(--gold-soft);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
 }
 .tail-summary {
   display: grid;
@@ -1080,12 +1075,12 @@ dd {
 .tail-line {
   fill: none;
   stroke: var(--gold);
-  stroke-width: 1.0;
+  stroke-width: 1.5;
 }
 .tail-point {
   fill: var(--teal);
   stroke: #d7f5f1;
-  stroke-width: 1;
+  stroke-width: 0.5;
 }
 .axis-label,
 .chart-note {
@@ -1115,18 +1110,6 @@ dd {
 .percentile-chart strong {
   color: var(--gold-soft);
   text-align: right;
-}
-.compact-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  margin-top: 10px;
-}
-.mechanic-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-  margin-top: 9px;
 }
 .microcopy {
   margin: 8px 0 0;
@@ -1306,9 +1289,6 @@ footer {
 .detailed-export-document .split-panel {
   grid-template-columns: 0.9fr 1.1fr;
 }
-.detailed-export-document .mechanic-detail-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 .detailed-export-document .validation-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -1332,7 +1312,6 @@ footer {
   font-size: 6.8pt;
 }
 .detailed-export-document .mechanic-grid article,
-.detailed-export-document .mechanic-detail-grid article,
 .detailed-export-document .validation-grid article {
   padding: 1.8mm;
 }
@@ -1388,7 +1367,6 @@ footer {
   .split-panel {
     grid-template-columns: 1fr;
   }
-  .mechanic-detail-grid,
   .validation-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1413,13 +1391,11 @@ footer {
   .executive-strip,
   .executive-analysis-grid,
   .mechanic-grid,
-  .mechanic-detail-grid,
   .validation-grid,
   .source-mix {
     grid-template-columns: 1fr;
   }
   .source-mix,
-  .compact-grid,
   .tail-summary {
     grid-template-columns: 1fr 1fr;
   }
@@ -1480,7 +1456,7 @@ footer {
   .comparison-tail-section,
   .comparison-chart-section,
   .economy-comparison,
-  .mechanic-detail-grid article,
+  .mechanic-grid article,
   .validation-grid article {
     break-inside: avoid;
     page-break-inside: avoid;
