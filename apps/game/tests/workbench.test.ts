@@ -37,6 +37,7 @@ import {
 } from '../src/presentation/win-connectors.js';
 import { formatCredits, formatInteger, formatMultiplier } from '../src/workbench/number-format.js';
 import { BATHALA_SYMBOL_IDS, BATHALA_SYMBOL_VISUALS } from '../src/presentation/symbol-visuals.js';
+import { createDefaultBoard } from '../src/presentation/default-board.js';
 import { renderRulesContent, rulesReferenceText } from '../src/presentation/rules-dialog.js';
 import {
   LOCALE_STORAGE_KEY,
@@ -49,6 +50,27 @@ import {
   translateWorkbench,
   WORKBENCH_TRANSLATIONS,
 } from '../src/i18n/workbench.js';
+
+describe('presentation-only default board', () => {
+  it('uses the fixed requested top-to-bottom layout in the column-major board model', () => {
+    const board = createDefaultBoard();
+    const rows = Array.from({ length: 5 }, (_, row) =>
+      board.map((column) => {
+        const cell = column[row]!;
+        return cell.symbol === 'MULTIPLIER' ? `x${cell.multiplierValue}` : cell.symbol;
+      }),
+    );
+
+    expect(rows).toEqual([
+      ['L1', 'L1', 'L1', 'L1', 'L1', 'L1'],
+      ['L2', 'L2', 'L2', 'L2', 'L2', 'L2'],
+      ['x5', 'x10', 'x20', 'x50', 'x100', 'x500'],
+      ['H4', 'H4', 'H4', 'H4', 'H4', 'H4'],
+      ['SCATTER', 'SCATTER', 'SCATTER', 'SCATTER', 'SCATTER', 'SCATTER'],
+    ]);
+    expect(new Set(board.flatMap((column) => column.map((cell) => cell?.id))).size).toBe(30);
+  });
+});
 
 async function baseline(): Promise<ActiveGameConfig> {
   const text = await readFile(resolve(process.cwd(), 'math/generated/runtime-config.json'), 'utf8');

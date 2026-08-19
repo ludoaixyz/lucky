@@ -1,4 +1,4 @@
-import { generateBoard, resolveSpin, SeededRandom } from '@lucky/math-engine';
+import { resolveSpin, SeededRandom } from '@lucky/math-engine';
 import type {
   ActiveGameConfig,
   BathalaSpinResult,
@@ -31,6 +31,7 @@ import {
   formatPercent,
 } from './workbench/number-format.js';
 import { createSymbolElement } from './presentation/symbol-visuals.js';
+import { createDefaultBoard } from './presentation/default-board.js';
 import { renderRulesContent } from './presentation/rules-dialog.js';
 import {
   BoardPresentationController,
@@ -297,7 +298,7 @@ async function boot(): Promise<void> {
     history = new HistoryStore(active.limits.maximumSessionRecords);
     lastWin = 0;
     if (resetCredits) credits = active.betting.startingCredits;
-    renderBoard(generateBoard(active, 'base', new SeededRandom(session.seed), { nextId: 1 }));
+    renderBoard(createDefaultBoard());
     byId('tumble-state').textContent = '—';
     byId('bathala-state').textContent = '—';
     byId('multiplier-state').textContent = '—';
