@@ -3,7 +3,12 @@ import {
   type ManagementTarget,
   type ManagementTargets,
 } from '../config/management-targets.js';
-import type { ProfileStatus, SimulationReport, Status } from '../types/simulation-report.js';
+import type {
+  DashboardAnalysisReport,
+  ProfileStatus,
+  SimulationReport,
+  Status,
+} from '../types/simulation-report.js';
 import { componentRtp, deriveAnalytics, frequencyOdds } from './derived.js';
 import { METRIC_REGISTRY, type MetricId } from './metric-registry.js';
 
@@ -16,46 +21,63 @@ export interface Reconciliation {
   key: 'gameFeature' | 'componentCredits' | 'componentRtp' | 'schemaValidation' | 'requiredMetrics';
   expected: number | string;
   actual: number | string;
-  status: 'PASS' | 'WARN' | 'FAIL';
+  status: Status;
 }
 
-export function reconcileReport(report: SimulationReport): Reconciliation[] {
+export function reconcileReport(report: DashboardAnalysisReport): Reconciliation[] {
   const m = report.metrics;
   const c = m.components;
-  const credits =
-    c.baseGameRegularPayout +
-    c.baseGameScatterPayout +
-    c.baseGameMultiplierUplift +
-    c.freeGameRegularPayout +
-    c.freeGameScatterPayout +
-    c.freeGameMultiplierUplift;
+  const componentValues = Object.values(c);
+  const credits = componentValues.some((value) => value === null)
+    ? null
+    : (componentValues as number[]).reduce((total, value) => total + value, 0);
   const rtp = componentRtp(report, credits);
+  const gameFeatureTotal =
+    m.baseGameWinContribution === null || m.freeGameWinContribution === null
+      ? null
+      : m.baseGameWinContribution + m.freeGameWinContribution;
+  const csv = report.sourceType === 'workbench-session';
   return [
     {
       key: 'gameFeature',
-      expected: m.rtp,
-      actual: m.baseGameWinContribution + m.freeGameWinContribution,
-      status: close(m.rtp, m.baseGameWinContribution + m.freeGameWinContribution) ? 'PASS' : 'FAIL',
+      expected: m.rtp ?? 'N/A',
+      actual: gameFeatureTotal ?? 'N/A',
+      status:
+        m.rtp === null || gameFeatureTotal === null
+          ? 'N/A'
+          : close(m.rtp, gameFeatureTotal)
+            ? 'PASS'
+            : 'FAIL',
     },
     {
       key: 'componentCredits',
-      expected: m.totalCreditedWin,
-      actual: credits,
-      status: close(m.totalCreditedWin, credits) ? 'PASS' : 'FAIL',
+      expected: m.totalCreditedWin ?? 'N/A',
+      actual: credits ?? 'N/A',
+      status:
+        m.totalCreditedWin === null || credits === null
+          ? 'N/A'
+          : close(m.totalCreditedWin, credits)
+            ? 'PASS'
+            : 'FAIL',
     },
     {
       key: 'componentRtp',
-      expected: m.rtp,
-      actual: rtp,
-      status: close(m.rtp, rtp) ? 'PASS' : 'FAIL',
+      expected: m.rtp ?? 'N/A',
+      actual: rtp ?? 'N/A',
+      status: m.rtp === null || rtp === null ? 'N/A' : close(m.rtp, rtp) ? 'PASS' : 'FAIL',
     },
     {
       key: 'schemaValidation',
       expected: '2.x',
       actual: report.metadata.schemaVersion,
-      status: report.metadata.schemaVersion.startsWith('2.') ? 'PASS' : 'FAIL',
+      status: csv ? 'N/A' : report.metadata.schemaVersion.startsWith('2.') ? 'PASS' : 'FAIL',
     },
-    { key: 'requiredMetrics', expected: 'finite', actual: 'finite', status: 'PASS' },
+    {
+      key: 'requiredMetrics',
+      expected: 'finite',
+      actual: csv ? 'N/A' : 'finite',
+      status: csv ? 'N/A' : 'PASS',
+    },
   ];
 }
 
@@ -86,7 +108,7 @@ export function evaluateTargetValue(value: number, target?: ManagementTarget): S
 
 export interface TargetEvaluation {
   readonly key: MetricId;
-  readonly value: number;
+  readonly value: number | null;
   readonly target: ManagementTarget | null;
   readonly range: ManagementTarget | null;
   readonly status: Status;
@@ -102,19 +124,19 @@ function targetDelta(value: number, target?: ManagementTarget): number | null {
 }
 
 export function evaluateTargets(
-  report: SimulationReport,
+  report: DashboardAnalysisReport,
   targets: ManagementTargets = MANAGEMENT_TARGETS,
 ): TargetEvaluation[] {
   return (Object.keys(METRIC_REGISTRY) as MetricId[]).map((key) => {
-    const value = METRIC_REGISTRY[key].getter(report) ?? 0;
+    const value = METRIC_REGISTRY[key].getter(report);
     const target = targets[key];
     return {
       key,
       value,
       target: target ?? null,
       range: target ?? null,
-      status: evaluateTargetValue(value, target),
-      delta: targetDelta(value, target),
+      status: value === null ? 'N/A' : evaluateTargetValue(value, target),
+      delta: value === null ? null : targetDelta(value, target),
     };
   });
 }

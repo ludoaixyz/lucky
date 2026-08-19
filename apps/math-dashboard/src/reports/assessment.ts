@@ -30,6 +30,7 @@ export function simulationAssessment(
   const findings: AssessmentFinding[] = [];
   const evaluated = evaluateTargets(report, targets);
   for (const item of evaluated) {
+    if (item.value === null) continue;
     if (item.status === 'FAIL')
       findings.push({
         key: 'findingTargetOutside',
@@ -48,7 +49,7 @@ export function simulationAssessment(
   }
   findings.push(
     { key: 'findingFeatureRtp', values: [m.freeGameWinContribution], status: 'INFO' },
-    { key: 'findingMultiplierRtp', values: [d.totalMultiplierRtp], status: 'INFO' },
+    { key: 'findingMultiplierRtp', values: [d.totalMultiplierRtp ?? 0], status: 'INFO' },
     {
       key: 'findingFeatureEntry',
       values: [m.featureFrequency, d.featureOneInN ?? 0],

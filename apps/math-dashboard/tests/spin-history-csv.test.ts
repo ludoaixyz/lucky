@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { renderDashboard } from '../src/components/dashboard.js';
+import { renderDashboard, renderDetailedExportDocument } from '../src/components/dashboard.js';
+import { formatNullableMetric } from '../src/i18n/format.js';
 import { TRANSLATIONS } from '../src/i18n/index.js';
 import { normalizeImportedReport } from '../src/reports/report-normalizer.js';
+import { reconcileReport } from '../src/reports/analysis.js';
 import {
   importAnalysisArtifact,
   parseCsv,
@@ -372,6 +374,27 @@ describe('Workbench spin-history CSV analysis', () => {
     expect(analyzed.featureLengthPercentiles.p50).toBeNull();
   });
 
+  it('formats unavailable values as N/A without discarding legitimate zeros', () => {
+    expect(formatNullableMetric(null)).toBe('N/A');
+    expect(formatNullableMetric(undefined)).toBe('N/A');
+    expect(formatNullableMetric(Number.NaN)).toBe('N/A');
+    expect(formatNullableMetric(Number.POSITIVE_INFINITY)).toBe('N/A');
+    expect(formatNullableMetric(0, (value) => `${Number(value).toFixed(2)}%`)).toBe('0.00%');
+  });
+
+  it('only passes CSV reconciliation checks supported by imported evidence', () => {
+    expect(reconcileReport(report()).map(({ key, status }) => [key, status])).toEqual([
+      ['gameFeature', 'PASS'],
+      ['componentCredits', 'PASS'],
+      ['componentRtp', 'PASS'],
+      ['schemaValidation', 'N/A'],
+      ['requiredMetrics', 'N/A'],
+    ]);
+    expect(
+      reconcileReport(report('bet,total_win\n1,0\n1,2')).every((item) => item.status === 'N/A'),
+    ).toBe(true);
+  });
+
   it('rejects unusable CSV while preserving the previous workspace report', () => {
     for (const csv of [
       'total_win\n1',
@@ -393,19 +416,44 @@ describe('Workbench spin-history CSV analysis', () => {
     expect(workspace.sets[0]?.lastImportStatus).toBe('rejected');
   });
 
-  it('routes JSON and CSV separately and renders source-aware partial analysis', () => {
+  it('routes CSV normalization into the canonical detailed-report hierarchy', () => {
     expect(importAnalysisArtifact('session.csv', expandedCsv()).ok).toBe(true);
     expect(importAnalysisArtifact('notes.txt', expandedCsv()).ok).toBe(false);
     const html = renderDashboard(report('bet,total_win\n1,0\n1,2'), {
       locale: 'en',
       labels: TRANSLATIONS.en.labels,
     });
-    expect(html).toContain('WORKBENCH SESSION');
+    expect(html).toContain('Active Report');
     expect(html).toContain('WORKBENCH CSV');
     expect(html).toContain('PARTIAL DATA');
+    expect(html).toContain('Executive Summary');
+    expect(html).toContain('Core Simulation Profile');
+    expect(html).toContain('Base Spins vs. Features');
+    expect(html).toContain('RTP Composition');
+    expect(html).toContain('Mechanics Overview');
+    expect(html).toContain('Payout Distribution');
+    expect(html).toContain('Validation &amp; Metadata');
+    expect(html.match(/<article class="kpi-card">/gu)).toHaveLength(6);
+    expect(
+      html.match(/<div class="mechanic-grid">[\s\S]*?<\/div><\/section>/u)?.[0].match(/<article/gu),
+    ).toHaveLength(8);
+    expect(html).not.toContain('WORKBENCH SESSION');
+    expect(html).not.toContain('metrics available');
+    expect(html).not.toContain('SESSION OVERVIEW');
     expect(html).not.toContain('Limited sample');
     expect(html).toContain('N/A');
     expect(html).not.toContain('MONTE CARLO SIMULATION');
+
+    const exported = renderDetailedExportDocument(report('bet,total_win\n1,0\n1,2'), {
+      locale: 'en',
+      labels: TRANSLATIONS.en.labels,
+    });
+    expect(exported.match(/class="export-page /gu)).toHaveLength(3);
+    expect(exported).toContain('Page 1 / 3');
+    expect(exported).toContain('Page 2 / 3');
+    expect(exported).toContain('Page 3 / 3');
+    expect(exported).toContain('Not observed');
+    expect(exported).not.toContain('Infinity');
   });
 });
 

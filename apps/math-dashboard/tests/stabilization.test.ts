@@ -166,8 +166,8 @@ describe('portrait export document structure', () => {
       );
       expect(executive?.querySelectorAll('.executive-strip .kpi-card')).toHaveLength(6);
       expect(subsections).toHaveLength(2);
-      expect(subsections?.[0]?.querySelector('h3')?.textContent).toBe('Simulation Profile');
-      expect(subsections?.[1]?.querySelector('h3')?.textContent).toBe('Base vs Feature');
+      expect(subsections?.[0]?.querySelector('h3')?.textContent).toBe('Core Simulation Profile');
+      expect(subsections?.[1]?.querySelector('h3')?.textContent).toBe('Base Spins vs. Features');
       expect(profileHeaders).toEqual(['Core Metric', 'Result']);
       expect(executive?.textContent).not.toContain('Bathala Tumble → Next Win Activation');
       expect(executive?.querySelector('.assessment-subsection')).toBeNull();
@@ -175,24 +175,24 @@ describe('portrait export document structure', () => {
       const mechanicPanels = [...host.querySelectorAll('.mechanic-grid > article')];
       expect(mechanicPanels).toHaveLength(8);
       expect(mechanicPanels.map((panel) => panel.querySelector('h3')?.textContent)).toEqual([
-        'Tumble',
-        'Bathala Elimination',
+        'Tumble Activations',
+        'Bathala Activations',
         'Multipliers',
         'Scatter Activations',
         'Free Game',
-        'Volatility Profile',
         'Feature Activations',
-        'Payout Percentiles',
+        'Feature Lengths',
+        'Volatility Profile',
       ]);
       expect(
-        [...(mechanicPanels[6]?.querySelectorAll('dt') ?? [])].map((row) => row.textContent),
+        [...(mechanicPanels[5]?.querySelectorAll('dt') ?? [])].map((row) => row.textContent),
       ).toEqual([
         'Initially Awarded Free Games',
         'Total Retriggers',
-        'Avg Retriggers / Feature',
-        'Avg Ending Free Game Multiplier',
+        'Average Retriggers per Feature',
+        'Average Ending Free Game Multiplier',
       ]);
-      expect(mechanicPanels[7]?.querySelectorAll('.percentile-chart > div')).toHaveLength(6);
+      expect(mechanicPanels[6]?.querySelectorAll('.percentile-chart > div')).toHaveLength(6);
       expect(host.querySelector('.feature-length-section')).toBeNull();
       expect(host.querySelector('.mechanic-detail-grid')).toBeNull();
       expect(host.querySelector('.validation-grid')?.children).toHaveLength(3);
@@ -244,8 +244,8 @@ describe('portrait export document structure', () => {
     const workspace = importIntoSet(createWorkspace(), 'sim-1', { ok: true, report }, 'one.json');
     const manager = renderSetManager(workspace, [], 'en', TRANSLATIONS.en.labels);
     const comparison = renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels);
-    expect(manager.match(/Comparison Workspace/gu)).toHaveLength(1);
-    expect(comparison).not.toContain('Comparison Workspace');
+    expect(manager.match(/>Workspace</gu)).toHaveLength(1);
+    expect(comparison).not.toContain('>Workspace<');
     expect(manager).toContain('set-status set-active');
     expect(comparison).toContain('set-status set-active');
     expect(`${manager}${comparison}`).not.toMatch(
