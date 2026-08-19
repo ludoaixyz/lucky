@@ -617,8 +617,7 @@ h1 span {
 }
 button:focus-visible,
 select:focus-visible,
-.upload-zone:focus-visible,
-.metric-tip:focus-visible {
+.upload-zone:focus-visible {
   outline: 3px solid #7bcdf6;
   outline-offset: 2px;
 }
@@ -774,6 +773,7 @@ select:focus-visible,
 .executive-strip .kpi-card {
   border-width: 1px 1px 0 0;
   border-radius: 0;
+  text-align: center;
 }
 .executive-strip .kpi-card:nth-child(6) {
   border-right: 0;
@@ -797,9 +797,6 @@ select:focus-visible,
   font-size: 0.75rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-}
-.assessment-subsection {
-  margin: 12px 17px 16px;
 }
 .kpi-card {
   min-width: 0;
@@ -836,19 +833,6 @@ select:focus-visible,
   color: var(--muted);
   font-size: 0.62rem;
 }
-.metric-tip {
-  display: inline-grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: 1px solid #69808b;
-  border-radius: 50%;
-  color: var(--muted);
-  background: transparent;
-  font-size: 0.62rem;
-  cursor: help;
-}
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -884,6 +868,7 @@ select:focus-visible,
   border-top: 3px solid var(--gold);
 }
 .executive-section > .section-heading {
+  margin-bottom: 0;
   padding: 14px 17px 0;
 }
 .executive-section > .subheading,
@@ -930,28 +915,6 @@ tbody td {
 tbody tr:last-child > * {
   border-bottom: 0;
 }
-.findings {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 7px 24px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.findings li {
-  padding: 7px 9px;
-  border-left: 3px solid var(--info);
-  color: #d8e3e8;
-  background: #091a25;
-  font-size: 0.76rem;
-  line-height: 1.35;
-}
-.findings .finding-fail {
-  border-color: var(--fail);
-}
-.findings .finding-warn {
-  border-color: var(--warn);
-}
 .split-panel {
   display: grid;
   grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
@@ -971,30 +934,11 @@ tbody tr:last-child > * {
   font-size: 0.7rem;
   font-weight: 700;
 }
-.horizontal-bars {
-  display: grid;
-  gap: 7px;
-}
-.bar-row {
-  display: grid;
-  grid-template-columns: 110px 1fr 62px;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.65rem;
-}
-.bar-row > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #cbd7dd;
-}
-.bar-row i,
 .percentile-chart i {
   height: 9px;
   border-radius: 2px;
   background: #183440;
 }
-.bar-row b,
 .percentile-chart b {
   display: block;
   height: 100%;
@@ -1002,10 +946,23 @@ tbody tr:last-child > * {
   border-radius: 2px;
   background: var(--gold);
 }
-.bar-row strong {
-  text-align: right;
-  color: var(--gold-soft);
-  font-variant-numeric: tabular-nums;
+.pie-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pie-slice {
+  stroke: #091a25;
+  stroke-width: 1.5;
+}
+.pie-leader {
+  fill: none;
+  stroke: #78909a;
+  stroke-width: 0.8;
+}
+.pie-label {
+  fill: #d7e1e5;
+  font-size: 8.5px;
 }
 .source-mix {
   display: grid;
@@ -1042,7 +999,7 @@ tbody tr:last-child > * {
   gap: 9px;
 }
 .mechanic-grid article,
-.diagnostic-grid article,
+.mechanic-detail-grid article,
 .validation-grid article {
   padding: 11px;
   border: 1px solid var(--line);
@@ -1050,7 +1007,7 @@ tbody tr:last-child > * {
   background: #091a25;
 }
 .mechanic-grid h3,
-.diagnostic-grid h3,
+.mechanic-detail-grid h3,
 .validation-grid h3 {
   margin: 0 0 8px;
   color: var(--gold-soft);
@@ -1107,13 +1064,23 @@ dd {
   width: 100%;
   height: auto;
 }
+.tail-chart .grid-line {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 0.5;
+  shape-rendering: crispEdges;
+}
 .axis {
   stroke: #536d78;
+  stroke-width: 1.2;
+}
+.axis-tick {
+  stroke: #536d78;
+  stroke-width: 1;
 }
 .tail-line {
   fill: none;
   stroke: var(--gold);
-  stroke-width: 2.5;
+  stroke-width: 1.0;
 }
 .tail-point {
   fill: var(--teal);
@@ -1125,6 +1092,11 @@ dd {
   fill: var(--muted);
   font-size: 9px;
   text-anchor: middle;
+}
+.tail-chart .y-axis-label {
+  fill: var(--muted);
+  font-size: 8px;
+  text-anchor: end;
 }
 .chart-note {
   text-anchor: start;
@@ -1150,10 +1122,11 @@ dd {
   gap: 7px;
   margin-top: 10px;
 }
-.diagnostic-grid {
+.mechanic-detail-grid {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 0.9fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
+  margin-top: 9px;
 }
 .microcopy {
   margin: 8px 0 0;
@@ -1163,7 +1136,7 @@ dd {
 }
 .validation-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 9px;
 }
 .validation-list {
@@ -1333,17 +1306,16 @@ footer {
 .detailed-export-document .split-panel {
   grid-template-columns: 0.9fr 1.1fr;
 }
-.detailed-export-document .diagnostic-grid {
+.detailed-export-document .mechanic-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.detailed-export-document .validation-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.detailed-export-document .validation-grid,
 .detailed-export-document .executive-analysis-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .detailed-export-document .executive-analysis-grid {
-  margin: 2mm 0 0;
-}
-.detailed-export-document .assessment-subsection {
   margin: 2mm 0 0;
 }
 .detailed-export-document .executive-subsection {
@@ -1360,7 +1332,7 @@ footer {
   font-size: 6.8pt;
 }
 .detailed-export-document .mechanic-grid article,
-.detailed-export-document .diagnostic-grid article,
+.detailed-export-document .mechanic-detail-grid article,
 .detailed-export-document .validation-grid article {
   padding: 1.8mm;
 }
@@ -1416,7 +1388,7 @@ footer {
   .split-panel {
     grid-template-columns: 1fr;
   }
-  .diagnostic-grid,
+  .mechanic-detail-grid,
   .validation-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1441,9 +1413,9 @@ footer {
   .executive-strip,
   .executive-analysis-grid,
   .mechanic-grid,
-  .diagnostic-grid,
+  .mechanic-detail-grid,
   .validation-grid,
-  .findings {
+  .source-mix {
     grid-template-columns: 1fr;
   }
   .source-mix,
@@ -1453,9 +1425,6 @@ footer {
   }
   .report-section {
     padding: 13px;
-  }
-  .bar-row {
-    grid-template-columns: 92px 1fr 58px;
   }
   th,
   td {
@@ -1511,7 +1480,7 @@ footer {
   .comparison-tail-section,
   .comparison-chart-section,
   .economy-comparison,
-  .diagnostic-grid article,
+  .mechanic-detail-grid article,
   .validation-grid article {
     break-inside: avoid;
     page-break-inside: avoid;

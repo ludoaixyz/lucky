@@ -168,11 +168,19 @@ describe('portrait export document structure', () => {
       expect(subsections).toHaveLength(2);
       expect(subsections?.[0]?.querySelector('h3')?.textContent).toBe('Simulation Profile');
       expect(subsections?.[1]?.querySelector('h3')?.textContent).toBe('Base vs Feature');
-      expect(profileHeaders).toEqual(['Dimension', 'Result']);
-      expect(executive?.querySelector('.assessment-subsection h3')?.textContent).toBe(
-        'Simulation Assessment',
+      expect(profileHeaders).toEqual(['Core Metric', 'Result']);
+      expect(executive?.textContent).not.toContain('Bathala Tumble → Next Win Activation');
+      expect(executive?.querySelector('.assessment-subsection')).toBeNull();
+      expect(host.querySelector('.pie-chart')?.querySelectorAll('.pie-slice')).toHaveLength(6);
+      expect(host.querySelector('.mechanic-detail-grid')?.children).toHaveLength(2);
+      expect(host.querySelector('.mechanic-section')?.textContent).toContain('Volatility Profile');
+      expect(host.querySelector('.mechanic-section')?.textContent).toContain('Scatter Performance');
+      expect(host.querySelector('.validation-grid')?.children).toHaveLength(3);
+      expect(host.querySelector('.validation-section')?.textContent).toContain(
+        'Simulation Confidence',
       );
-      expect(host.querySelector('.validation-grid')?.children).toHaveLength(2);
+      expect(host.querySelector('.diagnostics-section')).toBeNull();
+      expect(host.querySelector('.metric-tip')).toBeNull();
       expect(host.textContent).not.toContain('Mathematical Health');
       expect(host.textContent).not.toContain('Profile Status');
       expect(host.textContent).not.toContain('UNCALIBRATED');
