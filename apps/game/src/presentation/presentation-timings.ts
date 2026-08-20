@@ -4,10 +4,10 @@ export const PRESENTATION_TIMINGS = Object.freeze({
   normal: {
     drop: {
       total: 2100,
-      motion: 500,
-      columnStagger: 305,
-      rowStagger: 205,
-      landing: 100,
+      motion: 2000,
+      columnStagger: 150,
+      rowStagger: 250,
+      landing: 250,
       postLandingHold: 300,
     },
     win: {
