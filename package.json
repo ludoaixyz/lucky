@@ -13,13 +13,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run math:build && npm run dev -w @lucky/game",
+    "dev": "npm run math:build -- --profile lucky888-bathala-aligned-v3 && npm run dev -w @lucky/game",
     "dashboard:dev": "npm run dev -w @lucky/math-dashboard",
     "dashboard:build": "npm run build -w @lucky/math-dashboard",
     "dashboard:preview": "npm run preview -w @lucky/math-dashboard",
-    "build": "npm run math:build && npm run build -w @lucky/game",
+    "build": "npm run math:build -- --profile lucky888-bathala-aligned-v3 && npm run build -w @lucky/game",
     "deploy:build": "tsx scripts/build-deployment.ts",
-    "test": "npm run math:build && vitest run --config packages/math-engine/vitest.config.ts && vitest run --config scripts/vitest.config.ts && vitest run --config apps/game/vitest.config.ts && vitest run --config apps/math-dashboard/vitest.config.ts",
+    "test": "npm run math:build -- --profile lucky888-bathala-aligned-v3 && vitest run --config packages/math-engine/vitest.config.ts && vitest run --config scripts/vitest.config.ts && vitest run --config apps/game/vitest.config.ts && vitest run --config apps/math-dashboard/vitest.config.ts",
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -31,7 +31,7 @@
     "math:simulate": "tsx scripts/simulate.ts",
     "math:calibrate": "tsx scripts/calibrate-bathala.ts",
     "math:calibration:validate": "tsx scripts/validate-bathala-calibration.ts",
-    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate && npm test && npm run dashboard:build && npm run build",
+    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run math:validate -- --profile lucky888-bathala-aligned-v3 && npm test && npm run dashboard:build && npm run build",
     "clean": "npm run clean --workspaces --if-present"
   },
   "dependencies": {

@@ -1,11 +1,12 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
 import { resolve } from 'node:path';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 import { loadOrBuildStructuralCache, priceInitialBoardRtp } from './lib/structural-cache.js';
 
 const started = performance.now();
-const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig();
+const { config, sourceHash, structuralHash, payoutHash } =
+  await loadSourceConfig(requireProfileId());
 const structural = await loadOrBuildStructuralCache(
   config,
   structuralHash,

@@ -26,7 +26,7 @@ The retired five-reel evaluator is kept only in unreferenced legacy source files
 
 ## Configuration authority
 
-The seven files in `math/source` are the only active math authority:
+Each folder under `math/profiles/<configuration-id>/` is a self-contained math authority with seven files:
 
 - `game-config.json`: layout, model, safety limit, symbol taxonomy, collection trigger.
 - `base-symbol-weights.csv`: Base Game relative cell weights.
@@ -41,16 +41,16 @@ Weights and count pays are calibration placeholders, not claims about Spin Maste
 ## Commands
 
 ```text
-npm run math:build
-npm run math:validate
+npm run math:build -- --profile bathala-tumble-balanced-v1
+npm run math:validate -- --profile bathala-tumble-balanced-v1
 npm test
 npm run typecheck
 npm run lint
 npm run build
-npm run math:simulate -- --spins 10000 --seed 2026
+npm run math:simulate -- --profile bathala-tumble-balanced-v1 --spins 10000 --seed 2026
 ```
 
-The simulator aggregates results while each spin is discarded, so large runs do not retain board histories. `resolveSpin(config, rng, true)` enables rich trace boards for debugging.
+Profile selection is mandatory for the individual math commands. The simulator reads all seven files exclusively from the selected profile and aggregates results while each spin is discarded, so large runs do not retain board histories. `resolveSpin(config, rng, true)` enables rich trace boards for debugging.
 
 ## GitHub Pages Deployment
 

@@ -8,7 +8,7 @@ import {
   type RuntimeGameConfig,
   type SimulationReport,
 } from '@lucky/shared-types';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 
 const number = (value: number): string => value.toFixed(6);
 
@@ -241,8 +241,9 @@ const DEFAULT_DEPENDENCIES: EnumerationCliDependencies = {
 export async function runEnumerationCli(
   dependencies: EnumerationCliDependencies = DEFAULT_DEPENDENCIES,
 ): Promise<'completed' | 'not-applicable'> {
-  const { config, sourceHash } = await dependencies.loadSource();
-  const issues = dependencies.validate(config, 'math/source');
+  const profileId = requireProfileId();
+  const { config, sourceHash } = await dependencies.loadSource(profileId);
+  const issues = dependencies.validate(config, `math/profiles/${profileId}`);
   if (issues.length > 0)
     throw new Error(`Enumeration stopped: ${issues.length} validation issue(s)`);
 

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { readFile, readdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { readFile, readdir, realpath, stat } from 'node:fs/promises';
+import { relative, resolve } from 'node:path';
 import type {
   ActiveGameConfig,
   BathalaConfig,
@@ -12,7 +12,7 @@ import type {
   WeightedSymbol,
 } from '@lucky/shared-types';
 
-const SOURCE = resolve(process.cwd(), 'math/source');
+export const MATH_PROFILES_DIRECTORY = resolve(process.cwd(), 'math/profiles');
 export const MATH_SOURCE_FILES = [
   'game-config.json',
   'base-symbol-weights.csv',
@@ -45,22 +45,101 @@ function positive(name: string, row: number, field: string, raw: string): number
   return value;
 }
 
-export async function loadSourceConfig(): Promise<{
+function nonNegative(name: string, row: number, field: string, raw: string): number {
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0)
+    throw new Error(`${name}:${row}:${field}: expected a non-negative number`);
+  return value;
+}
+
+export function profileOption(args: readonly string[] = process.argv.slice(2)): string | undefined {
+  const inline = args.find((argument) => argument.startsWith('--profile='));
+  const position = args.indexOf('--profile');
+  return inline?.slice('--profile='.length) ?? (position >= 0 ? args[position + 1] : undefined);
+}
+
+export function requireProfileId(args: readonly string[] = process.argv.slice(2)): string {
+  const profileId = profileOption(args);
+  if (!profileId || profileId.startsWith('--')) {
+    throw new Error(
+      'Missing required --profile argument.\n\nExample:\nnpm run math:simulate -- --profile bathala-tumble-balanced-v1 --spins 1000000 --seed 2026',
+    );
+  }
+  if (!/^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/iu.test(profileId) || profileId === '.') {
+    throw new Error(
+      `Invalid math profile "${profileId}". --profile must be a folder name inside math/profiles (paths are not allowed).`,
+    );
+  }
+  return profileId;
+}
+
+export function simulationReportName(profileId: string, seed: number, spins: number): string {
+  requireProfileId(['--profile', profileId]);
+  return `${profileId}-simulation-${seed}-${spins}.json`;
+}
+
+async function availableProfiles(): Promise<readonly string[]> {
+  try {
+    return (await readdir(MATH_PROFILES_DIRECTORY, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+export async function resolveProfileDirectory(profileId: string): Promise<string> {
+  requireProfileId(['--profile', profileId]);
+  const candidate = resolve(MATH_PROFILES_DIRECTORY, profileId);
+  let details;
+  try {
+    details = await stat(candidate);
+  } catch {
+    const available = await availableProfiles();
+    throw new Error(
+      `Math profile "${profileId}" was not found.\n\nExpected:\nmath/profiles/${profileId}/` +
+        (available.length > 0
+          ? `\n\nAvailable profiles:\n${available.map((id) => `- ${id}`).join('\n')}`
+          : ''),
+    );
+  }
+  if (!details.isDirectory()) throw new Error(`Math profile "${profileId}" is not a directory.`);
+  const [profilesRoot, actual] = await Promise.all([
+    realpath(MATH_PROFILES_DIRECTORY),
+    realpath(candidate),
+  ]);
+  const escaped = relative(profilesRoot, actual);
+  if (escaped === '..' || escaped.startsWith(`..\\`) || escaped.startsWith('../'))
+    throw new Error(`Invalid math profile "${profileId}": resolved outside math/profiles.`);
+  return actual;
+}
+
+export async function loadSourceConfig(profileId: string): Promise<{
   config: ActiveGameConfig;
   sourceHash: string;
   structuralHash: string;
   payoutHash: string;
+  sourceDirectory: string;
 }> {
-  const actual = (await readdir(SOURCE, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && /\.(csv|json)$/u.test(entry.name))
-    .map((entry) => entry.name)
-    .sort();
+  const source = await resolveProfileDirectory(profileId);
+  const entriesInDirectory = await readdir(source, { withFileTypes: true });
+  const actual = entriesInDirectory.map((entry) => entry.name).sort();
   const expected = [...MATH_SOURCE_FILES].sort();
-  if (JSON.stringify(actual) !== JSON.stringify(expected))
-    throw new Error(`math/source must contain exactly: ${expected.join(', ')}`);
+  const missing = expected.filter((name) => !actual.includes(name));
+  const extra = actual.filter(
+    (name) => !expected.includes(name as (typeof MATH_SOURCE_FILES)[number]),
+  );
+  if (missing.length > 0 || extra.length > 0) {
+    const details = [
+      ...(missing.length > 0 ? [`Missing:\n${missing.map((name) => `- ${name}`).join('\n')}`] : []),
+      ...(extra.length > 0 ? [`Unexpected:\n${extra.map((name) => `- ${name}`).join('\n')}`] : []),
+    ].join('\n\n');
+    throw new Error(`Profile "${profileId}" is invalid.\n\n${details}`);
+  }
   const entries = await Promise.all(
     MATH_SOURCE_FILES.map(
-      async (name) => [name, await readFile(resolve(SOURCE, name), 'utf8')] as const,
+      async (name) => [name, await readFile(resolve(source, name), 'utf8')] as const,
     ),
   );
   const files = Object.fromEntries(entries) as Record<(typeof MATH_SOURCE_FILES)[number], string>;
@@ -73,6 +152,11 @@ export async function loadSourceConfig(): Promise<{
     | 'bathala'
     | 'scatter'
   >;
+  if (game.configurationId !== profileId) {
+    throw new Error(
+      `Profile directory/configuration mismatch.\n\nSelected profile:\n${profileId}\n\ngame-config.json configurationId:\n${game.configurationId}`,
+    );
+  }
   const weights = (
     name: 'base-symbol-weights.csv' | 'freegame-symbol-weights.csv',
   ): WeightedSymbol[] =>
@@ -94,7 +178,7 @@ export async function loadSourceConfig(): Promise<{
     files['multiplier-values.csv'],
   ).map((row, index) => ({
     value: positive('multiplier-values.csv', index + 2, 'value', row.value ?? ''),
-    weight: positive('multiplier-values.csv', index + 2, 'weight', row.weight ?? ''),
+    weight: nonNegative('multiplier-values.csv', index + 2, 'weight', row.weight ?? ''),
   }));
   const config: ActiveGameConfig = {
     ...game,
@@ -122,5 +206,5 @@ export async function loadSourceConfig(): Promise<{
   const payoutHash = createHash('sha256')
     .update([files['cluster-paytable.csv'], files['multiplier-values.csv']].join('\n'))
     .digest('hex');
-  return { config, sourceHash, structuralHash, payoutHash };
+  return { config, sourceHash, structuralHash, payoutHash, sourceDirectory: source };
 }

@@ -10,7 +10,7 @@ import {
 } from '../src/components/workspace.js';
 import { normalizeBasePath, resolveDashboardBase } from '../src/config/base-path.js';
 import { TRANSLATIONS } from '../src/i18n/index.js';
-import { formatPercentRange } from '../src/i18n/format.js';
+import { formatAdaptivePercent, formatPercentRange } from '../src/i18n/format.js';
 import {
   DASHBOARD_LANGUAGE_OPTIONS,
   flagAssetPath,
@@ -23,6 +23,17 @@ import {
   SUPPORTED_REPORT_SCHEMA_VERSIONS,
 } from '../src/reports/report-normalizer.js';
 import { evaluateTargetValue } from '../src/reports/analysis.js';
+import {
+  percentagePointDelta,
+  relativePercentageDelta,
+  tailFrequencyDelta,
+} from '../src/reports/comparison-delta.js';
+import {
+  FIXED_TAIL_OCCURRENCES,
+  formatReciprocalTailTick,
+  reciprocalTailScale,
+  reciprocalTailY,
+} from '../src/reports/tail-axis.js';
 import type { SimulationReport } from '../src/types/simulation-report.js';
 import { createWorkspace, importIntoSet } from '../src/workspace/simulation-workspace.js';
 
@@ -60,8 +71,9 @@ describe('dark print/export CSS contract', () => {
     expect(css).not.toMatch(/A4\s+landscape|1400px|transform\s*:\s*rotate/iu);
     expect(css).toContain('width: 210mm');
     expect(css).toContain('table-layout: fixed');
-    expect(css).toContain('--comparison-metric-column: 31%');
+    expect(css).toContain('--comparison-metric-column: 33%');
     expect(css).toContain('--comparison-sim-column: 23%');
+    expect(css).toContain('--comparison-delta-column: 21%');
     expect(css).toContain('border-left: 1px solid var(--line)');
     expect(css).toContain('border-left: 1.5px solid var(--line-strong)');
     expect(css).toMatch(/\.comparison-line\s*\{[^}]*stroke-width:\s*1\.5/isu);
@@ -103,9 +115,10 @@ describe('portrait export document structure', () => {
     expect(html).toContain('Same configuration');
     expect(html).toContain('Detailed Comparison');
     expect(html).toContain('Comparative Distribution');
-    expect(html.match(/class="comparison-sim-column"/gu)?.length).toBe(9);
-    expect(html).toContain('N/A');
-    expect(html).toContain('class="value-na"');
+    expect(html.match(/class="comparison-sim-column"/gu)?.length).toBe(6);
+    expect(html.match(/class="comparison-delta-column"/gu)?.length).toBe(3);
+    expect(html).toContain('Sim 2 vs Sim 1');
+    expect(html).not.toContain('Sim 3');
   });
 
   it('keeps generated comparison output free of mojibake', () => {
@@ -127,17 +140,17 @@ describe('portrait export document structure', () => {
       );
   });
 
-  it('uses the shared comparison grid and independent full-width export charts', () => {
+  it('uses sectioned comparison grids and a single full-width distribution chart', () => {
     const report = reportFixture();
     let workspace = createWorkspace();
     workspace = importIntoSet(workspace, 'sim-1', { ok: true, report }, 'one.json');
     workspace = importIntoSet(workspace, 'sim-2', { ok: true, report }, 'two.json');
     const html = renderCompareExportDocument(workspace, 'en', TRANSLATIONS.en.labels);
     expect(html.match(/class="comparison-grid-table/gu)).toHaveLength(3);
-    expect(html).toContain('class="comparison-grid-table economy-table"');
+    expect(html).not.toContain('economy-table');
     const chartsPage = html.slice(html.indexOf('compare-export-charts'));
-    expect(chartsPage).toContain('comparison-chart-section');
     expect(chartsPage).toContain('comparison-tail-section');
+    expect(chartsPage).not.toContain('comparison-chart-section');
     expect(chartsPage).not.toContain('comparison-chart-grid');
     expect(chartsPage).not.toContain('economy-comparison');
   });
@@ -216,11 +229,29 @@ describe('portrait export document structure', () => {
   it('keeps fixed comparison columns in the live dashboard', () => {
     const html = renderCompareDashboard(createWorkspace(), 'en', TRANSLATIONS.en.labels);
     expect(html).toContain('<col class="comparison-metric-column">');
-    expect(html.match(/<col class="comparison-sim-column">/gu)).toHaveLength(6);
+    expect(html.match(/<col class="comparison-sim-column">/gu)).toHaveLength(4);
+    expect(html.match(/<col class="comparison-delta-column">/gu)).toHaveLength(2);
     expect(html).toContain('Simulation Spins');
   });
 
-  it('orders comparison sections by decision hierarchy without duplicating Economy', () => {
+  it('keeps Sim 3 internally while hiding it from the comparison workflow', () => {
+    const report = reportFixture();
+    let workspace = createWorkspace();
+    workspace = importIntoSet(workspace, 'sim-1', { ok: true, report }, 'one.json');
+    workspace = importIntoSet(workspace, 'sim-2', { ok: true, report }, 'two.json');
+    workspace = importIntoSet(workspace, 'sim-3', { ok: true, report }, 'three.json');
+    expect(workspace.sets).toHaveLength(3);
+    for (const html of [
+      renderSetManager(workspace, [], 'en', TRANSLATIONS.en.labels),
+      renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels),
+      renderCompareExportDocument(workspace, 'en', TRANSLATIONS.en.labels),
+    ]) {
+      expect(html).not.toContain('Sim 3');
+      expect(html).not.toContain('data-set-card="sim-3"');
+    }
+  });
+
+  it('groups comparison metrics by decision hierarchy without redundant RTP cards', () => {
     const report = reportFixture();
     const workspace = importIntoSet(createWorkspace(), 'sim-1', { ok: true, report }, 'one.json');
     for (const html of [
@@ -228,15 +259,32 @@ describe('portrait export document structure', () => {
       renderCompareExportDocument(workspace, 'en', TRANSLATIONS.en.labels),
     ]) {
       const executive = html.indexOf('Comparative Executive Summary');
-      const economy = html.indexOf('Base vs Feature Economy');
-      const rtp = html.indexOf('RTP Composition Comparison');
+      const overview = html.indexOf('Simulation Overview');
+      const rtp = html.indexOf('RTP Composition');
+      const detail = html.indexOf('Detailed Comparison');
       const tail = html.indexOf('Payout Tail Comparison');
       expect(executive).toBeGreaterThan(-1);
-      expect(economy).toBeGreaterThan(executive);
-      expect(rtp).toBeGreaterThan(economy);
-      expect(tail).toBeGreaterThan(rtp);
-      expect(html.match(/Base vs Feature Economy/gu)).toHaveLength(1);
+      expect(overview).toBeGreaterThan(executive);
+      expect(rtp).toBeGreaterThan(overview);
+      expect(detail).toBeGreaterThan(rtp);
+      expect(tail).toBeGreaterThan(detail);
+      expect(html).not.toContain('Base vs Feature Economy');
+      expect(html).not.toContain('RTP Composition Comparison');
+      expect(html).not.toContain('comparison-chart-section');
     }
+  });
+
+  it('shows exact component RTP values inside the executive RTP subsection', () => {
+    const report = reportFixture();
+    const workspace = importIntoSet(createWorkspace(), 'sim-1', { ok: true, report }, 'one.json');
+    const html = renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels);
+    const expected = formatAdaptivePercent(
+      report.metrics.components.baseGameRegularPayout / report.metrics.totalBet,
+      'en',
+    );
+    expect(html).toContain('Base Regular RTP');
+    expect(html).toContain('Free Game Multiplier RTP');
+    expect(html).toContain(expected);
   });
 
   it('keeps workspace context only in the manager and uses one green ACTIVE badge contract', () => {
@@ -271,6 +319,19 @@ describe('portrait export document structure', () => {
     expect(html).toContain('class="y-axis-label"');
     expect(html).toContain('class="y-axis-title"');
     expect(html).toContain('class="comparison-line series-stroke-1"');
+    expect(html).toContain('Log Frequency');
+    for (const tick of [
+      '1 in 10',
+      '1 in 100',
+      '1 in 1k',
+      '1 in 10k',
+      '1 in 100k',
+      '1 in 1 million',
+    ])
+      expect(html).toContain(tick);
+    expect(html).toContain('Observed:');
+    expect(html).toContain('Tail Frequency Table');
+    expect(html).not.toContain('log₁₀ frequency');
 
     const narrow = {
       ...report,
@@ -285,6 +346,36 @@ describe('portrait export document structure', () => {
     const narrowHtml = render(narrow);
     expect(narrowHtml).not.toMatch(/NaN|Infinity/u);
     expect(narrowHtml.match(/class="chart-gridline"/gu)?.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('shares a safe reciprocal logarithmic scale across tail charts', () => {
+    const scale = reciprocalTailScale([1 / 50, 1 / 1_000, 1 / 1_000_000]);
+    expect(scale).not.toBeNull();
+    expect(scale?.ticks.map((tick) => Math.round(1 / tick.frequency))).toEqual([
+      ...FIXED_TAIL_OCCURRENCES,
+    ]);
+    expect(scale?.ticks.every((tick) => tick.frequency > 0)).toBe(true);
+    const positions = scale!.ticks.map((tick) => reciprocalTailY(scale!, tick.frequency, 20, 300));
+    const gaps = positions.slice(1).map((position, index) => position! - positions[index]!);
+    expect(gaps.every((gap) => Math.abs(gap - gaps[0]!) < 1e-9)).toBe(true);
+    expect(reciprocalTailY(scale!, 1 / 1_000, 20, 300)).toBeTypeOf('number');
+    expect(reciprocalTailY(scale!, 0, 20, 300)).toBeNull();
+    expect(reciprocalTailScale([0, Number.NaN])).toBeNull();
+  });
+
+  it('formats reciprocal decades and appropriate delta types', () => {
+    expect(
+      FIXED_TAIL_OCCURRENCES.map((occurrence) =>
+        formatReciprocalTailTick(1 / occurrence, '1 in', '1 million'),
+      ),
+    ).toEqual(['1 in 10', '1 in 100', '1 in 1k', '1 in 10k', '1 in 100k', '1 in 1 million']);
+    expect(percentagePointDelta(0.3131, 0.4559)).toBeCloseTo(14.28);
+    expect(relativePercentageDelta(9.499, 3.684)).toBeCloseTo(-61.2169);
+    expect(tailFrequencyDelta(1 / 1_080, 1 / 3_509)).toEqual({
+      kind: 'rarer',
+      factor: 3_509 / 1_080,
+    });
+    expect(tailFrequencyDelta(0, 1 / 1_000)).toEqual({ kind: 'notComparable' });
   });
 });
 
@@ -413,13 +504,14 @@ describe('stable series identities', () => {
     workspace = importIntoSet(workspace, 'sim-2', { ok: true, report }, 'two.json');
     workspace = importIntoSet(workspace, 'sim-3', { ok: true, report }, 'three.json');
     const withoutOne = renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels);
-    expect(withoutOne).toContain('series-2');
-    expect(withoutOne).toContain('series-3');
+    expect(withoutOne).toContain('series-stroke-2');
+    expect(withoutOne).not.toContain('series-stroke-3');
     expect(withoutOne).not.toContain('series-stroke-1');
     workspace = importIntoSet(workspace, 'sim-1', { ok: true, report }, 'one.json');
     const withOne = renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels);
+    expect(withOne).toContain('series-stroke-1');
     expect(withOne).toContain('series-stroke-2');
-    expect(withOne).toContain('series-stroke-3');
+    expect(withOne).not.toContain('series-stroke-3');
   });
 });
 

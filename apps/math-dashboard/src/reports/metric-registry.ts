@@ -30,6 +30,15 @@ const metric = (
   ...(precision === undefined ? {} : { precision }),
 });
 
+const componentRatio = (
+  report: DashboardAnalysisReport,
+  component: keyof DashboardAnalysisReport['metrics']['components'],
+): number | null => {
+  const value = report.metrics.components[component];
+  const totalBet = report.metrics.totalBet;
+  return value === null || totalBet === null || totalBet <= 0 ? null : value / totalBet;
+};
+
 export const METRIC_REGISTRY = Object.freeze({
   rtp: metric('rtp', 'creditedRtp', 'percent', 'metrics.rtp', (r) => r.metrics.rtp, 'tipRtp'),
   winningSpinFrequency: metric(
@@ -71,6 +80,27 @@ export const METRIC_REGISTRY = Object.freeze({
     (r) => r.metrics.freeGameTumbleTriggerFrequency,
     'tipFreeTumble',
   ),
+  tumbleTriggerFrequency: metric(
+    'tumbleTriggerFrequency',
+    'comparisonTumbleTriggerFrequency',
+    'percent',
+    'metrics.tumbleTriggerFrequency',
+    (r) => r.metrics.tumbleTriggerFrequency,
+  ),
+  tumbleRoundsPerPaidSpin: metric(
+    'tumbleRoundsPerPaidSpin',
+    'roundsPerSpin',
+    'decimal',
+    'metrics.tumbleRoundsPerPaidSpin',
+    (r) => r.metrics.tumbleRoundsPerPaidSpin,
+  ),
+  averageTumbleRoundsPerTriggeringSpin: metric(
+    'averageTumbleRoundsPerTriggeringSpin',
+    'comparisonAverageTumbleRounds',
+    'decimal',
+    'metrics.averageTumbleRoundsPerTriggeringSpin',
+    (r) => r.metrics.averageTumbleRoundsPerTriggeringSpin,
+  ),
   averageBaseGameTumbleRoundsPerTrigger: metric(
     'averageBaseGameTumbleRoundsPerTrigger',
     'baseTumbleAverage',
@@ -85,9 +115,37 @@ export const METRIC_REGISTRY = Object.freeze({
     'metrics.averageFreeGameTumbleRoundsPerTrigger',
     (r) => r.metrics.averageFreeGameTumbleRoundsPerTrigger,
   ),
+  maximumObservedBaseGameTumbleDepth: metric(
+    'maximumObservedBaseGameTumbleDepth',
+    'maximumBaseTumbleDepth',
+    'count',
+    'metrics.maximumObservedBaseGameTumbleDepth',
+    (r) => r.metrics.maximumObservedBaseGameTumbleDepth,
+  ),
+  maximumObservedFreeGameTumbleDepth: metric(
+    'maximumObservedFreeGameTumbleDepth',
+    'maximumFreeTumbleDepth',
+    'count',
+    'metrics.maximumObservedFreeGameTumbleDepth',
+    (r) => r.metrics.maximumObservedFreeGameTumbleDepth,
+  ),
+  bathalaActivationFrequency: metric(
+    'bathalaActivationFrequency',
+    'bathalaActivationFrequency',
+    'percent',
+    'metrics.bathalaActivationFrequency',
+    (r) => r.metrics.bathalaActivationFrequency,
+  ),
+  averageSymbolsRemoved: metric(
+    'averageSymbolsRemoved',
+    'averageRemoved',
+    'decimal',
+    'metrics.averageSymbolsRemoved',
+    (r) => r.metrics.averageSymbolsRemoved,
+  ),
   bathalaToNextWinConversionRate: metric(
     'bathalaToNextWinConversionRate',
-    'bathalaConversion',
+    'comparisonBathalaConversion',
     'percent',
     'metrics.bathalaToNextWinConversionRate',
     (r) => r.metrics.bathalaToNextWinConversionRate,
@@ -107,6 +165,20 @@ export const METRIC_REGISTRY = Object.freeze({
     'metrics.averageMultiplierValue',
     (r) => r.metrics.averageMultiplierValue,
   ),
+  averageSummedMultiplierOnMultipliedWins: metric(
+    'averageSummedMultiplierOnMultipliedWins',
+    'effectiveMultiplier',
+    'multiplier',
+    'metrics.averageSummedMultiplierOnMultipliedWins',
+    (r) => r.metrics.averageSummedMultiplierOnMultipliedWins,
+  ),
+  maximumSummedMultiplier: metric(
+    'maximumSummedMultiplier',
+    'maximumMultiplier',
+    'multiplier',
+    'metrics.maximumSummedMultiplier',
+    (r) => r.metrics.maximumSummedMultiplier,
+  ),
   freeGameWinContribution: metric(
     'freeGameWinContribution',
     'freeContribution',
@@ -121,6 +193,68 @@ export const METRIC_REGISTRY = Object.freeze({
     'percent',
     'metrics.baseGameWinContribution',
     (r) => r.metrics.baseGameWinContribution,
+  ),
+  baseRtpShare: metric(
+    'baseRtpShare',
+    'baseShare',
+    'percent',
+    'derived: baseGameWinContribution / rtp',
+    (r) =>
+      r.metrics.rtp !== null && r.metrics.rtp > 0 && r.metrics.baseGameWinContribution !== null
+        ? r.metrics.baseGameWinContribution / r.metrics.rtp
+        : null,
+  ),
+  featureRtpShare: metric(
+    'featureRtpShare',
+    'featureShare',
+    'percent',
+    'derived: freeGameWinContribution / rtp',
+    (r) =>
+      r.metrics.rtp !== null && r.metrics.rtp > 0 && r.metrics.freeGameWinContribution !== null
+        ? r.metrics.freeGameWinContribution / r.metrics.rtp
+        : null,
+  ),
+  baseRegularRtp: metric(
+    'baseRegularRtp',
+    'baseRegularRtp',
+    'percent',
+    'metrics.components.baseGameRegularPayout / metrics.totalBet',
+    (r) => componentRatio(r, 'baseGameRegularPayout'),
+  ),
+  baseScatterRtp: metric(
+    'baseScatterRtp',
+    'baseScatterRtp',
+    'percent',
+    'metrics.components.baseGameScatterPayout / metrics.totalBet',
+    (r) => componentRatio(r, 'baseGameScatterPayout'),
+  ),
+  baseMultiplierRtp: metric(
+    'baseMultiplierRtp',
+    'baseMultiplierRtp',
+    'percent',
+    'metrics.components.baseGameMultiplierUplift / metrics.totalBet',
+    (r) => componentRatio(r, 'baseGameMultiplierUplift'),
+  ),
+  freeRegularRtp: metric(
+    'freeRegularRtp',
+    'freeRegularRtp',
+    'percent',
+    'metrics.components.freeGameRegularPayout / metrics.totalBet',
+    (r) => componentRatio(r, 'freeGameRegularPayout'),
+  ),
+  freeScatterRtp: metric(
+    'freeScatterRtp',
+    'freeScatterRtp',
+    'percent',
+    'metrics.components.freeGameScatterPayout / metrics.totalBet',
+    (r) => componentRatio(r, 'freeGameScatterPayout'),
+  ),
+  freeMultiplierRtp: metric(
+    'freeMultiplierRtp',
+    'freeMultiplierRtp',
+    'percent',
+    'metrics.components.freeGameMultiplierUplift / metrics.totalBet',
+    (r) => componentRatio(r, 'freeGameMultiplierUplift'),
   ),
   multiplierRtpContribution: metric(
     'multiplierRtpContribution',
@@ -143,8 +277,8 @@ export const METRIC_REGISTRY = Object.freeze({
     'multiplier',
     'metrics.maximumObservedWin',
     (r) => r.metrics.maximumObservedWin,
-	undefined,
-	0,	
+    undefined,
+    0,
   ),
   coefficientOfVariation: metric(
     'coefficientOfVariation',
@@ -154,12 +288,54 @@ export const METRIC_REGISTRY = Object.freeze({
     (r) => r.metrics.coefficientOfVariation,
     'tipCv',
   ),
+  standardDeviation: metric(
+    'standardDeviation',
+    'sd',
+    'decimal',
+    'metrics.standardDeviation',
+    (r) => r.metrics.standardDeviation,
+  ),
   averageFreeGamesPlayed: metric(
     'averageFreeGamesPlayed',
     'averageFreeGames',
     'decimal',
     'metrics.averageFreeGamesPlayed',
     (r) => r.metrics.averageFreeGamesPlayed,
+  ),
+  freeGameTriggerCount: metric(
+    'freeGameTriggerCount',
+    'triggerCount',
+    'count',
+    'metrics.freeGameTriggerCount',
+    (r) => r.metrics.freeGameTriggerCount,
+  ),
+  averageInitiallyAwardedFreeGames: metric(
+    'averageInitiallyAwardedFreeGames',
+    'initialFreeGames',
+    'decimal',
+    'metrics.averageInitiallyAwardedFreeGames',
+    (r) => r.metrics.averageInitiallyAwardedFreeGames,
+  ),
+  maximumObservedFeatureLength: metric(
+    'maximumObservedFeatureLength',
+    'maximumObservedFeatureLength',
+    'count',
+    'metrics.maximumObservedFeatureLength',
+    (r) => r.metrics.maximumObservedFeatureLength,
+  ),
+  retriggerCount: metric(
+    'retriggerCount',
+    'retriggerCount',
+    'count',
+    'metrics.retriggerCount',
+    (r) => r.metrics.retriggerCount,
+  ),
+  averageRetriggersPerFeature: metric(
+    'averageRetriggersPerFeature',
+    'averageRetriggers',
+    'decimal',
+    'metrics.averageRetriggersPerFeature',
+    (r) => r.metrics.averageRetriggersPerFeature,
   ),
   averageEndingFreeGameMultiplier: metric(
     'averageEndingFreeGameMultiplier',

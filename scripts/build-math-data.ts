@@ -2,9 +2,10 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { validateConfig } from '@lucky/math-engine';
 import type { ActiveGameConfig } from '@lucky/shared-types';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 
-const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig();
+const profileId = requireProfileId();
+const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig(profileId);
 const issues = validateConfig(config);
 if (issues.length > 0) throw new Error(`Math build stopped: ${issues.length} validation issue(s)`);
 const artifact = {
@@ -22,9 +23,14 @@ const artifact = {
   config,
 };
 const text = `${JSON.stringify(artifact, null, 2)}\n`;
-const generatedRuntimePath = resolve(process.cwd(), 'math/generated/runtime-config.json');
+const generatedRuntimePath = resolve(
+  process.cwd(),
+  'math/generated',
+  profileId,
+  'runtime-config.json',
+);
 const gameRuntimePath = resolve(process.cwd(), 'apps/game/public/data/runtime-config.json');
-for (const directory of ['math/generated', 'apps/game/public/data'])
+for (const directory of [`math/generated/${profileId}`, 'apps/game/public/data'])
   await mkdir(resolve(process.cwd(), directory), { recursive: true });
 await Promise.all([writeFile(generatedRuntimePath, text), writeFile(gameRuntimePath, text)]);
 const [generatedRuntime, gameRuntime] = await Promise.all([

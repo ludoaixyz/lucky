@@ -33,10 +33,10 @@ describe('math source-to-runtime reconciliation', () => {
   });
 
   it('matches every compiled symbol, payline, reel stop, paytable row, and JSON value', async () => {
-    const source = await loadSourceConfig();
+    const source = await loadSourceConfig('lucky888-bathala-aligned-v3');
     assertProductionProfile(source.config);
     for (const path of [
-      'math/generated/runtime-config.json',
+      'math/generated/lucky888-bathala-aligned-v3/runtime-config.json',
       'apps/game/public/data/runtime-config.json',
     ]) {
       const runtime = await artifact(path);
@@ -56,7 +56,7 @@ describe('math source-to-runtime reconciliation', () => {
     ['free-spin reel stop', 'freeSpinReelStrips'],
     ['paytable award', 'paytable'],
   ] as const)('rejects a generated-runtime %s mismatch', async (_label, field) => {
-    const { config } = await loadSourceConfig();
+    const { config } = await loadSourceConfig('lucky888-bathala-aligned-v3');
     const changed = structuredClone(config) as RuntimeGameConfig & Record<string, unknown>;
     if (field === 'symbols') Object.assign(changed, { symbols: config.symbols.slice(1) });
     if (field === 'paylines') {

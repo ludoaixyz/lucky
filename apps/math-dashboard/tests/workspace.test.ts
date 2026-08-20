@@ -94,7 +94,7 @@ describe('nullable comparison semantics', () => {
     );
   });
 
-  it('renders each valid configuration under its own set column and N/A for empty sets', () => {
+  it('renders the two visible configurations with a Delta column', () => {
     const report = fixture();
     const reportB = { ...report, metadata: { ...report.metadata, configurationId: 'profile-b' } };
     let workspace = createWorkspace();
@@ -103,7 +103,8 @@ describe('nullable comparison semantics', () => {
     const html = renderCompareDashboard(workspace, 'en', TRANSLATIONS.en.labels);
     expect(html).toContain('lucky888-bathala-aligned-v3');
     expect(html).toContain('profile-b');
-    expect(html).toContain('N/A');
+    expect(html).toContain('Sim 2 vs Sim 1');
+    expect(html).not.toContain('Sim 3');
     expect(html).not.toMatch(/NaN|Infinity|undefined/);
   });
 });

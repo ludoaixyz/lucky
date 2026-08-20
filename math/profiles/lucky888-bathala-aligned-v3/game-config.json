@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "2.0.0",
+  "gameId": "lucky888",
+  "gameName": "Lucky888",
+  "gameVersion": "2.0.0",
+  "configurationId": "lucky888-bathala-aligned-v3",
+  "metadata": {
+    "profileName": "Bathala Aligned / Calibrated v3",
+    "version": "3.0.0",
+    "volatilityProfile": "high"
+  },
+  "betting": {
+    "bets": [
+      300, 500, 1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 100000, 200000, 500000, 1000000,
+      5000000, 10000000
+    ],
+    "defaultBet": 300,
+    "startingCredits": 1000000,
+    "autoSpinOptions": [1, 5, 10, 25, 50, 100]
+  },
+  "references": {
+    "targetRtp": 0.94,
+    "featureEntrySpins": 120
+  },
+  "limits": {
+    "maximumWinMultiple": 10000,
+    "maximumMultiplier": 500,
+    "maximumSessionRecords": 100000
+  },
+  "model": "bathala-count-pay-tumble",
+  "columns": 6,
+  "rows": 5,
+  "minimumWinCount": 8,
+  "totalBet": 1,
+  "maximumTumbleRounds": 100,
+  "freeGameMultiplierCollectionTrigger": "winning_round",
+  "symbols": ["L1", "L2", "L3", "L4", "L5", "H1", "H2", "H3", "H4", "SCATTER", "MULTIPLIER"],
+  "regularSymbols": ["L1", "L2", "L3", "L4", "L5", "H1", "H2", "H3", "H4"],
+  "lowSymbols": ["L1", "L2", "L3", "L4", "L5"],
+  "notes": [
+    "Regular-symbol paytable is aligned to observed Bathala 8-9 / 10-11 / 12-30 tiers.",
+    "Scatter is resolved once on the final board after the tumble chain.",
+    "The 6+ Scatter payout remains an implementation assumption pending direct verification."
+  ]
+}

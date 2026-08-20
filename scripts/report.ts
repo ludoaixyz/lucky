@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { runSimulationCheckpoints, SeededRandom, validateConfig } from '@lucky/math-engine';
 import type { ExactMathReport } from '@lucky/shared-types';
 import { formatPercentRatio } from '@lucky/shared-types';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 import { buildDurableReport, renderSimulationMarkdown } from './lib/simulation-report.js';
 
 function option(name: string, fallback: number): number {
@@ -61,8 +61,9 @@ async function requiredHybrid(
 
 const spins = option('spins', 1_000_000);
 const seed = option('seed', 2026);
-const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig();
-const issues = validateConfig(config, 'math/source');
+const profileId = requireProfileId();
+const { config, sourceHash, structuralHash, payoutHash } = await loadSourceConfig(profileId);
+const issues = validateConfig(config, `math/profiles/${profileId}`);
 if (issues.length > 0)
   throw new Error(`Report generation stopped: ${issues.length} math validation issue(s)`);
 

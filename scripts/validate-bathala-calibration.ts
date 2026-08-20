@@ -1,5 +1,5 @@
 import { runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 
 function option(name: string, fallback: number): number {
   const prefix = `--${name}=`;
@@ -15,7 +15,7 @@ function option(name: string, fallback: number): number {
 
 const spins = option('spins', 1_000_000);
 const seed = option('seed', 2026);
-const { config } = await loadSourceConfig();
+const { config } = await loadSourceConfig(requireProfileId());
 const issues = validateConfig(config);
 if (issues.length > 0) throw new Error(`Invalid source config: ${issues.length} issue(s)`);
 

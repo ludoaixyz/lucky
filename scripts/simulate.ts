@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
   assertFiniteReport,
@@ -7,8 +7,7 @@ import {
   validateConfig,
 } from '@lucky/math-engine';
 import { formatPercentRatio } from '@lucky/shared-types';
-import type { ActiveGameConfig } from '@lucky/shared-types';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId, simulationReportName } from './lib/source-loader.js';
 
 function option(name: string, fallback: number): number {
   const prefix = `--${name}=`;
@@ -22,24 +21,17 @@ function option(name: string, fallback: number): number {
   return value;
 }
 
-function textOption(name: string): string | undefined {
-  const prefix = `--${name}=`;
-  const inline = process.argv.find((argument) => argument.startsWith(prefix));
-  const position = process.argv.indexOf(`--${name}`);
-  return inline?.slice(prefix.length) ?? (position >= 0 ? process.argv[position + 1] : undefined);
-}
-
-async function simulationMathConfig(): Promise<ActiveGameConfig> {
-  const path = textOption('config');
-  if (!path) return (await loadSourceConfig()).config;
-  const payload = JSON.parse(await readFile(resolve(process.cwd(), path), 'utf8')) as
-    ActiveGameConfig | { readonly config: ActiveGameConfig };
-  return 'config' in payload ? payload.config : payload;
-}
-
 const spins = option('spins', 100_000);
 const seed = option('seed', 2026);
-const config = await simulationMathConfig();
+const profileId = requireProfileId();
+if (process.argv.some((argument) => argument === '--source' || argument.startsWith('--source=')))
+  throw new Error('--source is no longer supported. Select an isolated profile with --profile.');
+if (process.argv.some((argument) => argument === '--config' || argument.startsWith('--config=')))
+  throw new Error('--config is no longer supported for profile simulation. Use --profile.');
+const { config } = await loadSourceConfig(profileId);
+console.log(
+  `Math profile: ${profileId}\nSource: math/profiles/${profileId}\nSpins: ${spins.toLocaleString('en-US')}\nSeed: ${seed}`,
+);
 const issues = validateConfig(config);
 if (issues.length > 0) throw new Error(`Simulation stopped: ${issues.length} validation issue(s)`);
 const report = runSimulation(config, { spins, seed }, new SeededRandom(seed));
@@ -57,7 +49,8 @@ if (
 )
   throw new Error('RTP component reconciliation failed');
 await mkdir(resolve(process.cwd(), 'math/reports'), { recursive: true });
-const output = resolve(process.cwd(), `math/reports/bathala-simulation-${seed}-${spins}.json`);
+const reportName = simulationReportName(profileId, seed, spins);
+const output = resolve(process.cwd(), 'math/reports', reportName);
 const envelope = {
   metadata: {
     schemaVersion: report.schemaVersion,
@@ -71,16 +64,16 @@ const envelope = {
   simulation: { methodology: report.methodology, spins, seed },
   metrics: report,
 };
-await writeFile(output, `${JSON.stringify(envelope, null, 2)}\n`);
-if (spins === 1_000_000 && seed === 2026)
-  await writeFile(
-    resolve(
-      process.cwd(),
-      'apps/math-dashboard/public/reports/bathala-simulation-2026-1000000.json',
-    ),
-    `${JSON.stringify(envelope, null, 2)}\n`,
-  );
+if (
+  envelope.metadata.configurationId !== profileId ||
+  envelope.metrics.configurationId !== profileId
+)
+  throw new Error(`Simulation report configuration mismatch for profile "${profileId}".`);
+const dashboardDirectory = resolve(process.cwd(), 'apps/math-dashboard/public/reports');
+await mkdir(dashboardDirectory, { recursive: true });
+const dashboardOutput = resolve(dashboardDirectory, reportName);
+const serialized = `${JSON.stringify(envelope, null, 2)}\n`;
+await Promise.all([writeFile(output, serialized), writeFile(dashboardOutput, serialized)]);
 console.log(
-  `Simulated ${spins.toLocaleString()} spins: RTP ${formatPercentRatio(report.rtp, 4)}, hit ${formatPercentRatio(report.winningSpinFrequency, 4)}, features ${report.freeGameTriggerCount}.`,
+  `\nSimulation complete.\n\nProfile: ${profileId}\nRTP: ${formatPercentRatio(report.rtp, 4)}\nHit frequency: ${formatPercentRatio(report.winningSpinFrequency, 4)}\nFeature frequency: ${formatPercentRatio(report.featureFrequency, 4)}\nCoV: ${report.coefficientOfVariation.toFixed(4)}\n\nReport:\nmath/reports/${reportName}\n\nDashboard:\napps/math-dashboard/public/reports/${reportName}`,
 );
-console.log(`Report: ${output}`);

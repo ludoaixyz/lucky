@@ -6,7 +6,7 @@ import type {
   BathalaSimulationReport,
   BathalaSymbolId,
 } from '@lucky/shared-types';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 
 function integerOption(name: string, fallback: number): number {
   const prefix = `--${name}=`;
@@ -70,7 +70,7 @@ const seed = integerOption('seed', 2026);
 const scatterWeights = listOption('scatter-weights', [8, 12, 16, 20, 24, 28, 32, 36, 40]);
 const baseMultiplierWeights = listOption('base-multiplier-weights', [15]);
 const freeMultiplierWeights = listOption('free-multiplier-weights', [22]);
-const { config: sourceConfig } = await loadSourceConfig();
+const { config: sourceConfig } = await loadSourceConfig(requireProfileId());
 const results: CandidateResult[] = [];
 
 for (const baseScatterWeight of scatterWeights) {

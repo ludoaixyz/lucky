@@ -11,8 +11,9 @@
   --line: #294653;
   --line-strong: #416575;
   --na: #c0697d;
-  --comparison-metric-column: 31%;
+  --comparison-metric-column: 33%;
   --comparison-sim-column: 23%;
+  --comparison-delta-column: 21%;
   --gold: #d9b45a;
   --gold-soft: #f2dda0;
   --teal: #52b9b0;
@@ -68,7 +69,7 @@
 .set-manager-grid,
 .comparison-set-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 .simulation-set-card {
@@ -294,6 +295,9 @@
 .comparison-grid-table .comparison-sim-column {
   width: var(--comparison-sim-column);
 }
+.comparison-grid-table .comparison-delta-column {
+  width: var(--comparison-delta-column);
+}
 .comparison-grid-table th + th,
 .comparison-grid-table td + td,
 .targets-section th + th,
@@ -327,6 +331,30 @@
   color: var(--muted);
   font-size: 0.53rem;
 }
+.comparison-delta-heading,
+.comparison-delta-cell {
+  background: #102531;
+}
+.comparison-delta-cell strong {
+  color: var(--teal) !important;
+  font-variant-numeric: tabular-nums;
+}
+.comparison-subsection-row th {
+  padding: 13px 8px 7px;
+  color: var(--gold);
+  background: #152934;
+  font-size: 0.68rem;
+  letter-spacing: 0.11em;
+  text-align: left !important;
+  text-transform: uppercase;
+}
+.comparison-subsection-row:first-child th {
+  padding-top: 8px;
+  border-top: 0;
+}
+.comparison-subsection-row span {
+  display: block;
+}
 .comparison-ci strong {
   white-space: nowrap;
 }
@@ -335,10 +363,112 @@
   font-weight: 500;
 }
 .comparison-context-note,
-.export-baseline {
+.export-baseline,
+.comparison-baseline {
   margin: 8px 0 0;
   color: var(--info);
   font-size: 0.68rem;
+}
+.comparison-insights {
+  margin-top: 16px;
+}
+.profile-shift-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.profile-shift-grid article {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #091a25;
+}
+.profile-shift-grid span,
+.profile-shift-grid strong,
+.profile-shift-grid small {
+  display: block;
+}
+.profile-shift-grid span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.profile-shift-grid strong {
+  margin-top: 5px;
+  color: var(--gold-soft);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+.profile-shift-grid strong b {
+  color: var(--muted);
+}
+.profile-shift-grid small {
+  margin-top: 3px;
+  color: var(--teal);
+  font-size: 0.62rem;
+}
+.profile-diagnosis {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 9px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: #102531;
+}
+.profile-diagnosis h3,
+.profile-diagnosis p {
+  margin: 0;
+}
+.profile-diagnosis h3 {
+  color: var(--gold);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.profile-diagnosis p {
+  display: flex;
+  gap: 7px;
+  font-size: 0.64rem;
+}
+.profile-diagnosis p span {
+  color: var(--muted);
+}
+.tail-chart-subtitle {
+  margin: -4px 0 7px;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+.tail-frequency-block h3 {
+  margin: 10px 0 6px;
+  color: var(--gold);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tail-frequency-table th,
+.tail-frequency-table td {
+  padding: 5px 7px;
+}
+.tail-endpoint-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+.tail-endpoint-notes p {
+  margin: 0;
+}
+.compare-dashboard .section-heading,
+.compare-export-document .section-heading,
+.compare-export-document .export-report-header,
+.compare-export-document .export-section-header {
+  border-bottom: 0;
 }
 .comparison-chart-grid {
   display: grid;
@@ -440,7 +570,8 @@
   text-anchor: middle;
 }
 .y-axis-title {
-  font-size: 8px;
+  font-size: 10px;
+  font-weight: 700;
   text-anchor: start;
 }
 .series-stroke-1 {
@@ -1216,7 +1347,7 @@ footer {
   -webkit-line-clamp: 2;
 }
 .export-report .comparison-set-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .export-report .comparison-set-grid article > strong {
   white-space: normal;
@@ -1226,12 +1357,11 @@ footer {
   grid-template-columns: 1fr;
 }
 .compare-export-charts .comparison-tail-section,
-.compare-export-charts .comparison-chart-section,
-.compare-export-charts .economy-comparison {
+.compare-export-charts .comparison-chart-section {
   width: 100%;
 }
 .compare-export-charts .comparison-tail-section svg {
-  max-height: 66mm;
+  max-height: 122mm;
 }
 .compare-export-charts .grouped-bars {
   gap: 1.5mm;
@@ -1284,6 +1414,85 @@ footer {
 }
 .detailed-export-document .tail-chart svg {
   max-height: 42mm;
+}
+.export-report .comparison-subsection-row th {
+  padding: 1.8mm 1.3mm 1mm;
+  font-size: 6.8pt;
+  letter-spacing: 0.08em;
+}
+.export-report .comparison-subsection-row:first-child th {
+  padding-top: 1mm;
+}
+.compare-export-executive .comparison-table th,
+.compare-export-executive .comparison-table td {
+  padding-top: 0.5mm;
+  padding-bottom: 0.5mm;
+}
+.compare-export-executive {
+  gap: 1.8mm;
+}
+.compare-export-executive .export-report-header {
+  padding-bottom: 1.5mm;
+}
+.compare-export-executive .comparison-metadata,
+.compare-export-executive .comparison-insights,
+.compare-export-executive .comparison-table-section {
+  padding: 1.5mm;
+}
+.compare-export-executive .comparison-insights {
+  margin-top: 0;
+}
+.compare-export-executive .profile-shift-grid {
+  gap: 1mm;
+}
+.compare-export-executive .profile-shift-grid article {
+  padding: 1.2mm;
+}
+.compare-export-executive .profile-shift-grid strong {
+  margin-top: 0.7mm;
+  font-size: 6.7pt;
+}
+.compare-export-executive .profile-shift-grid small,
+.compare-export-executive .profile-shift-grid span,
+.compare-export-executive .profile-diagnosis {
+  font-size: 5.8pt;
+}
+.compare-export-executive .profile-diagnosis {
+  gap: 1mm 3mm;
+  margin-top: 1mm;
+  padding: 1mm 1.4mm;
+}
+.compare-export-executive .comparison-set-grid article {
+  padding: 1.3mm;
+}
+.compare-export-executive .comparison-subsection-row th {
+  padding-top: 1mm;
+  padding-bottom: 0.5mm;
+}
+.compare-export-executive .comparison-subsection-row:first-child th {
+  padding-top: 0.5mm;
+}
+.compare-export-details .comparison-table th,
+.compare-export-details .comparison-table td {
+  padding-top: 0.85mm;
+  padding-bottom: 0.85mm;
+}
+.compare-export-charts .comparison-tail-section {
+  padding: 2mm;
+}
+.compare-export-charts .tail-chart-subtitle {
+  margin-bottom: 1mm;
+}
+.compare-export-charts .tail-frequency-block h3 {
+  margin: 1.5mm 0 1mm;
+}
+.compare-export-charts .tail-frequency-table th,
+.compare-export-charts .tail-frequency-table td {
+  padding: 0.7mm 1.2mm;
+}
+.compare-export-charts .tail-endpoint-notes {
+  margin-top: 1.2mm;
+  font-size: 6.2pt;
 }
 .detailed-export-document table {
   font-size: 7pt;

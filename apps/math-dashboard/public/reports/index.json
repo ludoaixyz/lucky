@@ -3,5 +3,9 @@
     "file": "bathala-simulation-2026-1000000.json",
     "label": "Bathala-aligned v3 1,000,000-spin acceptance run",
     "default": true
+  },
+  {
+    "file": "bathala-tumble-balanced-v1-simulation-2026-1000000.json",
+    "label": "Tumble Balanced v1 1,000,000-spin comparison run"
   }
 ]

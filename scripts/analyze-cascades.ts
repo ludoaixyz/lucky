@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { resolveSpin, SeededRandom, validateConfig } from '@lucky/math-engine';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 
 function option(name: string, fallback: number): number {
   const prefix = `--${name}=`;
@@ -16,8 +16,9 @@ function option(name: string, fallback: number): number {
 
 const spins = option('spins', 1_000_000);
 const seed = option('seed', 2026);
-const { config, sourceHash } = await loadSourceConfig();
-const issues = validateConfig(config, 'math/source');
+const profileId = requireProfileId();
+const { config, sourceHash } = await loadSourceConfig(profileId);
+const issues = validateConfig(config, `math/profiles/${profileId}`);
 if (issues.length > 0)
   throw new Error(`Cascade analysis stopped: ${issues.length} math validation issue(s)`);
 

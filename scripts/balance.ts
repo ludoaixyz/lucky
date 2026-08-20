@@ -2,12 +2,13 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { runSimulation, SeededRandom, validateConfig } from '@lucky/math-engine';
 import { formatPercentRatio } from '@lucky/shared-types';
-import { loadSourceConfig } from './lib/source-loader.js';
+import { loadSourceConfig, requireProfileId } from './lib/source-loader.js';
 
 const seeds = [2026, 888, 20260806, 314159, 271828] as const;
 const spins = 1_000_000;
-const { config, sourceHash } = await loadSourceConfig();
-const issues = validateConfig(config, 'math/source');
+const profileId = requireProfileId();
+const { config, sourceHash } = await loadSourceConfig(profileId);
+const issues = validateConfig(config, `math/profiles/${profileId}`);
 if (issues.length > 0) throw new Error(`Balance run stopped: ${issues.length} validation issue(s)`);
 const reports = seeds.map((seed) =>
   runSimulation(

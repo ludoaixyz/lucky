@@ -33,6 +33,7 @@ math/reports/*
 !math/reports/cascade-depth-2026-1000000.json
 math/reports/raw/
 math/generated/*.json
+math/generated/**/runtime-config.json
 apps/game/public/data/runtime-config.json
 !math/generated/.gitkeep
 !apps/game/public/data/.gitkeep

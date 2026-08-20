@@ -6,7 +6,7 @@ import { loadSourceConfig } from '../lib/source-loader.js';
 
 describe('exact-enumeration CLI orchestration', () => {
   it('keeps the canonical engine guard for direct cascade enumeration', async () => {
-    const { config } = await loadSourceConfig();
+    const { config } = await loadSourceConfig('lucky888-bathala-aligned-v3');
     expect(config.cascades?.enabled).toBe(true);
     expect(() => enumerateExact(config, 'cascade-source')).toThrow(
       'Exact enumeration currently supports non-cascading profiles only',
@@ -14,7 +14,7 @@ describe('exact-enumeration CLI orchestration', () => {
   });
 
   it('reports cascade profiles as not applicable without enumerating or writing reports', async () => {
-    const source = await loadSourceConfig();
+    const source = await loadSourceConfig('lucky888-bathala-aligned-v3');
     const enumerate = vi.fn(() => {
       throw new Error('enumerateExact must not be called for cascades');
     });
@@ -39,7 +39,7 @@ describe('exact-enumeration CLI orchestration', () => {
   });
 
   it('continues exact enumeration for a legacy profile with cascades omitted', async () => {
-    const source = await loadSourceConfig();
+    const source = await loadSourceConfig('lucky888-bathala-aligned-v3');
     const legacyConfig = { ...source.config };
     delete legacyConfig.cascades;
     const legacySource = { ...source, config: legacyConfig };
@@ -64,7 +64,7 @@ describe('exact-enumeration CLI orchestration', () => {
   });
 
   it('continues exact enumeration when cascades are explicitly disabled', async () => {
-    const source = await loadSourceConfig();
+    const source = await loadSourceConfig('lucky888-bathala-aligned-v3');
     const disabledConfig: RuntimeGameConfig = {
       ...source.config,
       cascades: { enabled: false },

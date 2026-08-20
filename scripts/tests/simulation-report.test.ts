@@ -9,7 +9,9 @@ import {
 
 describe('durable simulation report', () => {
   it('loads the complete production 20-line math profile', async () => {
-    const { config, structuralHash, payoutHash } = await loadSourceConfig();
+    const { config, structuralHash, payoutHash } = await loadSourceConfig(
+      'lucky888-bathala-aligned-v3',
+    );
     expect(config.symbols.filter((symbol) => symbol.category === 'regular')).toHaveLength(8);
     expect(config.symbols.filter((symbol) => symbol.category === 'wild')).toHaveLength(1);
     expect(config.symbols.filter((symbol) => symbol.category === 'scatter')).toHaveLength(1);
@@ -32,7 +34,7 @@ describe('durable simulation report', () => {
   });
 
   it('generates JSON-ready data and all required reconciliation checks', async () => {
-    const { config } = await loadSourceConfig();
+    const { config } = await loadSourceConfig('lucky888-bathala-aligned-v3');
     expect(config).toMatchObject({
       configurationId: 'lucky888-production-20line-v1',
       cascades: {
@@ -75,7 +77,7 @@ describe('durable simulation report', () => {
   });
 
   it('rejects reports whose accounting does not reconcile', async () => {
-    const { config } = await loadSourceConfig();
+    const { config } = await loadSourceConfig('lucky888-bathala-aligned-v3');
     const simulation = runSimulation(
       config,
       { spins: 10, seed: 7, betCredits: config.totalBetCredits },

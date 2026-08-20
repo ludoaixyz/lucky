@@ -19,6 +19,11 @@ import type { DashboardAnalysisReport, ProfileStatus, Status } from '../types/si
 import { evaluateTargets, reconcileReport, type TargetEvaluation } from '../reports/analysis.js';
 import { deriveAnalytics } from '../reports/derived.js';
 import { metricDefinition, type MetricId, type MetricUnit } from '../reports/metric-registry.js';
+import {
+  formatReciprocalTailTick,
+  reciprocalTailScale,
+  reciprocalTailY,
+} from '../reports/tail-axis.js';
 
 type Labels = DashboardLabels;
 const label = (labels: Labels, key: string): string =>
@@ -435,28 +440,22 @@ function tailChart(report: DashboardAnalysisReport, locale: DashboardLocale, l: 
   const observed = report.metrics.tails.filter((x) => x.frequency > 0);
   const width = 620,
     height = 320,
-    left = 50,
+    left = 76,
     right = 18,
     top = 18,
     bottom = 40;
   if (!observed.length) return `<div class="empty-state">${esc(l.notObserved)}</div>`;
-  const logs = observed.map((x) => Math.log10(x.frequency));
-  const min = Math.min(...logs),
-    max = Math.max(...logs);
-  const tickMin = Math.floor(min);
-  const tickMax = Math.ceil(max);
-  const ticks = Array.from({ length: tickMax - tickMin + 1 }, (_, index) => tickMin + index);
+  const scale = reciprocalTailScale(observed.map((tail) => tail.frequency));
+  if (!scale) return `<div class="empty-state">${esc(l.notObserved)}</div>`;
+  const plotHeight = height - top - bottom;
   const points = observed.map((tail, i) => {
     const px = left + (i / Math.max(1, observed.length - 1)) * (width - left - right);
-    const py =
-      top +
-      ((max - Math.log10(tail.frequency)) / Math.max(0.0001, max - min)) * (height - top - bottom);
+    const py = reciprocalTailY(scale, tail.frequency, top, plotHeight) ?? top;
     return { x: px, y: py, t: tail.threshold, f: tail.frequency };
   });
-  const yTicks = ticks
+  const yTicks = scale.ticks
     .map((tick) => {
-      const y = top + ((max - tick) / Math.max(0.0001, max - min)) * (height - top - bottom);
-      if (y < top - 1 || y > height - bottom + 1) return '';
+      const y = reciprocalTailY(scale, tick.frequency, top, plotHeight) ?? top;
       return `
 		  <line
 			class="grid-line"
@@ -476,11 +475,11 @@ function tailChart(report: DashboardAnalysisReport, locale: DashboardLocale, l: 
 			class="y-axis-label"
 			x="${left - 8}"
 			y="${y + 3}"
-		  >${esc(formatOneIn(10 ** tick, locale, l.oneIn))}</text>
+		  >${esc(formatReciprocalTailTick(tick.frequency, l.oneIn, l.oneMillion))}</text>
 		`;
     })
     .join('');
-  return `<figure class="chart-card tail-chart"><figcaption>${esc(l.tailDecayChart)}</figcaption><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(l.tailDecayChart)}"><line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"/><line class="axis" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"/>${yTicks}<polyline class="tail-line" points="${points.map((p) => `${p.x},${p.y}`).join(' ')}"/>${points.map((p) => `<circle class="tail-point" cx="${p.x}" cy="${p.y}" r="4"><title>${formatInteger(p.t, locale)}×+: ${formatAdaptivePercent(p.f, locale)}</title></circle><text class="axis-label" x="${p.x}" y="${height - 16}">${formatInteger(p.t, locale)}×</text>`).join('')}<text class="chart-note" x="${left}" y="12">${esc(l.observedFrequency)}</text></svg></figure>`;
+  return `<figure class="chart-card tail-chart"><figcaption>${esc(l.tailDecayChart)}</figcaption><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(l.tailDecayChart)}"><line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"/><line class="axis" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"/>${yTicks}<polyline class="tail-line" points="${points.map((p) => `${p.x},${p.y}`).join(' ')}"/>${points.map((p) => `<circle class="tail-point" cx="${p.x}" cy="${p.y}" r="4"><title>${formatInteger(p.t, locale)}×+\n${esc(l.frequency)}: ${formatAdaptivePercent(p.f, locale)}\n${esc(l.occurrence)}: ${esc(formatOneIn(p.f, locale, l.oneIn))}</title></circle><text class="axis-label" x="${p.x}" y="${height - 16}">${formatInteger(p.t, locale)}×</text>`).join('')}<text class="chart-note" x="${left}" y="12">${esc(l.occurrence)}</text></svg></figure>`;
 }
 
 function tailPerformance(
