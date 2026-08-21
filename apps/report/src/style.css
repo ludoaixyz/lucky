@@ -150,6 +150,7 @@ a:focus-visible {
   font-family: Arial, Helvetica, 'Liberation Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow: hidden;
 }
 .report-host .report-page-frame > section.docx {
   position: absolute;
@@ -159,7 +160,9 @@ a:focus-visible {
   transform: scale(var(--report-scale));
   transform-origin: top left;
 }
-.report-host section.docx [style*='font-family: Arial'] {
+.report-host
+  section.docx
+  :where(p, span, div, table, thead, tbody, tfoot, tr, th, td, ul, ol, li, header, footer, a) {
   font-family: Arial, Helvetica, 'Liberation Sans', sans-serif !important;
 }
 .report-host section.docx p.report-default-align {
@@ -167,6 +170,37 @@ a:focus-visible {
 }
 .report-host section.docx p.report-centered-align {
   text-align: center !important;
+}
+.report-host section.docx p.report-drawing-anchor {
+  position: relative;
+  text-align: start !important;
+}
+.report-host section.docx .report-drawing-caption {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--report-caption-columns), minmax(0, 1fr));
+  color: #17365d;
+  font-size: 7.2pt;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  white-space: normal;
+}
+.report-host section.docx p.report-drawing-spacer {
+  height: var(--report-spacer-height) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  line-height: 0 !important;
+}
+.report-host section.docx p.report-drawing-spacer--empty {
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  line-height: 0 !important;
 }
 .report-host section.docx header p.report-header-line {
   display: flex;
@@ -226,7 +260,17 @@ a:focus-visible {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 0 0 24px;
+
+    @bottom-center {
+      content: 'Page ' counter(page) ' of 12';
+      color: #687889;
+      font:
+        8.5pt Arial,
+        Helvetica,
+        'Liberation Sans',
+        sans-serif;
+    }
   }
   :root,
   body {
@@ -252,9 +296,23 @@ a:focus-visible {
     box-shadow: none !important;
     transform: none !important;
     zoom: 1 !important;
-    break-after: page;
-    page-break-after: always;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+  .report-host section.docx footer {
+    display: none !important;
+  }
+  .report-host section.docx .report-breakable-layout,
+  .report-host section.docx .report-breakable-layout > tbody,
+  .report-host section.docx .report-breakable-layout > tbody > tr,
+  .report-host section.docx .report-breakable-layout > tr,
+  .report-host section.docx .report-breakable-layout > tbody > tr > td,
+  .report-host section.docx .report-breakable-layout > tr > td {
+    display: block !important;
+    width: 100% !important;
+  }
+  .report-host section.docx .report-print-page-start {
+    break-before: page;
+    page-break-before: always;
   }
 }
