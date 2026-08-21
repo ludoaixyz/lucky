@@ -15,11 +15,16 @@ describe('deployment base paths', () => {
     expect(normalizeDeploymentBase(input)).toBe(expected);
   });
 
-  it('derives the dashboard path from the game path', () => {
-    expect(resolveDeploymentBases('/')).toEqual({ game: '/', dashboard: '/dashboard/' });
+  it('derives the dashboard and report paths from the game path', () => {
+    expect(resolveDeploymentBases('/')).toEqual({
+      game: '/',
+      dashboard: '/dashboard/',
+      report: '/report/',
+    });
     expect(resolveDeploymentBases('/lucky/')).toEqual({
       game: '/lucky/',
       dashboard: '/lucky/dashboard/',
+      report: '/lucky/report/',
     });
   });
 

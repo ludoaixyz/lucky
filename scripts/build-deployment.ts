@@ -6,8 +6,10 @@ import { resolveDeploymentBases } from './lib/deployment-base.js';
 const repositoryRoot = resolve(import.meta.dirname, '..');
 const gameDist = resolve(repositoryRoot, 'apps/game/dist');
 const dashboardDist = resolve(repositoryRoot, 'apps/math-dashboard/dist');
+const reportDist = resolve(repositoryRoot, 'apps/report/dist');
 const pagesDist = resolve(repositoryRoot, 'dist-pages');
 const assembledDashboard = resolve(pagesDist, 'dashboard');
+const assembledReport = resolve(pagesDist, 'report');
 const npmCli = process.env.npm_execpath;
 const bases = resolveDeploymentBases(process.env.VITE_BASE_PATH);
 
@@ -56,6 +58,7 @@ function verifyHtmlBase(htmlPath: string, base: string, label: string): void {
 try {
   console.info(`[deploy] Game base: ${bases.game}`);
   console.info(`[deploy] Dashboard base: ${bases.dashboard}`);
+  console.info(`[deploy] Report base: ${bases.report}`);
 
   runNpmScript('build', { ...process.env, VITE_BASE_PATH: bases.game });
   requirePath(gameDist, 'directory', 'Game production bundle');
@@ -66,19 +69,27 @@ try {
   });
   requirePath(dashboardDist, 'directory', 'Dashboard production bundle');
 
+  runNpmScript('report:build', { ...process.env, VITE_BASE_PATH: bases.report });
+  requirePath(reportDist, 'directory', 'Report production bundle');
+
   console.info('[deploy] Assembling Pages artifact at dist-pages');
   rmSync(pagesDist, { force: true, recursive: true });
   cpSync(gameDist, pagesDist, { recursive: true });
   cpSync(dashboardDist, assembledDashboard, { recursive: true });
+  cpSync(reportDist, assembledReport, { recursive: true });
   requirePath(pagesDist, 'directory', 'Combined Pages artifact');
   requirePath(assembledDashboard, 'directory', 'Assembled dashboard bundle');
+  requirePath(assembledReport, 'directory', 'Assembled report bundle');
 
   const gameIndex = resolve(pagesDist, 'index.html');
   const dashboardIndex = resolve(assembledDashboard, 'index.html');
+  const reportIndex = resolve(assembledReport, 'index.html');
   requirePath(gameIndex, 'file', 'Game entry point');
   requirePath(dashboardIndex, 'file', 'Dashboard entry point');
+  requirePath(reportIndex, 'file', 'Report entry point');
   verifyHtmlBase(gameIndex, bases.game, 'Game entry point');
   verifyHtmlBase(dashboardIndex, bases.dashboard, 'Dashboard entry point');
+  verifyHtmlBase(reportIndex, bases.report, 'Report entry point');
 
   console.info('[deploy] Deployment bundle ready at dist-pages');
 } catch (error) {

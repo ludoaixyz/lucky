@@ -1,6 +1,7 @@
 export interface DeploymentBases {
   readonly game: string;
   readonly dashboard: string;
+  readonly report: string;
 }
 
 export function normalizeDeploymentBase(value: string | undefined): string {
@@ -21,5 +22,5 @@ export function normalizeDeploymentBase(value: string | undefined): string {
 
 export function resolveDeploymentBases(value: string | undefined): DeploymentBases {
   const game = normalizeDeploymentBase(value);
-  return { game, dashboard: `${game}dashboard/` };
+  return { game, dashboard: `${game}dashboard/`, report: `${game}report/` };
 }
