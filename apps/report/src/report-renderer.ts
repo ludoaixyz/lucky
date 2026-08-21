@@ -24,7 +24,7 @@ export async function renderReport(host: HTMLElement): Promise<void> {
     ignoreLastRenderedPageBreak: false,
     ignoreWidth: false,
     ignoreHeight: false,
-    ignoreFonts: true,
+    ignoreFonts: false,
     renderHeaders: true,
     renderFooters: true,
     renderFootnotes: true,

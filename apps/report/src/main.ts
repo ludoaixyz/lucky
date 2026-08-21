@@ -9,6 +9,7 @@ import {
   type ReportLocale,
 } from './report-localization.js';
 import { renderReport } from './report-renderer.js';
+import { enhanceReportPresentation } from './report-presentation.js';
 
 function required<T extends Element>(selector: string): T {
   const node = document.querySelector<T>(selector);
@@ -63,6 +64,7 @@ status.textContent = SHELL_TRANSLATIONS[locale].loading;
 
 try {
   await renderReport(host);
+  enhanceReportPresentation(host);
   renderContents(contentsPanel, buildReportNavigation(host));
   status.hidden = true;
   host.classList.add('is-ready');
