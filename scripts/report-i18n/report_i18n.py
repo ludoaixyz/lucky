@@ -18,6 +18,7 @@ SOURCE_DOCX = ROOT / "Lucky888_Bathala_Prototype_Analysis_HTML.docx"
 MEMORY_DIR = ROOT / "report-i18n"
 EN_JSON = MEMORY_DIR / "en.json"
 ZH_JSON = MEMORY_DIR / "zh-CN.json"
+GLOSSARY_JSON = MEMORY_DIR / "glossary.zh-CN.json"
 GENERATED_DOCX = ROOT / "generated" / "report-docx"
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -282,7 +283,56 @@ def translation_segments(unit: dict[str, Any], translation: str) -> list[str]:
 
 
 def invariant_tokens(text: str) -> Counter[str]:
-    return Counter(URL.findall(text) + NUMBER.findall(text))
+    canonical = re.sub(r"\b1\s+million\b", "1,000,000", text, flags=re.IGNORECASE)
+    return Counter(URL.findall(canonical) + NUMBER.findall(canonical))
+
+
+def validate_terminology(
+    english: dict[str, Any],
+    chinese: dict[str, Any],
+    glossary: dict[str, Any],
+) -> list[str]:
+    issues: list[str] = []
+    entries = chinese.get("entries", {})
+    forbidden = glossary.get("forbiddenTerms", {})
+    for unit in english["units"]:
+        entry = entries.get(unit["id"])
+        if not entry or not entry.get("translation"):
+            continue
+        translated_text = MARKER.sub(lambda match: match.group(2), entry["translation"])
+        for term, preferred in forbidden.items():
+            if term in translated_text:
+                issues.append(
+                    f'{unit["id"]}: prohibited terminology "{term}"; prefer "{preferred}"'
+                )
+        if "Feature Frequency" in unit["source"] and not any(
+            preferred in translated_text for preferred in ("奖励功能触发频率", "功能触发频率")
+        ):
+            issues.append(
+                f'{unit["id"]}: "Feature Frequency" should use 奖励功能触发频率'
+            )
+    return issues
+
+
+def terminology_warnings(
+    english: dict[str, Any],
+    chinese: dict[str, Any],
+    glossary: dict[str, Any],
+) -> list[str]:
+    warnings: list[str] = []
+    entries = chinese.get("entries", {})
+    warning_terms = glossary.get("warningTerms", {})
+    for unit in english["units"]:
+        entry = entries.get(unit["id"])
+        if not entry or not entry.get("translation"):
+            continue
+        translated_text = MARKER.sub(lambda match: match.group(2), entry["translation"])
+        for term, preferred in warning_terms.items():
+            if term in translated_text:
+                warnings.append(
+                    f'{unit["id"]}: review terminology "{term}"; prefer "{preferred}"'
+                )
+    return warnings
 
 
 def validate_memory(english: dict[str, Any], chinese: dict[str, Any]) -> list[str]:
@@ -306,6 +356,8 @@ def validate_memory(english: dict[str, Any], chinese: dict[str, Any]) -> list[st
         translated_text = "".join(translated_segments)
         if invariant_tokens(unit["source"]) != invariant_tokens(translated_text):
             errors.append(f"{unit['id']}: numbers, percentages, multipliers, or URLs changed")
+    if GLOSSARY_JSON.exists():
+        errors.extend(validate_terminology(english, chinese, load_json(GLOSSARY_JSON)))
     return errors
 
 
@@ -515,6 +567,10 @@ def command_validate() -> None:
     if errors:
         print("\n".join(f"[report-i18n] {error}" for error in errors), file=sys.stderr)
         raise ReportI18nError(f"Validation failed with {len(errors)} error(s).")
+    if GLOSSARY_JSON.exists():
+        warnings = terminology_warnings(english, chinese, load_json(GLOSSARY_JSON))
+        for warning in warnings:
+            print(f"[report-i18n] Terminology warning: {warning}", file=sys.stderr)
     print(f"[report-i18n] Validated {len(english['units'])} Chinese translation units.")
 
 

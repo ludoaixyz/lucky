@@ -14,10 +14,13 @@ from report_i18n import (  # noqa: E402
     ReportI18nError,
     build_docx,
     extract_units,
+    invariant_tokens,
     sync_memory,
+    terminology_warnings,
     translation_segments,
     validate_docx,
     validate_memory,
+    validate_terminology,
 )
 
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -81,6 +84,45 @@ class ReportI18nTests(unittest.TestCase):
         unit = {"id": "x", "segments": [{}, {}]}
         with self.assertRaises(ReportI18nError):
             translation_segments(unit, "⟦R0⟧文本⟦/R0⟧")
+
+    def test_terminology_validation_rejects_forbidden_slot_term(self) -> None:
+        english = {"units": [{"id": "x", "source": "Bathala Slot Analysis"}]}
+        chinese = {
+            "entries": {
+                "x": {
+                    "translation": "⟦R0⟧Bathala 角子机分析⟦/R0⟧",
+                    "status": "translated",
+                }
+            }
+        }
+        glossary = {"forbiddenTerms": {"角子机": "老虎机"}}
+        self.assertIn(
+            "prohibited terminology",
+            "\n".join(validate_terminology(english, chinese, glossary)),
+        )
+
+    def test_spelled_out_million_matches_numeric_invariant(self) -> None:
+        self.assertEqual(
+            invariant_tokens("Only 34 out of 1 million paid spins reached ≥500×."),
+            invariant_tokens("1,000,000 次付费 Spin 中仅 34 次达到 ≥500×。"),
+        )
+
+    def test_advisory_terminology_is_reported_without_becoming_validation_error(self) -> None:
+        english = {"units": [{"id": "x", "source": "Volatility Profile"}]}
+        chinese = {
+            "entries": {
+                "x": {
+                    "translation": "⟦R0⟧波动性配置⟦/R0⟧",
+                    "status": "translated",
+                }
+            }
+        }
+        glossary = {"warningTerms": {"波动性配置": "波动性特征"}}
+        self.assertIn(
+            "review terminology",
+            "\n".join(terminology_warnings(english, chinese, glossary)),
+        )
+        self.assertEqual(validate_terminology(english, chinese, glossary), [])
 
     def test_generated_docx_is_valid_and_preserves_tables_images_numbers_and_urls(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
