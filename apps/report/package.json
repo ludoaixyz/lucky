@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "docx-preview": "0.4.0"
+    "pdfjs-dist": "^6.2.108"
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5175 --strictPort",

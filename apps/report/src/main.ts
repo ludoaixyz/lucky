@@ -1,5 +1,4 @@
 import './style.css';
-import { buildReportNavigation, renderContents } from './report-navigation.js';
 import {
   initialLocale,
   isReportLocale,
@@ -8,8 +7,7 @@ import {
   SHELL_TRANSLATIONS,
   type ReportLocale,
 } from './report-localization.js';
-import { renderReport } from './report-renderer.js';
-import { enhanceReportPresentation } from './report-presentation.js';
+import { PdfReportViewer } from './report-renderer.js';
 
 function required<T extends Element>(selector: string): T {
   const node = document.querySelector<T>(selector);
@@ -20,11 +18,9 @@ function required<T extends Element>(selector: string): T {
 const host = required<HTMLElement>('#report');
 const status = required<HTMLElement>('#report-status');
 const languageSelector = required<HTMLElement>('.language-selector');
-const contentsButton = required<HTMLButtonElement>('#contents-button');
-const contentsPanel = required<HTMLElement>('#contents-panel');
-const printButton = required<HTMLButtonElement>('#print-button');
+const openButton = required<HTMLButtonElement>('#open-pdf-button');
 const announcement = document.querySelector<HTMLElement>('#language-announcement');
-
+const viewer = new PdfReportViewer(host);
 let locale = initialLocale();
 
 function applyShellLocale(nextLocale: ReportLocale): void {
@@ -32,44 +28,41 @@ function applyShellLocale(nextLocale: ReportLocale): void {
   const translation = SHELL_TRANSLATIONS[locale];
   document.documentElement.lang = locale;
   languageSelector.innerHTML = languageButtons(locale);
-  languageSelector.setAttribute('aria-label', translation.languageName);
-  contentsButton.textContent = translation.contents;
-  printButton.textContent = translation.print;
+  languageSelector.setAttribute('aria-label', translation.languageSelector);
+  openButton.textContent = translation.openPdf;
   host.setAttribute('aria-label', translation.reportLabel);
   languageSelector.querySelectorAll<HTMLButtonElement>('[data-locale]').forEach((button) => {
     button.addEventListener('click', () => {
       const selected = button.dataset.locale;
-      if (!isReportLocale(selected)) return;
+      if (!isReportLocale(selected) || selected === locale) return;
       persistLocale(selected);
       applyShellLocale(selected);
       if (announcement) announcement.textContent = SHELL_TRANSLATIONS[selected].selected;
+      void loadLocale(selected);
     });
   });
 }
 
-contentsButton.addEventListener('click', () => {
-  const open = contentsPanel.hidden;
-  contentsPanel.hidden = !open;
-  contentsButton.setAttribute('aria-expanded', String(open));
+async function loadLocale(nextLocale: ReportLocale): Promise<void> {
+  status.hidden = false;
+  status.classList.remove('report-status--error');
+  status.textContent = SHELL_TRANSLATIONS[nextLocale].loading;
+  host.classList.remove('is-ready');
+  try {
+    await viewer.load(nextLocale);
+    status.hidden = true;
+    host.classList.add('is-ready');
+  } catch (error) {
+    console.error(`Unable to render the ${nextLocale} report PDF.`, error);
+    status.textContent = SHELL_TRANSLATIONS[nextLocale].error;
+    status.classList.add('report-status--error');
+  }
+}
+
+openButton.addEventListener('click', () => {
+  const currentUrl = viewer.currentUrl;
+  if (currentUrl) window.open(currentUrl, '_blank', 'noopener,noreferrer');
 });
-contentsPanel.addEventListener('click', (event) => {
-  if (!(event.target instanceof HTMLAnchorElement)) return;
-  contentsPanel.hidden = true;
-  contentsButton.setAttribute('aria-expanded', 'false');
-});
-printButton.addEventListener('click', () => window.print());
 
 applyShellLocale(locale);
-status.textContent = SHELL_TRANSLATIONS[locale].loading;
-
-try {
-  await renderReport(host);
-  enhanceReportPresentation(host);
-  renderContents(contentsPanel, buildReportNavigation(host));
-  status.hidden = true;
-  host.classList.add('is-ready');
-} catch (error) {
-  console.error('Unable to render the canonical report DOCX.', error);
-  status.textContent = SHELL_TRANSLATIONS[locale].error;
-  status.classList.add('report-status--error');
-}
+await loadLocale(locale);

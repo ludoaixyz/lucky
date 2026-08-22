@@ -1,0 +1,2325 @@
+{
+  "version": 1,
+  "locale": "zh-CN",
+  "sourceSha256": "b5d8a487459067da0b4c62511d9f30a41c8227e8126e9b7c66ebe125cdf0ffa3",
+  "syncedAt": "2026-08-22T11:28:23Z",
+  "entries": {
+    "document.body.0000.tbl.0000.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "c275653fd6c11711cc2ab3b62bf5869e8132b501c3d1b7d054377c17b2b7cde7",
+      "source": "Bathala Slot Analysis",
+      "translation": "⟦R0⟧Bathala 角子机分析⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "163dda5cdde4460819df7f109194da42e98346159c8a4a5a766a1624167530b1",
+      "source": "1. DESIGN & DEVELOPMENT PROCESS",
+      "translation": "⟦R0⟧1. 设计与开发流程⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.p.0001": {
+      "sourceHash": "a8d412e57e613d66b2cb1af45fcfaa0b8bef6d1c1c05dc02456299036b9e088b",
+      "source": "Lucky888 was developed as a Bathala simulation twin for mathematical analysis and game design evaluation. The prototype reconstructs the reference game’s observable 6×5-reel structure, symbol set, tumble mechanic, Bathala elimination skill, Scatter behaviour, Free Game behaviour, and multiplier system. Gameplay rules that can be directly verified through observation have been reproduced as closely as possible. However, as the underlying probabilities and gameplay parameters cannot be directly verified, the simulation twin uses configurable datasets (JSON & CSV files) that can be easily imported, adjusted, and exported out via the HTML5-based workbench.",
+      "translation": "⟦R0⟧Lucky888 被开发为 Bathala 的仿真孪生体，用于数学分析与游戏设计评估。该原型重构了参考游戏中可观察到的 6×5 转轴结构、符号集合、连消机制、Bathala 消除技能、Scatter 行为、免费游戏行为及倍数系统。可通过观察直接验证的玩法规则均已尽可能忠实复现；但由于底层概率和玩法参数无法直接验证，仿真孪生体采用可配置数据集（JSON & CSV 文件），可通过基于 HTML5 的工作台轻松导入、调整和导出。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧⟦R23⟧⟦/R23⟧⟦R24⟧⟦/R24⟧⟦R25⟧⟦/R25⟧⟦R26⟧⟦/R26⟧⟦R27⟧⟦/R27⟧⟦R28⟧⟦/R28⟧⟦R29⟧⟦/R29⟧⟦R30⟧⟦/R30⟧⟦R31⟧⟦/R31⟧⟦R32⟧⟦/R32⟧⟦R33⟧⟦/R33⟧⟦R34⟧⟦/R34⟧⟦R35⟧⟦/R35⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "1469a5598be72b10969c1363061c2f43f3d74c1471096962890487a4e35623e1",
+      "source": "DESIGN METHODOLOGY",
+      "translation": "⟦R0⟧设计方法⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0001": {
+      "sourceHash": "af1bbcce0d36f0b88935b67e6f3da2108139f344196edd65c9ebd067f5624ecc",
+      "source": "The simulation twin’s development involved four key stages: Observation, Reconstruction, Simulation, and Appraisal. These development steps crystallized into 2 final outputs:",
+      "translation": "⟦R0⟧仿真孪生体的开发包含四个关键阶段：观察、重构、仿真和评估。这些开发步骤最终形成 2 项成果：⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0002": {
+      "sourceHash": "5418bec385bb61894c99b0dbd2fd550bc79ce0205725b7e2b2ae4bdceaed469b",
+      "source": "A playable simulation prototype with tools to track, input, and export session-based configuration inputs and spin outcomes · http://lucky888.ludoai.xyz/",
+      "translation": "⟦R0⟧可玩的仿真原型，提供按会话跟踪、输入及导出配置输入和旋转结果的工具⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧http://lucky888.ludoai.xyz/⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0003": {
+      "sourceHash": "5b29cd493907165f3ccf3c8a099459f80563ca53e1a7b72755c2ecbe040f2f03",
+      "source": "A dashboard with file upload functions and structured reporting · http://lucky888.ludoai.xyz/dashboard/",
+      "translation": "⟦R0⟧具备文件上传功能和结构化报告的仪表板⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧http://lucky888.ludoai.xyz/dashboard/⟦/R3⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0005": {
+      "sourceHash": "75b573b26f7a3fc1938d99c05d0467b12326f3dd6650f3b6498121d0ec8968b8",
+      "source": "A. OBSERVATION",
+      "translation": "⟦R0⟧A. 观察⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0006": {
+      "sourceHash": "8393d40d87b4fc9d427184da7abbc82c33632093c704090c0925b15d76159f8c",
+      "source": "Specific rules, mechanics and hidden parameters such as the minimum number of matching symbols required for a win were directly replicated from observable gameplay.",
+      "translation": "⟦R0⟧具体规则、机制及隐藏参数（例如构成中奖所需的最少相同符号数）均直接依据可观察玩法进行复现。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0007": {
+      "sourceHash": "a266d9dd1593e7f97ef5bf9dd52aead74b15b44e9e369d12ac8f5325acad9acd",
+      "source": "Values such as internal symbol probabilities, exact feature-entry weights, and multiplier probabilities cannot be verified simply by observing the game. All parameters that cannot be verified have still been implemented with easily modifiable weights for iterative testing.",
+      "translation": "⟦R0⟧内部符号概率、精确的功能触发权重及倍数概率等数值无法仅通过观察游戏加以验证。所有无法验证的参数仍以易于修改的权重实现，以支持迭代测试。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "8fb06bf2587270622e2631bd61eaf20633fd764f2981e1276847e88436b5f5db",
+      "source": "SYMBOL WEIGHTS AND PAYOUT DATA",
+      "translation": "⟦R0⟧符号权重与赔付数据⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "a440ae8ad6e7efd9d327dcd8c05976ec3ea6432e86522e42800864c91f288d4a",
+      "source": "MULTIPLIER WEIGHTS",
+      "translation": "⟦R0⟧倍数权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "ba0e4afa93400b805dfcc4b9e6aef549269946e2d1af5ababfc3a73c67912d89",
+      "source": "Symbol",
+      "translation": "⟦R0⟧符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0001.p.0000": {
+      "sourceHash": "81d27ef6d5033c3e1d46b7b2b50868604fd432ddb77716b5ed9383c30c08432f",
+      "source": "Weight",
+      "translation": "⟦R0⟧权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0002.p.0000": {
+      "sourceHash": "a7760e7549cabbd3fe9c479077ea42e464c6ff9dc02400d95cefaf05745155ef",
+      "source": "minCount",
+      "translation": "⟦R0⟧最小数量⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0003.p.0000": {
+      "sourceHash": "d0685efba23430ec703fce822145f7ecb3300ab7a4edf1ec2898e3473258f552",
+      "source": "maxCount",
+      "translation": "⟦R0⟧最大数量⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0004.p.0000": {
+      "sourceHash": "08be085af32a9da9661147d3eeafa76a1777d674b28878164b4f897b9dae0015",
+      "source": "Payout",
+      "translation": "⟦R0⟧赔付⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0006.p.0000": {
+      "sourceHash": "88fb11573a6a01055cff4da5a1b81f5b20850faa77b8ca6826ef9d278b150d20",
+      "source": "Multiplier",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0007.p.0000": {
+      "sourceHash": "81d27ef6d5033c3e1d46b7b2b50868604fd432ddb77716b5ed9383c30c08432f",
+      "source": "Weight",
+      "translation": "⟦R0⟧权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0002.tc.0000.p.0001": {
+      "sourceHash": "1b349ea66fd0a7a73f5b784dcd9d8ae14423aa492ebbd15b8cf70af8bce8e65d",
+      "source": "(Low-1)",
+      "translation": "⟦R0⟧（低赔-1）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0005.tc.0000.p.0001": {
+      "sourceHash": "9eca43beb1991cea0dad0a54b2d6c35e332a8167ee38ed91f27dc4463adae7df",
+      "source": "(Low-2)",
+      "translation": "⟦R0⟧（低赔-2）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0008.tc.0000.p.0001": {
+      "sourceHash": "d5dcf9ae4fafdbec1cfd0e2980a0944c74c14694c7aff739a998d8697bda05f1",
+      "source": "(Low-3)",
+      "translation": "⟦R0⟧（低赔-3）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0011.tc.0000.p.0001": {
+      "sourceHash": "45979d3a6ce6a44caeb2fc8c8982675b1c396ae8caeca73b7f92ff0b71474aba",
+      "source": "(Low-4)",
+      "translation": "⟦R0⟧（低赔-4）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0014.tc.0000.p.0001": {
+      "sourceHash": "08b96f99b715c94ce67b6174ccb71bae3cada7c334a0fb43669d55895a3ab4cc",
+      "source": "(Low-5)",
+      "translation": "⟦R0⟧（低赔-5）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0017.tc.0000.p.0001": {
+      "sourceHash": "9c0af46dea3600668fc352d8b85465e8985ee844e2092f6c153cc88c7eb789ce",
+      "source": "(High-1)",
+      "translation": "⟦R0⟧（高赔-1）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0020.tc.0000.p.0001": {
+      "sourceHash": "cafe467d2d82d090e98a15e6eccd11de4a515f2d37cf1a3f1231f3c7e40d0e02",
+      "source": "(High-2)",
+      "translation": "⟦R0⟧（高赔-2）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0023.tc.0000.p.0001": {
+      "sourceHash": "4a09f0681dd465e01f4a227e152dc1967675e7535fcaa2ae1524ff88189a0033",
+      "source": "(High-3)",
+      "translation": "⟦R0⟧（高赔-3）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0026.tc.0000.p.0001": {
+      "sourceHash": "6c6cd4cbc7bdfb2767b657d1bd29e5126544cec79b1e8c511b4372a1e5381c6a",
+      "source": "(High-4)",
+      "translation": "⟦R0⟧（高赔-4）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0029.tc.0000.p.0000": {
+      "sourceHash": "332663940113ed76f0839efdd69bd3e07de271c76ed323f2a38e086a3208e634",
+      "source": "SCATTER",
+      "translation": "⟦R0⟧SCATTER⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0029.tc.0002.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0029.tc.0003.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0029.tc.0004.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0030.tc.0000.p.0000": {
+      "sourceHash": "6addfee62e9deb2da3affee3128f9ec5159ab3588c7f97980541a13e516afff3",
+      "source": "MULTIPLIER",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0030.tc.0002.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0030.tc.0003.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0000.tr.0030.tc.0004.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0008": {
+      "sourceHash": "bc49efcb344fb4027e329fc9a2df2e804000e901b36b69b6eea4d367fd59536d",
+      "source": "Reel mechanics specific to the Bathala Slot machine game were carefully observed before replication. This is crucial because the game does not use paylines and instead relies on tumbling logic.",
+      "translation": "⟦R0⟧在复现之前，我们仔细观察了 Bathala 角子机特有的转轴机制。这一点至关重要，因为游戏不使用赔付线，而是依赖连消逻辑。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "97803147dacc66603f3b2e02c2974807dd10b936c5dea223faef02c1e7c3165e",
+      "source": "TUMBLE MECHANIC",
+      "translation": "⟦R0⟧连消机制⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "f1b4fae50b6ed9de9f2cca56931e1ad902789b10d1ca64f2ed94a7ad0d1ea686",
+      "source": "BATHALA SKILL (SYMBOL ELIMINATION)",
+      "translation": "⟦R0⟧BATHALA 技能（符号消除）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "90d713bf6685bdbdb2e4cf43baa46944764b1f37144e1883349676278a03bd90",
+      "source": "After a win, winning symbols are removed. Remaining symbols fall into place, and new symbols drop in from above.",
+      "translation": "⟦R0⟧中奖后，中奖符号会被移除。其余符号下落补位，新符号从上方落入。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0000.p.0001": {
+      "sourceHash": "09bbb76212f5c55af77dc16fd70d00b0ce6994d351c00288b54155826b234310",
+      "source": "The grid is then checked again for another win. Tumbles continue until no new win is formed.",
+      "translation": "⟦R0⟧随后再次检查网格是否形成新的中奖。连消会持续进行，直至不再产生新中奖。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0001.p.0000": {
+      "sourceHash": "7069e4ca89c7c5c0de8a15858bb22430b868dcc0e9975c39b0bec9ac608bb37c",
+      "source": "After each winning Tumble, one Low Pay Symbol (L1 to L5) is selected and removed from the reels.",
+      "translation": "⟦R0⟧每次中奖连消后，会选取一个低赔符号（L1 至 L5）并将其从转轴中移除。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0001.p.0001": {
+      "sourceHash": "e78488a62a569242e4cab79985199ecd6aa470602e02b3b34ee23801735c0c99",
+      "source": "Removal does not award a payout by itself.",
+      "translation": "⟦R0⟧消除本身不会产生赔付。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0001.p.0002": {
+      "sourceHash": "91404db8dd91ccd052c9ad644ed5eaadd8ccf0c726b73512c78908802995bc1b",
+      "source": "Remaining symbols fall into place, new symbols drop in, and the next Tumble is evaluated.",
+      "translation": "⟦R0⟧其余符号下落补位，新符号落入，随后评估下一次连消。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "450389688bac8f6f5461835c45ceb7c2626ff16d44ecebb323afa3f69835843b",
+      "source": "SCATTERS",
+      "translation": "⟦R0⟧SCATTER 符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0002.tc.0001.p.0000": {
+      "sourceHash": "948179aeddb20e08435e79dbe6e84edd09bf924ad107e5daa8d4c257d31d535a",
+      "source": "FREE SPINS",
+      "translation": "⟦R0⟧免费旋转⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0000": {
+      "sourceHash": "3e8e98c7342e1c4d271378853c94e482fd223d179d1b21ba84e1f69f860be18e",
+      "source": "Scatter Symbols pay anywhere on the reel.",
+      "translation": "⟦R0⟧Scatter 符号在转轴任意位置均可赔付。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0001": {
+      "sourceHash": "f59941ab833ed660f1c86d2942d72204c388909bb3d273ebc9adc5bf1afd4245",
+      "source": "4 Scatters: 3× Total Bet",
+      "translation": "⟦R0⟧4 个 Scatter：总投注的 3×⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0002": {
+      "sourceHash": "23f665aa560b286efbc5915eb46edf00d96aa4b2d47f3254173d40a56889c1e1",
+      "source": "5 Scatters: 5× Total Bet",
+      "translation": "⟦R0⟧5 个 Scatter：总投注的 5×⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0003": {
+      "sourceHash": "7628d6a7b7d028cd9badc3015a5bf007ec3417395321cc5d7a35721108545311",
+      "source": ">6 Scatters: 100× Total Bet",
+      "translation": "⟦R0⟧>6 个 Scatter：总投注的 100×⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0004": {
+      "sourceHash": "7b618eec920e939ae03dc07aea2b45a94525433ef0626bd44f89c298afb0511b",
+      "source": "Landing ≥4 Scatters in the Base Game awards 15 Free Spins.",
+      "translation": "⟦R0⟧基础游戏中出现 ≥4 个 Scatter 时，奖励 15 次免费旋转。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0005": {
+      "sourceHash": "a121c163feb902fc7f8ce566e4d62324c97a3a9b1e80127b7f971a53f8f2d062",
+      "source": "Note: Scatter Symbols are evaluated after all Tumbles have finished.",
+      "translation": "⟦R0⟧注意：所有连消结束后才评估 Scatter 符号。⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0001.p.0000": {
+      "sourceHash": "7b618eec920e939ae03dc07aea2b45a94525433ef0626bd44f89c298afb0511b",
+      "source": "Landing ≥4 Scatters in the Base Game awards 15 Free Spins.",
+      "translation": "⟦R0⟧基础游戏中出现 ≥4 个 Scatter 时，奖励 15 次免费旋转。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0001.p.0001": {
+      "sourceHash": "ef9e7c32fe1bafd2d776ee0c9f3a078d43376d6d5e410373e9cbdb0599765383",
+      "source": "Landing ≥3 Scatters during Free Spins awards 5 additional Free Spins.",
+      "translation": "⟦R0⟧免费旋转期间出现 ≥3 个 Scatter 时，额外奖励 5 次免费旋转。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0001.p.0002": {
+      "sourceHash": "3b0127bce6bae0255b287269402233e92f97eda962a977580a28e9eaca062b92",
+      "source": "Multipliers collected from winning Tumbles are added together and carried forward for the remainder of the Free Spins feature.",
+      "translation": "⟦R0⟧中奖连消中收集的倍数会相加，并在免费旋转功能剩余期间持续保留。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0004.tc.0000.p.0000": {
+      "sourceHash": "dd8240c7d3fbe0749737a19728baad5f0d2c8ffe63dccd4975ba4ea7430695bd",
+      "source": "MULTIPLIERS",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0004.tc.0001.p.0000": {
+      "sourceHash": "7810cd397ce8cf765265ce215c5facc311edf138bcbf61c6fd8821b69eb44b1f",
+      "source": "MAX WIN",
+      "translation": "⟦R0⟧最高中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0005.tc.0000.p.0000": {
+      "sourceHash": "e9a96f875f427499c2d47318e925bc886ac788c7989e4fc23cc3b647aeeb0a1f",
+      "source": "When a winning Tumble contains one or more Multiplier Symbols, their values are added together and applied to the win.",
+      "translation": "⟦R0⟧当中奖连消中包含一个或多个倍数符号时，其数值会相加并应用于该次中奖。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0005.tc.0000.p.0001": {
+      "sourceHash": "a407cfd7b46f224a9d2f0f2907756691a441fb93010b30668453043512bb0bbd",
+      "source": "During Free Spins, collected multipliers are added to the current feature multiplier and accumulate into subsequent tumbles.",
+      "translation": "⟦R0⟧免费旋转期间，收集到的倍数会加入当前功能倍数，并累积至后续连消。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0005.tc.0000.p.0002": {
+      "sourceHash": "17bf1ef915e2992d2a7230790c40977b18298dbd29573d79f0e2f277b743bc3b",
+      "source": "Note: Multiplier Symbols are collected only when they appear on a winning Tumble.",
+      "translation": "⟦R0⟧注意：倍数符号仅在其出现在中奖连消中时才会被收集。⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0005.tc.0001.p.0000": {
+      "sourceHash": "6bbfbb0679ab7a19e9fe2ba817ea6b4cbd7517c20e8e35bba8325acbe8ebc723",
+      "source": "Maximum Win: 10,000× Total Bet",
+      "translation": "⟦R0⟧最高中奖：总投注的 10,000×⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0001.tr.0005.tc.0001.p.0001": {
+      "sourceHash": "e530fa937f10a3753607e65f36b97c98666c240975338b4f349d583bce2bde0b",
+      "source": "Highest Multiplier Symbol: 500×",
+      "translation": "⟦R0⟧最高倍数符号：500×⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0011": {
+      "sourceHash": "fb7f702575ebeac0ca027a544ab3233abdcdcd17e683009bbfc6dfe90c5b2996",
+      "source": "B. RECONSTRUCTION & SIMULATION",
+      "translation": "⟦R0⟧B. 重构与仿真⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0012": {
+      "sourceHash": "6b24066467f04c091314670c229f18f4d28572df2ab65791f97dc142cb34d50d",
+      "source": "Observable gameplay was translated into a simulation engine that could reproduce Spin behaviours.",
+      "translation": "⟦R0⟧可观察玩法被转化为能够复现旋转行为的仿真引擎。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0013": {
+      "sourceHash": "eeb2248a421a9e2694a48b409676781eddba10710877e596f66400e5588744c8",
+      "source": "The simulation engine was designed to trigger the known reel logic: symbol generation, win evaluation, multiplier handling, symbol eliminations, symbol refill, Scatter evaluation, and Free Game resolution.",
+      "translation": "⟦R0⟧仿真引擎用于执行已知的转轴逻辑：符号生成、中奖评估、倍数处理、符号消除、符号补充、Scatter 评估及免费游戏结算。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0002.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "082130f82cfb815a9b3b38f1c63bb131fe3afbac91a5bea7df51e063e31dae3d",
+      "source": "SYMBOL SET",
+      "translation": "⟦R0⟧符号集合⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0002.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "d1a2d8b98993ee114367d030c58961dbf8329434d3fd27203445ad02ec2ed269",
+      "source": "GAME BOARD (6×5 REEL)",
+      "translation": "⟦R0⟧游戏盘面（6×5 转轴）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0002.tr.0002.tc.0001.p.0000": {
+      "sourceHash": "3261ef255be88cd5636d42a0bd8f554f269c09285e8df9e5b3e32bb173ad39e7",
+      "source": "SYMBOL REFILL TUMBLE LOGIC",
+      "translation": "⟦R0⟧符号补充连消逻辑⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "5f0b7387ab5a8c2663c72152d45f07d2175c342fc922a8684fcea984ad926c78",
+      "source": "TUMBLE WIN: (L4 X 8) with x4 MULTIPLIER",
+      "translation": "⟦R0⟧连消中奖：(L4 X 8)，倍数 x4⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "61419f3c2bfc4a668b33e8ef60bf05bac620275a06bf614dfe984e09b6d7ceaa",
+      "source": "POST-WIN ELIMINATION TRIGGER: (L2 X 2)",
+      "translation": "⟦R0⟧中奖后消除触发：(L2 X 2)⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0016": {
+      "sourceHash": "ee604b7c02ffd931e31c2b11f1f6a584e2f1525f65eefc31d8d52e1671719f6b",
+      "source": "The simulation prototype updates session metrics in real-time whilst allowing each spin’s inputs and outputs to be inspected independently.",
+      "translation": "⟦R0⟧仿真原型会实时更新会话指标，同时支持独立检查每次旋转的输入与输出。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "976eb94945747d4194a596cca687c088da90332510916d213d1aa2a82d69fdb2",
+      "source": "AGGREGATED DATA",
+      "translation": "⟦R0⟧汇总数据⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "0e8d7f6c9a427c7a33715bac42b6beafd6e05c4b378de52f40b5355e13f4d9ea",
+      "source": "INDIVIDUAL SPIN DATA",
+      "translation": "⟦R0⟧单次旋转数据⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "64b5b9e48fe4ad6c9e4641ab773d764bbe3c7cfcd240b8c621b92c6056be16b5",
+      "source": "SPIN HISTORY",
+      "translation": "⟦R0⟧旋转历史⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0017": {
+      "sourceHash": "49b7055653c2f9dfdc66a9441b30ed5688c215d57d106a8230be0a3a533f9851",
+      "source": "Betting configs, feature configs, symbol weights and paytables can be modified, imported, tested and exported on a per session basis.",
+      "translation": "⟦R0⟧投注配置、功能配置、符号权重和赔付表均可按会话进行修改、导入、测试和导出。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0034": {
+      "sourceHash": "c2d0712b6de6a08d132a3364891c0182bf54bdc25c00378c0d1f76529a4dd204",
+      "source": "C. APPRAISAL",
+      "translation": "⟦R0⟧C. 评估⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0035": {
+      "sourceHash": "5a41e319f1384661a1207dcf989ad5695bee4bb0f9e3e05e9187e159e13da511",
+      "source": "To evaluate the game’s mathematical profile, a standalone Monte Carlo simulation script was developed to generate large volumes of synthetic spin data.",
+      "translation": "⟦R0⟧为评估游戏的数学特征，我们开发了独立的蒙特卡洛仿真脚本，用于生成大量合成旋转数据。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0036": {
+      "sourceHash": "89b43b343901c3b1f7a705390301dff9f13aab6c839329b38c4bebbbb69f1d60",
+      "source": "Deterministic random seeds allow results to be reproduced and validated at-scale, thereby providing greater confidence in the observed RTP, volatility, win rate, and feature performance.",
+      "translation": "⟦R0⟧确定性随机种子使结果能够大规模复现和验证，从而提高对所观察 RTP、波动性、中奖率及功能表现的置信度。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0000.txbx.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "c4d3e7895511bb190f570aecd5212a8c3c83d87138147fee7fcc6ce236282529",
+      "source": "npm run math:simulate -- --spins 1000000 --seed 2026",
+      "translation": "⟦R0⟧npm run math:simulate -- --spins 1000000 --seed 2026⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0001.txbx.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "8f2c30dbadc70b08e27fc09bbca0335013e61b030b6ccc73e7823e142ffd515d",
+      "source": "Output JSON file",
+      "translation": "⟦R0⟧输出 JSON 文件⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0002.txbx.0000.txbxContent.0000.p.0001": {
+      "sourceHash": "3a59f25529c60e2eee8f81dd45b9491675a455fcfc18bbb36eba6d241932e5ec",
+      "source": "├─ Read --spins",
+      "translation": "⟦R0⟧├─ 读取 --spins⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0002.txbx.0000.txbxContent.0000.p.0002": {
+      "sourceHash": "8dbe9f34a9738cdfb312a8de4537848de0e917c7756ca66143ba6d8e58e52ca2",
+      "source": "├─ Read --seed",
+      "translation": "⟦R0⟧├─ 读取 --seed⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0002.txbx.0000.txbxContent.0000.p.0003": {
+      "sourceHash": "57ff83b9cf5bb39f85242ad1263cca8c138fb1b6a42663d1dd07908614c686cd",
+      "source": "├─ Load math config",
+      "translation": "⟦R0⟧├─ 加载数学配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0002.txbx.0000.txbxContent.0000.p.0004": {
+      "sourceHash": "ae5e80d4fdbb72dba1e714639134b7454ebcd6511223c507ae16cdb61cb995b1",
+      "source": "├─ Validate config",
+      "translation": "⟦R0⟧├─ 验证配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0002.txbx.0000.txbxContent.0000.p.0005": {
+      "sourceHash": "3b4f245fc64ce01468a2bbd0cf39ee712e8519dc120a457858644252872921c3",
+      "source": "└─ Create deterministic RNG",
+      "translation": "⟦R0⟧└─ 创建确定性 RNG⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "a9ecbdbbd55002b278201bcba4cf5ef59f1fde624339803aac015b8e4c722356",
+      "source": "runSimulation(...)",
+      "translation": "⟦R0⟧runSimulation(...)⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0001": {
+      "sourceHash": "e9c068540873fc74b0c18da0df3e749c920e60bb197f08a2f1a5135b18cdc689",
+      "source": "└─ resolveSpin(...) × 1,000,000",
+      "translation": "⟦R0⟧└─ resolveSpin(...) × 1,000,000⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0002": {
+      "sourceHash": "f5540d8176e5fdf36e4c35369a9d31893056a618d790c023e2dd3a0cfb5ce962",
+      "source": "├─ Generate 6×5 Reel",
+      "translation": "⟦R0⟧├─ 生成 6×5 转轴⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0003": {
+      "sourceHash": "c322319e9f8524a86fe4e99089aebd5ddaba953a12d396b797876c94d3937d84",
+      "source": "├─ Evaluate for Regular Wins",
+      "translation": "⟦R0⟧├─ 评估普通中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0004": {
+      "sourceHash": "6ae0a65e7ae2c8b800dcdb3df0fd0599d7436b42b5062cc5c295c056f9532d3e",
+      "source": "├─ Resolve Multiplier (compound)",
+      "translation": "⟦R0⟧├─ 结算倍数（复合）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0005": {
+      "sourceHash": "7c808f8b65f767074a510531929f6756ff1cdc726e47bb113cfd1b37af6e7321",
+      "source": "├─ Remove Winning Symbols",
+      "translation": "⟦R0⟧├─ 移除中奖符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0006": {
+      "sourceHash": "219a1f9836c07605873b398683eb06dbaf590f76508df20e1b6b427a0533abba",
+      "source": "├─ Apply Elimination",
+      "translation": "⟦R0⟧├─ 应用消除⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0007": {
+      "sourceHash": "5329412ae7596de0fd2d5868ce0ac15b4772f4b9871512d37ad15fcd4e8fe3bb",
+      "source": "├─ Collapse / Refill Symbols",
+      "translation": "⟦R0⟧├─ 符号下落 / 补充⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0008": {
+      "sourceHash": "585982ee73a223d729187851093b37e759a1f64e72bdf47b2aca963904b761ac",
+      "source": "├─ Repeat Tumbles",
+      "translation": "⟦R0⟧├─ 重复连消⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0009": {
+      "sourceHash": "52823bc406faa47bdbfa22110c2b7f71e16b6c6fd9d2d514575c8645a944dab7",
+      "source": "├─ Resolve Scatter",
+      "translation": "⟦R0⟧├─ 结算 Scatter⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0003.txbx.0000.txbxContent.0000.p.0010": {
+      "sourceHash": "b305e0e7c85b8a31ad7115e23f2c9d1e5d2e1fc6e53f03b035e44bbe5824355e",
+      "source": "└─ Resolve Free Games",
+      "translation": "⟦R0⟧└─ 结算免费游戏⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "470d2a64f5ed48959be6bcfb048ce05126b4957714c6e82b6c2d6f60162246ca",
+      "source": "SyntheticAccumulator",
+      "translation": "⟦R0⟧SyntheticAccumulator⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0001": {
+      "sourceHash": "d1c5b7e0663472cc8ea09e6d88005046f594abcba3d1d1e71c24578bf73bee3e",
+      "source": "├─ Credited RTP",
+      "translation": "⟦R0⟧├─ 计入 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0002": {
+      "sourceHash": "c569ebb9364f75bd18c74eefeafd252d0d1c7bb0a1807726ed91d6049367fde5",
+      "source": "├─ Win Frequency",
+      "translation": "⟦R0⟧├─ 中奖频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0003": {
+      "sourceHash": "fdce9bf3e29f5920e17e74585f3f7193ddef1d7312fc71501647cd37ebad6bbe",
+      "source": "├─ Feature Frequency",
+      "translation": "⟦R0⟧├─ 功能频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0004": {
+      "sourceHash": "4dbefba8ce0695a5437cebbe27b8e602d11bfda6f98852c5c9e2d223c903b171",
+      "source": "├─ Tumble Statistics",
+      "translation": "⟦R0⟧├─ 连消统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0005": {
+      "sourceHash": "20355a8291c309c27ef9be5fb8c410a3ab6a3a62a6587c42a0ac0190e31d0a42",
+      "source": "├─ Elimination Statistics",
+      "translation": "⟦R0⟧├─ 消除统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0006": {
+      "sourceHash": "8037baa5462db8ac21c741512a3afac49997cd493886358aa4b15a06dc8ab491",
+      "source": "├─ Scatter Statistics",
+      "translation": "⟦R0⟧├─ Scatter 统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0007": {
+      "sourceHash": "a30aa18fa12cbb4adaa6f5071d5dea9093f34c4e1ff492c5858ccca2177c9633",
+      "source": "├─ Multiplier Statistics",
+      "translation": "⟦R0⟧├─ 倍数统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0008": {
+      "sourceHash": "5712bbce27a18dfd7cccad6daee6b61293d9bf01ff8d3c0614ed714c8535de0c",
+      "source": "├─ Volatility Profile",
+      "translation": "⟦R0⟧├─ 波动性特征⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0009": {
+      "sourceHash": "57fbf4b8c1f397f9b164e45ceca768bc4dd173c660f323c72e6d42cc225e8825",
+      "source": "├─ Payout Distribution",
+      "translation": "⟦R0⟧├─ 赔付分布⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Choice.0000.drawing.0000.anchor.0000.graphic.0000.graphicData.0000.wgp.0000.wsp.0004.txbx.0000.txbxContent.0000.p.0010": {
+      "sourceHash": "d4bb85cbde724540f40a59d77e1548382e5cbd5783e4b7252f78268416f29df1",
+      "source": "└─ RTP Components",
+      "translation": "⟦R0⟧└─ RTP 构成⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0000.textbox.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "c4d3e7895511bb190f570aecd5212a8c3c83d87138147fee7fcc6ce236282529",
+      "source": "npm run math:simulate -- --spins 1000000 --seed 2026",
+      "translation": "⟦R0⟧npm run math:simulate -- --spins 1000000 --seed 2026⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0001.textbox.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "8f2c30dbadc70b08e27fc09bbca0335013e61b030b6ccc73e7823e142ffd515d",
+      "source": "Output JSON file",
+      "translation": "⟦R0⟧输出 JSON 文件⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0002.textbox.0000.txbxContent.0000.p.0001": {
+      "sourceHash": "3a59f25529c60e2eee8f81dd45b9491675a455fcfc18bbb36eba6d241932e5ec",
+      "source": "├─ Read --spins",
+      "translation": "⟦R0⟧├─ 读取 --spins⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0002.textbox.0000.txbxContent.0000.p.0002": {
+      "sourceHash": "8dbe9f34a9738cdfb312a8de4537848de0e917c7756ca66143ba6d8e58e52ca2",
+      "source": "├─ Read --seed",
+      "translation": "⟦R0⟧├─ 读取 --seed⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0002.textbox.0000.txbxContent.0000.p.0003": {
+      "sourceHash": "57ff83b9cf5bb39f85242ad1263cca8c138fb1b6a42663d1dd07908614c686cd",
+      "source": "├─ Load math config",
+      "translation": "⟦R0⟧├─ 加载数学配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0002.textbox.0000.txbxContent.0000.p.0004": {
+      "sourceHash": "ae5e80d4fdbb72dba1e714639134b7454ebcd6511223c507ae16cdb61cb995b1",
+      "source": "├─ Validate config",
+      "translation": "⟦R0⟧├─ 验证配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0002.textbox.0000.txbxContent.0000.p.0005": {
+      "sourceHash": "3b4f245fc64ce01468a2bbd0cf39ee712e8519dc120a457858644252872921c3",
+      "source": "└─ Create deterministic RNG",
+      "translation": "⟦R0⟧└─ 创建确定性 RNG⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "a9ecbdbbd55002b278201bcba4cf5ef59f1fde624339803aac015b8e4c722356",
+      "source": "runSimulation(...)",
+      "translation": "⟦R0⟧runSimulation(...)⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0001": {
+      "sourceHash": "e9c068540873fc74b0c18da0df3e749c920e60bb197f08a2f1a5135b18cdc689",
+      "source": "└─ resolveSpin(...) × 1,000,000",
+      "translation": "⟦R0⟧└─ resolveSpin(...) × 1,000,000⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0002": {
+      "sourceHash": "f5540d8176e5fdf36e4c35369a9d31893056a618d790c023e2dd3a0cfb5ce962",
+      "source": "├─ Generate 6×5 Reel",
+      "translation": "⟦R0⟧├─ 生成 6×5 转轴⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0003": {
+      "sourceHash": "c322319e9f8524a86fe4e99089aebd5ddaba953a12d396b797876c94d3937d84",
+      "source": "├─ Evaluate for Regular Wins",
+      "translation": "⟦R0⟧├─ 评估普通中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0004": {
+      "sourceHash": "6ae0a65e7ae2c8b800dcdb3df0fd0599d7436b42b5062cc5c295c056f9532d3e",
+      "source": "├─ Resolve Multiplier (compound)",
+      "translation": "⟦R0⟧├─ 结算倍数（复合）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0005": {
+      "sourceHash": "7c808f8b65f767074a510531929f6756ff1cdc726e47bb113cfd1b37af6e7321",
+      "source": "├─ Remove Winning Symbols",
+      "translation": "⟦R0⟧├─ 移除中奖符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0006": {
+      "sourceHash": "219a1f9836c07605873b398683eb06dbaf590f76508df20e1b6b427a0533abba",
+      "source": "├─ Apply Elimination",
+      "translation": "⟦R0⟧├─ 应用消除⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0007": {
+      "sourceHash": "5329412ae7596de0fd2d5868ce0ac15b4772f4b9871512d37ad15fcd4e8fe3bb",
+      "source": "├─ Collapse / Refill Symbols",
+      "translation": "⟦R0⟧├─ 符号下落 / 补充⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0008": {
+      "sourceHash": "585982ee73a223d729187851093b37e759a1f64e72bdf47b2aca963904b761ac",
+      "source": "├─ Repeat Tumbles",
+      "translation": "⟦R0⟧├─ 重复连消⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0009": {
+      "sourceHash": "52823bc406faa47bdbfa22110c2b7f71e16b6c6fd9d2d514575c8645a944dab7",
+      "source": "├─ Resolve Scatter",
+      "translation": "⟦R0⟧├─ 结算 Scatter⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0003.textbox.0000.txbxContent.0000.p.0010": {
+      "sourceHash": "b305e0e7c85b8a31ad7115e23f2c9d1e5d2e1fc6e53f03b035e44bbe5824355e",
+      "source": "└─ Resolve Free Games",
+      "translation": "⟦R0⟧└─ 结算免费游戏⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0000": {
+      "sourceHash": "470d2a64f5ed48959be6bcfb048ce05126b4957714c6e82b6c2d6f60162246ca",
+      "source": "SyntheticAccumulator",
+      "translation": "⟦R0⟧SyntheticAccumulator⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0001": {
+      "sourceHash": "d1c5b7e0663472cc8ea09e6d88005046f594abcba3d1d1e71c24578bf73bee3e",
+      "source": "├─ Credited RTP",
+      "translation": "⟦R0⟧├─ 计入 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0002": {
+      "sourceHash": "c569ebb9364f75bd18c74eefeafd252d0d1c7bb0a1807726ed91d6049367fde5",
+      "source": "├─ Win Frequency",
+      "translation": "⟦R0⟧├─ 中奖频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0003": {
+      "sourceHash": "fdce9bf3e29f5920e17e74585f3f7193ddef1d7312fc71501647cd37ebad6bbe",
+      "source": "├─ Feature Frequency",
+      "translation": "⟦R0⟧├─ 功能频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0004": {
+      "sourceHash": "4dbefba8ce0695a5437cebbe27b8e602d11bfda6f98852c5c9e2d223c903b171",
+      "source": "├─ Tumble Statistics",
+      "translation": "⟦R0⟧├─ 连消统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0005": {
+      "sourceHash": "20355a8291c309c27ef9be5fb8c410a3ab6a3a62a6587c42a0ac0190e31d0a42",
+      "source": "├─ Elimination Statistics",
+      "translation": "⟦R0⟧├─ 消除统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0006": {
+      "sourceHash": "8037baa5462db8ac21c741512a3afac49997cd493886358aa4b15a06dc8ab491",
+      "source": "├─ Scatter Statistics",
+      "translation": "⟦R0⟧├─ Scatter 统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0007": {
+      "sourceHash": "a30aa18fa12cbb4adaa6f5071d5dea9093f34c4e1ff492c5858ccca2177c9633",
+      "source": "├─ Multiplier Statistics",
+      "translation": "⟦R0⟧├─ 倍数统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0008": {
+      "sourceHash": "5712bbce27a18dfd7cccad6daee6b61293d9bf01ff8d3c0614ed714c8535de0c",
+      "source": "├─ Volatility Profile",
+      "translation": "⟦R0⟧├─ 波动性特征⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0009": {
+      "sourceHash": "57fbf4b8c1f397f9b164e45ceca768bc4dd173c660f323c72e6d42cc225e8825",
+      "source": "├─ Payout Distribution",
+      "translation": "⟦R0⟧├─ 赔付分布⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000.r.0000.AlternateContent.0000.Fallback.0000.pict.0000.group.0000.roundrect.0004.textbox.0000.txbxContent.0000.p.0010": {
+      "sourceHash": "d4bb85cbde724540f40a59d77e1548382e5cbd5783e4b7252f78268416f29df1",
+      "source": "└─ RTP Components",
+      "translation": "⟦R0⟧└─ RTP 构成⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.p.0038": {
+      "sourceHash": "c578a8058c54837a8d8854773fb007d3c92e79ca2650807863cd05bbb4b1920a",
+      "source": "In order for the simulation data to be successfully evaluated, a math dashboard with a file ingestion pipeline was created to process the aggregated Spin data (JSON or CSV) into performance metrics.",
+      "translation": "⟦R0⟧为有效评估仿真数据，我们创建了带文件摄取管线的数学仪表板，将汇总旋转数据（JSON 或 CSV）处理为绩效指标。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0006.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "e2e6f372c42fee058b7deb3cd150ca1191bf2621ee4493d6d08762d1b9c658eb",
+      "source": "FILE INGESTION WORKSPACE",
+      "translation": "⟦R0⟧文件摄取工作区⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0007.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "c7e64aa6d4298f3d80a526d4d853571fe744938ae0bf971aff04da160c57142c",
+      "source": "DASHBOARD SUMMARY",
+      "translation": "⟦R0⟧仪表板摘要⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0007.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "50ec54947d58a71a58ded9267e1c53752b73c1131058cf1dfd648026fe462b6f",
+      "source": "RTP COMPOSITION",
+      "translation": "⟦R0⟧RTP 构成⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0000.tr.0000.tc.0000.tbl.0007.tr.0004.tc.0000.p.0000": {
+      "sourceHash": "747767b8d0b71e1258e03d418d596e4c51b2e773453627a5bd674c3083deae7a",
+      "source": "MECHANICS OVERVIEW",
+      "translation": "⟦R0⟧机制概览⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.p.0003": {
+      "sourceHash": "871b878666d3c25d68221474d22b662dd7f1a7477f5c8f64b831d21dbacf5113",
+      "source": "2. SUMMARY OF OBSERVATIONS",
+      "translation": "⟦R0⟧2. 观察摘要⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.p.0004": {
+      "sourceHash": "c272f11a6079cdf57a47aa21d3d3d91638f50b88bff890cb2133790420666ec8",
+      "source": "HEADLINE FINDINGS",
+      "translation": "⟦R0⟧核心发现⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0001.tr.0000.tc.0000.p.0001": {
+      "sourceHash": "e88ee801a778fafdc86c092285a5cb8a2033c6e1f3beb9fbf26791e727304c3b",
+      "source": "Credited RTP",
+      "translation": "⟦R0⟧计入 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0001.tr.0000.tc.0001.p.0001": {
+      "sourceHash": "4e13a0861189ff46d59b7d565e8c0646e4bbfe6392dbd631bbbce540fdadd9cc",
+      "source": "Winning Spin Frequency (≈1 winning outcome per 3.2 paid spins)",
+      "translation": "⟦R0⟧中奖旋转频率（每 3.2 次付费旋转约出现 1 次中奖结果）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0001.tr.0001.tc.0000.p.0001": {
+      "sourceHash": "47468da1364775e6016d4217f7efcb7d46966329cbe1d2bca71fd9adb55b3d5a",
+      "source": "Feature Frequency (≈1 per 113 paid spins)",
+      "translation": "⟦R0⟧功能频率（每 113 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0001.tr.0001.tc.0001.p.0001": {
+      "sourceHash": "18dbc6875cc3bd66dc3be155da9a1b776a885f465148aaedde31259f1089f3be",
+      "source": "Multiplier Payout as share of Credited RTP",
+      "translation": "⟦R0⟧倍数赔付占计入 RTP 的比例⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0001.tr.0002.tc.0000.p.0001": {
+      "sourceHash": "eafa3fc20ba98a4461585e194d7f66b3a6cad947cfa3053ce474263d47c3cf96",
+      "source": "Maximum Observed Win",
+      "translation": "⟦R0⟧最大观测中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0001.tr.0002.tc.0001.p.0001": {
+      "sourceHash": "a9eb69a7be17510356b1b1f4da70aac1a55cffbb818f99f280ae778a778f8d32",
+      "source": "~3.47% RTP Confidence Width",
+      "translation": "⟦R0⟧~3.47% RTP 置信区间宽度⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "cdd4cb8dd39f548109aa30aad04b2bc93109fb858f5143439d3527564b2fc99b",
+      "source": "A. CORE OBSERVATIONS",
+      "translation": "⟦R0⟧A. 核心观察⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0001": {
+      "sourceHash": "cb20061417457bf9e6410e87454db5a6e918359e89214312ea51e1f6283657ae",
+      "source": "Credited RTP: 93.15%",
+      "translation": "⟦R0⟧计入 RTP：93.15%⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0002": {
+      "sourceHash": "cb3868e97d6ab5a6ef0e697e90d9f1968b0058b4710edd960b990f0dd8a1f3a2",
+      "source": "The default configuration produced an overall RTP of 93.15%, which means the game operates within a commercially plausible range. However, how that return is distributed between ordinary wins, multipliers, Scatters, and Free Games matter more for user engagement and monetization.",
+      "translation": "⟦R0⟧默认配置产生的整体 RTP 为 93.15%，表明游戏处于商业上合理的范围。然而，对用户参与度和变现而言，更重要的是回报如何分配于普通中奖、倍数、Scatter 和免费游戏之间。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0003": {
+      "sourceHash": "00c1e7165ab0443b975b44a2e2efdac3157567cad4faacec9befbde934da6639",
+      "source": "Winning Spin Frequency: 31.31% (≈1 in 3.2 paid spins)",
+      "translation": "⟦R0⟧中奖旋转频率：31.31%（每 3.2 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0004": {
+      "sourceHash": "653e188340b1933a5e5baa1762a1f87988a6bc72d39e66f3f3bbf27aa512b0ad",
+      "source": "The default configuration provides relatively frequent positive feedback despite the game’s high-volatility profile. The result suggests that volatility is being generated less through low hit frequency, and more through substantial variation in the size of winning outcomes.",
+      "translation": "⟦R0⟧尽管游戏具有高波动特征，默认配置仍提供相对频繁的正向反馈。结果表明，波动性较少源于低命中频率，更多源于中奖结果金额的显著差异。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0005": {
+      "sourceHash": "84b9197ce8066bbe097a4d1acab64fa2541414bd10ee8e9c25fc250cdb76668c",
+      "source": "Feature Frequency: 0.88% (≈1 in 113 paid spins)",
+      "translation": "⟦R0⟧功能频率：0.88%（每 113 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0006": {
+      "sourceHash": "c95bbc93e71016190717951a6f1484b0a4e334e36f5b26c99b504891be2ed2af",
+      "source": "Free Games contribute approximately 29% of the game’s total RTP. So, while the majority of RTP still comes from the Base Game, the feature is large enough to influence the player's overall risk-and-reward experience.",
+      "translation": "⟦R0⟧免费游戏约贡献游戏总 RTP 的 29%。因此，尽管大部分 RTP 仍来自基础游戏，该功能的占比已足以影响玩家整体的风险与回报体验。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0007": {
+      "sourceHash": "9a82310a45d0692b7074f4cf4f3424020aff11f64236d87aaba7398a924e3c9e",
+      "source": "Multiplier RTP Contribution: 49.60% (or 53.24% of Credited RTP)",
+      "translation": "⟦R0⟧倍数 RTP 贡献：49.60%（占计入 RTP 的 53.24%）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0008": {
+      "sourceHash": "c30bc115d504e5b7cd81e7ff97a1e0accb3709029e51ccfe0f2fe7df3c914378",
+      "source": "Multipliers are the single largest source of returned value in the current configuration.",
+      "translation": "⟦R0⟧在当前配置中，倍数是返还价值最大的单一来源。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0009": {
+      "sourceHash": "7a760a8ed9348865e576d17e3a41d83832f9d02dad664d322a6af8a2e9cf134c",
+      "source": "This makes the game a multiplier-led experience where relatively small changes to multiplier frequency and payout weighting can substantially alter RTP and volatility.",
+      "translation": "⟦R0⟧这使游戏形成倍数主导的体验；倍数频率和赔付权重的较小变化即可显著改变 RTP 与波动性。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0011": {
+      "sourceHash": "6b24f62d556aa8f85691c8724fe513368d0d82069e6b080c5f7d06f160ef6834",
+      "source": "B. MULTIPLIER FREQUENCY & RTP",
+      "translation": "⟦R0⟧B. 倍数频率与 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0012": {
+      "sourceHash": "cf04e60e193b0f7e3cbe6c62a3eb72f3983f052f5905c83efd0e378c7d8f5fa9",
+      "source": "Free Game Multiplier RTP: 22.97% (out of 27.03% Feature RTP)",
+      "translation": "⟦R0⟧免费游戏倍数 RTP：22.97%（功能 RTP 共 27.03%）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0013": {
+      "sourceHash": "b369cf01ba731780811b1bd0f77c1fb977707bdf24eb347638967334b8ba976a",
+      "source": "Approximately 85% of Free Game RTP is generated by multiplier uplift. This indicates that Free Game is fundamentally an accumulation and multiplier-led feature, rather than a feature driven by additional spins and regular wins.",
+      "translation": "⟦R0⟧约 85% 的免费游戏 RTP 来自倍数提升。这表明免费游戏本质上是累积型、倍数主导的功能，而非由额外旋转和普通中奖驱动。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0014": {
+      "sourceHash": "88289c6280bbbbeb37c5c0022d1702a33aacfb49c859b7de1219adb56f9a70cd",
+      "source": "Base Game Multiplier RTP: 26.63% (out of 66.12% Base Game RTP)",
+      "translation": "⟦R0⟧基础游戏倍数 RTP：26.63%（基础游戏 RTP 共 66.12%）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0015": {
+      "sourceHash": "b0bb9934387b52bce12b6b35615a6adc210e770dc28a1a9f280e887a47b0d0af",
+      "source": "Multipliers are not only important during Free Games. They account for roughly 40.2% of Base Game return as well. This means multiplier behaviour affects the entire game economy rather than functioning solely as a bonus-feature enhancement.",
+      "translation": "⟦R0⟧倍数并非只在免费游戏中重要，其同样约占基础游戏回报的 40.2%。这意味着倍数行为会影响整个游戏经济，而不只是作为奖励功能的增强手段。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0016": {
+      "sourceHash": "e6eff850276559caaa2970da1a877acb9fd2ee77267e904b757f0ebac862d2ec",
+      "source": "Multiplier Frequency: 4.85% (≈1 in 20.6 paid spins)",
+      "translation": "⟦R0⟧倍数频率：4.85%（每 20.6 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0017": {
+      "sourceHash": "dd2182098055aed9c69ea58662384c8c0a2522a1ecf572c3e0a74a33a799aced",
+      "source": "Multipliers appear relatively infrequently yet generate half of total RTP, demonstrating how leveraged the mechanic is. Basically, whenever multipliers interact with winning combinations and tumbles, they produce a disproportionately large payout effect.",
+      "translation": "⟦R0⟧倍数出现相对不频繁，却产生了总 RTP 的一半，说明该机制具有很高的杠杆效应。基本上，倍数一旦与中奖组合和连消交互，就会产生不成比例的高额赔付影响。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0018": {
+      "sourceHash": "5bce62943276afaa5814e5654eb04c46199ef7e4f3464713b027c60625b8bd23",
+      "source": "Mean Multiplier vs. Summed Multiplier vs. Maximum Observed : 6.60x vs. 8.44x vs. 522x",
+      "translation": "⟦R0⟧平均倍数 vs. 合计倍数 vs. 最大观测值：6.60x vs. 8.44x vs. 522x⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0019": {
+      "sourceHash": "88f2238d28747083128e9701f2d6c381477bc7a759a8dd08ef6defc7e5e07e09",
+      "source": "At 6.60x, most multiplier interactions seem to occur at relatively modest values.",
+      "translation": "⟦R0⟧在 6.60x 的水平下，大多数倍数交互似乎发生在相对适中的数值。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0020": {
+      "sourceHash": "6aab9946fc5bbdb2e88d2da511a92a61c120c51762ed8c08251431e7266650c1",
+      "source": "However, the large gap between the average and maximum observed summed multiplier is characteristic of a design where multiplier events provide constant engagement while rare combinations create headline win potential.",
+      "translation": "⟦R0⟧然而，平均合计倍数与最大观测合计倍数之间的巨大差距，体现了这样一种设计：倍数事件持续提供参与感，而罕见组合则创造标志性大奖潜力。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0022": {
+      "sourceHash": "31a1137c928b7ab63cd549acfecd078a1f8431f6f0d46bb8d123c6841c15b987",
+      "source": "C. SYMBOL ELIMINATION (BATHALA SKILL)",
+      "translation": "⟦R0⟧C. 符号消除（BATHALA 技能）⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0023": {
+      "sourceHash": "0becdce62f9d883b08acd18c525b01605f4a61f90458e53ea4f280dd7ba30c69",
+      "source": "Elimination Conversion Rate: 38.78%",
+      "translation": "⟦R0⟧消除转化率：38.78%⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0024": {
+      "sourceHash": "e49dc04e9c355bf72efd20825570635aa095fabfc3a79970e98d7ffe37d7365f",
+      "source": "Approximately 4 in 10 symbol eliminations result in the refilled board immediately producing a winning combination.",
+      "translation": "⟦R0⟧约每 10 次符号消除中有 4 次会使补充后的盘面立即形成中奖组合。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0025": {
+      "sourceHash": "f217d2ed0dd797f2bc37307b081d1ee7e50cca283ead3ca38ba98616c6812c14",
+      "source": "This observation confirms that the elimination effect is not merely a visual event but is in fact a continuation mechanic by virtue of regularly extending winning sequences.",
+      "translation": "⟦R0⟧该观察证实，消除效果并非单纯的视觉事件，而是会经常延长中奖序列的延续机制。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0026": {
+      "sourceHash": "eb48b1ded84ee335262084c8d2ef39b6611ff4a9e947ef1720dd28cf92942794",
+      "source": "Elimination Activations: 56.74% (≈1.95 symbols eliminated per paid spin)",
+      "translation": "⟦R0⟧消除激活率：56.74%（每次付费旋转约消除 1.95 个符号）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0027": {
+      "sourceHash": "b99259fe28bb89a95e741f2970be4b5f9efdf076f7c9ce041509d5f85d715af9",
+      "source": "The elimination effect changes the reel composition frequently, allowing for more variance.",
+      "translation": "⟦R0⟧消除效果会频繁改变转轴构成，从而带来更多变化。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0028": {
+      "sourceHash": "4116cc28314c9b5c6dbdaf99ba10b17cbdb178c5cbe9ec9cd4d01ef94aa7d7fe",
+      "source": "Even when elimination does not immediately create another win, the mechanic boosts the number of refills and winning frequency, making it a core mechanic rather than a bonus event.",
+      "translation": "⟦R0⟧即使消除未立即带来下一次中奖，该机制仍会提高补充次数和中奖频率，因此它属于核心机制而非奖励事件。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0030": {
+      "sourceHash": "358d96af3341a43e8bd8c11d81aa1d3103cb9927898101c834b14f3253349bbd",
+      "source": "D. TUMBLE MECHANIC",
+      "translation": "⟦R0⟧D. 连消机制⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0031": {
+      "sourceHash": "d3df8647bdfb08481d372704a59ab33848cc02d7866c303bd257b9ffd4db8a3d",
+      "source": "Tumble Frequency & Average Depth: 34.74% & 1.63 rounds",
+      "translation": "⟦R0⟧连消频率与平均深度：34.74% & 1.63 轮⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0032": {
+      "sourceHash": "ced308f920ae6ceb7bdacd5824aeb955be2b9c68b30cb2ea1b4f63e5d02af4b9",
+      "source": "While roughly 1/3 of paid spins produce a tumble, the average tumble sequence remains relatively short. These sequences serve to provide continuation without long cascades dominating gameplay.",
+      "translation": "⟦R0⟧约 1/3 的付费旋转会产生连消，但平均连消序列仍相对较短。这些序列能够提供延续感，同时避免长连锁主导玩法。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0033": {
+      "sourceHash": "27a52c9bd1e6b2d4dae868b04f8e741210a04c8196451b846bccd8bf88de705e",
+      "source": "Regardless, the maximum observed tumble depth of 10 indicates that players do occasionally encounter extended sequences.",
+      "translation": "⟦R0⟧尽管如此，观测到的最大连消深度为 10，说明玩家偶尔仍会遇到较长序列。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0034": {
+      "sourceHash": "3533e37728604cbd89dd630bda80b79bb289f918a76308f87318789b3df925e1",
+      "source": "Base Game Tumble vs. Free Game Tumble: 30.98% vs. 27.77%",
+      "translation": "⟦R0⟧基础游戏连消 vs. 免费游戏连消：30.98% vs. 27.77%⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0035": {
+      "sourceHash": "fe9d5035312e43922f57aa892b16a4dbaaebfd76ef374f5c7eaea99a72b77549",
+      "source": "Free Games do not appear to derive more RTP from either deeper or more frequent tumbles.",
+      "translation": "⟦R0⟧免费游戏似乎并未从更深或更频繁的连消中获得更多 RTP。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0036": {
+      "sourceHash": "d7a844a4d998be66ff728d1c28a3bd71edded271d90e004d75036599eb8c9474",
+      "source": "Instead, the feature's additional RTP is primarily generated through the accumulating multiplier mechanic. This is useful because it clearly separates the role of the two mechanics: tumbles provide cadence, while multipliers provide feature and payout escalation.",
+      "translation": "⟦R0⟧相反，该功能的额外 RTP 主要由累积倍数机制产生。这清楚地区分了两种机制的作用：连消提供节奏，倍数则推动功能和赔付升级。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0038": {
+      "sourceHash": "8df5f66c75a480d1d5bdb6f35108ae810dee4d4bf28dbdbecb32dfbe2fdafb88",
+      "source": "E. VOLATILITY & PAYOUT",
+      "translation": "⟦R0⟧E. 波动性与赔付⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0039": {
+      "sourceHash": "b1a6069eef11b3d0eb6436cb8667a3601e52e06ba10eba6beffc0672473f1d9e",
+      "source": "Payout Tail: 10× 1 in 68 paid spins (or 1 in 21 winning spins)",
+      "translation": "⟦R0⟧赔付尾部：10× 每 68 次付费旋转 1 次（或每 21 次中奖旋转 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0040": {
+      "sourceHash": "27c62111fc489b1661062a606ba97978d79f912e92dd1aba61b49eabb3698f26",
+      "source": "95% of winning spins remain below 10×, while ≥100× outcomes represent only about 0.34% of winning spins.",
+      "translation": "⟦R0⟧95% 的中奖旋转低于 10×，而 ≥100× 的结果仅占中奖旋转约 0.34%。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0041": {
+      "sourceHash": "398f71c0646639c4d514f7978917e7b7e0c764aa5c06f406d5d95ada046c63c1",
+      "source": "Moreover, only 34 out of 1 million paid spins triggered ≥500× outcomes.",
+      "translation": "⟦R0⟧此外，1 百万次付费旋转中仅有 34 次触发 ≥500× 的结果。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0042": {
+      "sourceHash": "c324a7ab6d3704fcac8f026a719703ccfffcc0b6040038019bdbdabdd78a43e6",
+      "source": "This means that ordinary wins serve to maintain session activity and user engagement, while the most memorable wins remain genuinely coveted.",
+      "translation": "⟦R0⟧这意味着普通中奖用于维持会话活跃度和用户参与，而最令人难忘的大奖仍然真正稀有且令人向往。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0043": {
+      "sourceHash": "e617398f132cf3aa27c5f7c354dd0141f35aecbaa06079282c5f6ce2cc0cacab",
+      "source": "Mean Win per Paid Spin vs. SD vs. CoV: 0.932 vs. 8.85 vs. 9.5",
+      "translation": "⟦R0⟧每次付费旋转平均中奖 vs. SD vs. CoV：0.932 vs. 8.85 vs. 9.5⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0044": {
+      "sourceHash": "f8407ba75caa37917879a12648292604e22a2d285408f70cda562db311d9687e",
+      "source": "The contrast between the mean win and a standard of deviation of 8.85 suggests that individual outcomes vary widely around the average.",
+      "translation": "⟦R0⟧平均中奖与 8.85 的标准差形成鲜明对比，表明单次结果围绕平均值存在很大差异。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0000.tr.0001.tc.0000.tbl.0002.tr.0000.tc.0000.p.0045": {
+      "sourceHash": "ee5a613ab76fc914103660eff30b4d1fe4e46d9fd94fd21b6152b98f0b135954",
+      "source": "Since SD is approximately 9.5 times the mean RTP, a large proportion of RTP is concentrated on a handful of very high value wins rather than being distributed evenly. Therefore, this volatility profile is considered high.",
+      "translation": "⟦R0⟧由于 SD 约为平均 RTP 的 9.5 倍，大量 RTP 集中于少数极高价值中奖，而非均匀分布。因此，该波动性特征被视为较高。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "4c0ed69317d8e51eb0c184e1435890410925138cc3e6dd88b50476d35d60bf5c",
+      "source": "3. EVALUATION & RTP TUNING",
+      "translation": "⟦R0⟧3. 评估与 RTP 调优⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0001": {
+      "sourceHash": "bbfabe23acc2e50e922af7c382fba56d0afa324b73b93b117202460fd5faff20",
+      "source": "A. VOLATILITY PROFILE ANALYSIS",
+      "translation": "⟦R0⟧A. 波动性特征分析⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0002": {
+      "sourceHash": "c117f123eeab1a4da6c871a7761d0205f2f5f8d483dc7af2dc98f83102629e25",
+      "source": "The current default setup in the simulation twin is a multiplier-led profile. In this setup, whilst some players will get to see more extravagant wins, the typical player will often only see outcomes around the average. This is further confirmed by a CoV of 9.5.",
+      "translation": "⟦R0⟧仿真孪生体当前的默认设置为倍数主导型特征。在该设置下，部分玩家会看到更夸张的中奖，但典型玩家往往只能看到接近平均值的结果。CoV 为 9.5 进一步证实了这一点。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0003": {
+      "sourceHash": "a8002a09dfb6b2939a2a80bb7b3b79758ca32617e9f8fb17279c6e239664b487",
+      "source": "From a qualitative experience standpoint, the 2 screenshots on the right show Spins #68 and #55 accumulate several multipliers, spiking session RTP to 225% and volatility to a staggering 7.69.",
+      "translation": "⟦R0⟧从定性体验来看，右侧 2 张截图显示旋转 #68 和 #55 累积了多个倍数，使会话 RTP 飙升至 225%，波动性达到惊人的 7.69。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0004": {
+      "sourceHash": "e30a909391283c2a710dcc5c2cc7e1a3c3030f9f77e90a43db6c8600fcc8afbb",
+      "source": "One reason why the multipliers were able to accumulate so quickly was because of 3 feature activations within 68 spins. Typically, this would be a very rare occurrence because the default config triggers 1 feature approximately every 120 paid spins.",
+      "translation": "⟦R0⟧倍数能够如此迅速累积的原因之一，是在 68 次旋转内触发了 3 次功能。通常这极为罕见，因为默认配置约每 120 次付费旋转才触发 1 次功能。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0006": {
+      "sourceHash": "56562e8ede7790746c6478241cb3b968b07577a520611845c2333a18b51df940",
+      "source": "Upon closer analysis of the exported CSV, over 80% of the session's total returns came from just 4 specific spins:",
+      "translation": "⟦R0⟧进一步分析导出的 CSV 后发现，该会话总回报的 80% 以上仅来自 4 次特定旋转：⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0007": {
+      "sourceHash": "cd9a583cdc5d70907a61cbabf983be479ec7fc10c955583976d137fef34b016a",
+      "source": "Spin #40 (Free Game Trigger 1): 21.60x total win",
+      "translation": "⟦R0⟧旋转 #40（免费游戏触发 1）：总中奖 21.60x⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0008": {
+      "sourceHash": "383c2dbf5281eb10fe32faaadd46f4be58b616192200f4ea93cb6146efa56a5a",
+      "source": "Spin #44 (Base Game Outlier): 46.60x total win",
+      "translation": "⟦R0⟧旋转 #44（基础游戏异常值）：总中奖 46.60x⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0009": {
+      "sourceHash": "d17bedda2be570a134112c87adb6a30e5db5f36f27e407512ec5b87e82f30a64",
+      "source": "Spin #55 (Free Game Trigger 2): 30.90x total win",
+      "translation": "⟦R0⟧旋转 #55（免费游戏触发 2）：总中奖 30.90x⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0010": {
+      "sourceHash": "fac0aa6d6ae3c00a90bfe967de79d74f5c091912213ceb2cd9c8fc38a58867a2",
+      "source": "Spin #68 (Free Game Trigger 3): 25.85x total win",
+      "translation": "⟦R0⟧旋转 #68（免费游戏触发 3）：总中奖 25.85x⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0012": {
+      "sourceHash": "8fc09bf6c816183183d71a60add9e9bb11ec731c0b5b6584e94404bc90588a96",
+      "source": "For a Slot machine and RMG operator, such variance is unsustainable.",
+      "translation": "⟦R0⟧对角子机和 RMG 运营商而言，这种方差不可持续。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0013": {
+      "sourceHash": "6d68b505552b5d0004e350a33c62f8a0b531a8986e17fa0b3552bee9aad06547",
+      "source": "One way to resolve the volatility spikes is to replace the existing multiplier-led math profile with a tumble-led math profile, where engagement and RTP are primarily derived from symbol eliminations, longer tumble sequences, and medium-sized wins.",
+      "translation": "⟦R0⟧解决波动尖峰的一种方式，是用连消主导型数学特征替代现有的倍数主导型特征，使参与度和 RTP 主要来自符号消除、更长的连消序列及中等规模中奖。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧⟦R23⟧⟦/R23⟧⟦R24⟧⟦/R24⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0014": {
+      "sourceHash": "eaa616d3abf49ad75ada4f971964d22d4abd89f7dc463937db394be2d105e954",
+      "source": "The main KPI target is to reduce CoV to between ~4.5 and 6.",
+      "translation": "⟦R0⟧主要 KPI 目标是将 CoV 降至 ~4.5 至 6 之间。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0016": {
+      "sourceHash": "c6c3204af1cb4df9524ba2c303a065d91de0c69c885addb4ec6725636608635a",
+      "source": "PROFILE COMPARISON BY CHARACTERISTICS",
+      "translation": "⟦R0⟧按特征比较配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "1c438c10f26f0455aac1ac898ebaf86938fdf98bf70f4a4622b0e32f348fb489",
+      "source": "Characteristic",
+      "translation": "⟦R0⟧特征⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "810b08dbb291ee80a5b33ec83fed949c5b04a1bf68d488755100dc43b25d39bd",
+      "source": "Existing Profile (Multiplier-led)",
+      "translation": "⟦R0⟧现有特征（倍数主导型）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "b367085804232ff46202e3ba1fd693babfebd10ce18424b6b0e7dadc480e4ec5",
+      "source": "Proposed Profile (Tumble-led)",
+      "translation": "⟦R0⟧建议特征（连消主导型）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "00ac2f4d43aede8122a02be3f2f22e14e53b12b121442dc5d1ebe7b38481cc88",
+      "source": "Multipliers",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0001.p.0000": {
+      "sourceHash": "55f2d0085373b5ee0c30290c14c207720eef9a898ee2524788ebfef14c1f1610",
+      "source": "Primary accelerator & Core mechanic",
+      "translation": "⟦R0⟧主要加速器与核心机制⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0001.tc.0002.p.0000": {
+      "sourceHash": "ff2db0894dbfcbc35c37af20218577898c702dfa261fd22056dc728d6e644e80",
+      "source": "Occasional/Tertiary mechanic",
+      "translation": "⟦R0⟧偶发 / 第三级机制⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "358f2f7514407fd11d1480797f642f8680b7bd408ecd1e5b7f6d584fed1d901d",
+      "source": "Coefficient of Variation (CoV)",
+      "translation": "⟦R0⟧变异系数（CoV）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0002.tc.0001.p.0000": {
+      "sourceHash": "0e03578dde3563ed2d8ad19dadb055ca1c8b3291929a460d00d7f5d668f98e43",
+      "source": "Current: ~7.5 to 9.5",
+      "translation": "⟦R0⟧当前：~7.5 至 9.5⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0002.tc.0002.p.0000": {
+      "sourceHash": "394fbd62ba7e9c27d959fc0ba85ea086aa0cb8448cc2f890182035d543eb8c11",
+      "source": "Target: ~4.5 to 6",
+      "translation": "⟦R0⟧目标：~4.5 至 6⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0003.tc.0000.p.0000": {
+      "sourceHash": "15b0d1da8e2d31af3267a2da946255c2338b290fe96af7b3226aa6d227c4f518",
+      "source": "Small Wins",
+      "translation": "⟦R0⟧小额中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0003.tc.0001.p.0000": {
+      "sourceHash": "7a3c239dbd49e38e06f5e1e2fdfbb62ec16784eacc873741d19a4b291894aca4",
+      "source": "Frequent but relatively weak",
+      "translation": "⟦R0⟧频繁但相对较弱⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0003.tc.0002.p.0000": {
+      "sourceHash": "3f0e79c10973802b054f8a59f26d8678f88494c17b025866ee9c3d3bc1a6a9aa",
+      "source": "More frequent with slightly larger wins",
+      "translation": "⟦R0⟧更频繁，中奖额略高⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0004.tc.0000.p.0000": {
+      "sourceHash": "39fe1bc5993f118a7060b77df036d88a80424204b23f53ffc2d820456013afb0",
+      "source": "Medium Wins",
+      "translation": "⟦R0⟧中额中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0004.tc.0001.p.0000": {
+      "sourceHash": "30354f52805cce217051fe878c45f4da50ddfcdf3da46c73448bb8009e034ed7",
+      "source": "Less frequent and relatively weak",
+      "translation": "⟦R0⟧较不频繁且相对较弱⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0004.tc.0002.p.0000": {
+      "sourceHash": "ceb9365d6880ae5d3abc2e58f80392837b4bbd1ed55bc59f6e8b86311ba63042",
+      "source": "Core winning mechanic",
+      "translation": "⟦R0⟧核心中奖机制⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0005.tc.0000.p.0000": {
+      "sourceHash": "7cc9e81608a53213b308c64e57234cd7c5bb8c65b1bc03d124f0476b7d465e53",
+      "source": "Extreme Wins",
+      "translation": "⟦R0⟧极端大奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0005.tc.0001.p.0000": {
+      "sourceHash": "e1825caa4465e002b5572d5f872ac74d2650ff596671c49d5d796bf0279a0db1",
+      "source": "Key RTP contributor",
+      "translation": "⟦R0⟧关键 RTP 贡献项⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0005.tc.0002.p.0000": {
+      "sourceHash": "1f017924581339e49f8a924735e4fc8030b8e459499b5e5fd7a5d9aafd556e3d",
+      "source": "Much rarer with lower caps",
+      "translation": "⟦R0⟧更为罕见且上限更低⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0006.tc.0000.p.0000": {
+      "sourceHash": "bc4600940eeaf15b876ffc3fc4ef6290bc2b68b3a8de3d4019099e374fe4b5ed",
+      "source": "Free Games",
+      "translation": "⟦R0⟧免费游戏⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0006.tc.0001.p.0000": {
+      "sourceHash": "d3d311a4eda20784e1797d9e23ca5932d14cc4d81ca4f94cc119b0f805c63858",
+      "source": "Enhanced by Multiplier mechanic",
+      "translation": "⟦R0⟧由倍数机制增强⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0006.tc.0002.p.0000": {
+      "sourceHash": "4c565db33a2451052ce8fe35ae285fd8e180b4275ab8bd82c9d71c851b7726e7",
+      "source": "Enhanced by premium Symbols",
+      "translation": "⟦R0⟧由高价值符号增强⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0007.tc.0000.p.0000": {
+      "sourceHash": "c32355af352c39279834642481cabecc9cbafa261188c63d6111ff2385e4ba73",
+      "source": "Engagement Design",
+      "translation": "⟦R0⟧参与度设计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0007.tc.0001.p.0000": {
+      "sourceHash": "b83896ecd50c9ab4cff983a2e9f855c82f56ceedfbdbda33a26b6a56f8fc3530",
+      "source": "Powerful Multiplier spikes",
+      "translation": "⟦R0⟧强力倍数尖峰⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0007.tc.0002.p.0000": {
+      "sourceHash": "e53c6ceb940bd3656932441a363e61118f1c34f7bc82c12a025d9b0224ac5e06",
+      "source": "Frequent clusters and tumbles",
+      "translation": "⟦R0⟧频繁的符号簇与连消⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0008.tc.0000.p.0000": {
+      "sourceHash": "440e13699b78ea52df15dd5c349b34a86f13fd2624f112bbdab318571dd6ea3e",
+      "source": "Player Experience",
+      "translation": "⟦R0⟧玩家体验⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0008.tc.0001.p.0000": {
+      "sourceHash": "ae7d7265c586c3794dc465a92b1c9e1ac75bc5143c4d8594db947b1b8bd324ab",
+      "source": "“Nothing… nothing… BOOM”",
+      "translation": "⟦R0⟧“没有……没有……爆发”⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0000.tr.0008.tc.0002.p.0000": {
+      "sourceHash": "c216b931b60d24eb2bbe6c848ffdf9abab2cf435bf84e751b5c10c827ee33076",
+      "source": "Win Tumble Medium payouts",
+      "translation": "⟦R0⟧中奖 连消 中额赔付⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0018": {
+      "sourceHash": "768be380df42f0354cf27ec9345b1cda8a9333e24f2ffe382fd4bd577226bfd9",
+      "source": "To achieve this proposed profile, there are 4 key areas that must be tuned:",
+      "translation": "⟦R0⟧要实现所提议的特征，必须调优以下 4 个关键领域：⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "77e14505eb7df7f948c85cd2e9cc0e2608adc40e3d35e86e812a2122dacd14bd",
+      "source": "Tuning Area",
+      "translation": "⟦R0⟧调优领域⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "7a0a7bcdebad847950f1c263636d1df7d880e56f7a23587fdd24b76bb67f7c1c",
+      "source": "Proposed Changes",
+      "translation": "⟦R0⟧建议变更⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "9c7572a4d4c3ead5399a78134f1104fa07b2ec0b731a55e98c473fa04e066025",
+      "source": "Multiplier Weights",
+      "translation": "⟦R0⟧倍数权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0001.tc.0001.p.0000": {
+      "sourceHash": "849e0a75e639cc5749f20d96d6163d0e5a5205d6e4c4289b959a93452adadc1c",
+      "source": "Move concentration from High Multipliers to Low Multipliers",
+      "translation": "⟦R0⟧将权重集中点从高倍数转向低倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "6101dd3de016269580c4e19e5dd8b5e703d8be3e7bfdcae416f8c049c4a4bf83",
+      "source": "Base Game Symbol Weights",
+      "translation": "⟦R0⟧基础游戏符号权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0002.tc.0001.p.0000": {
+      "sourceHash": "58c1507f228b0782e61d8ea86a4e889403c1dc53e2f8fa09e6d5a9e886a6cb23",
+      "source": "Move concentration towards Low-Symbol distribution",
+      "translation": "⟦R0⟧将权重集中于低赔符号分布⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0000.p.0000": {
+      "sourceHash": "0e786f75f4b229bfa67144cf280a1916f9a3452165267385580b693915b4f3fc",
+      "source": "Free Game Symbol Weights",
+      "translation": "⟦R0⟧免费游戏符号权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0003.tc.0001.p.0000": {
+      "sourceHash": "acf0d9085a573cb48178b76a01fd6674ee95d039919dd7801cf09b21bf19c402",
+      "source": "Concentrate weightage towards premium Symbols (High-Symbols)",
+      "translation": "⟦R0⟧将权重集中于高价值符号（高赔符号）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0004.tc.0000.p.0000": {
+      "sourceHash": "a963f456a45a822dcb3d16f680308e3c2fa72dde8f5720ef7d55e188e012de0d",
+      "source": "Cluster Paytable Payout Adjustments",
+      "translation": "⟦R0⟧符号簇赔付表调整⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0001.tr.0004.tc.0001.p.0000": {
+      "sourceHash": "32f071bdc393b7559eda44f512b487498c16d71bf51b361bd8262d4cff9222d3",
+      "source": "Dampen the payout cliffs observed in High-Symbols, while raising the overall payouts for Low-Symbols",
+      "translation": "⟦R0⟧缓和高赔符号的赔付断崖，同时提高低赔符号的整体赔付⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0019": {
+      "sourceHash": "fcb76570a6bf9fccac38103b1df927e6b1bec120cab272919500faf934abc58a",
+      "source": "B. MULTIPLIER TUNING",
+      "translation": "⟦R0⟧B. 倍数调优⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0020": {
+      "sourceHash": "9442534b5af1570b895566c8cf88000f84f8db6c875201543c7d78dfc6de6485",
+      "source": "DEFAULT MULTIPLIER STATISTICS",
+      "translation": "⟦R0⟧默认倍数统计⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0002.tr.0000.tc.0000.p.0001": {
+      "sourceHash": "657137e0c6a61a13f782ff955bef96ada2a8933d562bca8507ec09415bbd8d12",
+      "source": "Mean Multiplier",
+      "translation": "⟦R0⟧平均倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0002.tr.0000.tc.0001.p.0001": {
+      "sourceHash": "8269b9677cc6f1bdccf4ab07a6f799cc19063a602ca1fbcecf6c76ac0b53f5fe",
+      "source": "Multiplier Standard Deviation",
+      "translation": "⟦R0⟧倍数标准差⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0002.tr.0001.tc.0000.p.0001": {
+      "sourceHash": "0f937aef749239cd586d3d48d54197fd8fa4faba89feaf0b2b40309f3d3a81ac",
+      "source": "≥20× Frequency (≈1 per 22.4 paid spins)",
+      "translation": "⟦R0⟧≥20× 频率（每 22.4 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0002.tr.0001.tc.0001.p.0001": {
+      "sourceHash": "2970a0f6fcaf49c2ccf5588fd706b49612e67896ae375cc74b31e111c1ea0550",
+      "source": "≥50× Frequency (≈1 per 125 paid spins)",
+      "translation": "⟦R0⟧≥50× 频率（每 125 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0002.tr.0002.tc.0000.p.0001": {
+      "sourceHash": "2403d4ba6b1e40479446a5928168d2f5c7638bd631a5c23034e312c8d43eea7b",
+      "source": "≥100× Frequency (≈1 per 384 paid spins)",
+      "translation": "⟦R0⟧≥100× 频率（每 384 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0002.tr.0002.tc.0001.p.0001": {
+      "sourceHash": "9ce5ff690cad85af9af35c57c9cfa4f993512d2d320972f1cc1bdbdbb2720d19",
+      "source": "≥250× Frequency (≈1 per 1370 paid spins)",
+      "translation": "⟦R0⟧≥250× 频率（每 1370 次付费旋转约 1 次）⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0022": {
+      "sourceHash": "6ca58ac9c563a81e36e5eaebdf5b826adf61b7a60d8cc26ab2fe5418e3455cc4",
+      "source": "Firstly, the multiplier distribution is very dispersed and requires radical tuning. A mean multiplier of 4.5× should be the hard cap, while multiplier SD should be below 3×. This change requires dampening the existing lottery mechanic and turning it into a progression amplifier. The two tables below illustrate the scale and impact of the new configuration.",
+      "translation": "⟦R0⟧首先，倍数分布非常分散，需要大幅调优。平均倍数应以 4.5× 为硬上限，而倍数 SD 应低于 3×。此变更需要削弱现有的彩票式机制，将其转化为进程放大器。下方两张表展示了新配置的规模及影响。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0023": {
+      "sourceHash": "c11264cf7d3561779226134f5a53c0188b37c5c2ecca4cc0706ce60406d0993c",
+      "source": "MULTIPLIER WEIGHTSMULTIPLIER STATISTICS",
+      "translation": "⟦R0⟧倍数权重倍数统计⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "88fb11573a6a01055cff4da5a1b81f5b20850faa77b8ca6826ef9d278b150d20",
+      "source": "Multiplier",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "e0d1b68224bf0b31ef16b206c65b5f8f6b89d18161f4a7cdcb8d0ac8d952549a",
+      "source": "Current",
+      "translation": "⟦R0⟧当前⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0001.p.0001": {
+      "sourceHash": "87e89abb4c1c551fe08d355d097f18b8de78edca5f556997085681662fce8eed",
+      "source": "Config",
+      "translation": "⟦R0⟧配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "18fdd549b2ed367ac0c74cbec1214644728515b30edbcb78e7d322757a7c8359",
+      "source": "New",
+      "translation": "⟦R0⟧新⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0002.p.0001": {
+      "sourceHash": "147ec15498661dd98b2128a1fa230b4838f66d6b66dea64847dc55ac7d88a130",
+      "source": "Weights",
+      "translation": "⟦R0⟧权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0004.p.0000": {
+      "sourceHash": "64fa8a14a90feef5d86951352195391dfead1194f932aaed0755021c504e2a15",
+      "source": "Observed",
+      "translation": "⟦R0⟧观测值⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0004.p.0001": {
+      "sourceHash": "855c126e96f97f40bcb741294da94f58b7651373f682e02f5f4b6beb039fdcc9",
+      "source": "Statistic",
+      "translation": "⟦R0⟧统计项⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0005.p.0000": {
+      "sourceHash": "e0d1b68224bf0b31ef16b206c65b5f8f6b89d18161f4a7cdcb8d0ac8d952549a",
+      "source": "Current",
+      "translation": "⟦R0⟧当前⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0005.p.0001": {
+      "sourceHash": "87e89abb4c1c551fe08d355d097f18b8de78edca5f556997085681662fce8eed",
+      "source": "Config",
+      "translation": "⟦R0⟧配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0006.p.0000": {
+      "sourceHash": "88fb11573a6a01055cff4da5a1b81f5b20850faa77b8ca6826ef9d278b150d20",
+      "source": "Multiplier",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0000.tc.0006.p.0001": {
+      "sourceHash": "27445f6ab61d9a5cea1584df4a98277b77e1d091fb67c143d4d40116468dcdec",
+      "source": "Targets",
+      "translation": "⟦R0⟧目标⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0001.tc.0004.p.0000": {
+      "sourceHash": "657137e0c6a61a13f782ff955bef96ada2a8933d562bca8507ec09415bbd8d12",
+      "source": "Mean Multiplier",
+      "translation": "⟦R0⟧平均倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0002.tc.0004.p.0000": {
+      "sourceHash": "eaeeb333f477dc33699b43239d80d5e2863e67e89e9bf706e36963ae1da1fd72",
+      "source": "Multiplier SD",
+      "translation": "⟦R0⟧倍数 SD⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0003.tc.0004.p.0000": {
+      "sourceHash": "9eff161c1203376c5bc94c6349d54af13c80fd5da5204996b1834d2beb958733",
+      "source": "≥10× Frequency",
+      "translation": "⟦R0⟧≥10× 频率⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0004.tc.0004.p.0000": {
+      "sourceHash": "5cb1d4be1e82c5c2ab07fa3c51086350832447fdbaf2a67bec943f1d0ae80dd4",
+      "source": "≥20× Frequency",
+      "translation": "⟦R0⟧≥20× 频率⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0005.tc.0004.p.0000": {
+      "sourceHash": "c1e66bee6fe3ad379ffc23311eb1af42fe2df354524ff2333b556bef8049ad97",
+      "source": "≥50× Frequency",
+      "translation": "⟦R0⟧≥50× 频率⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0003.tr.0006.tc.0004.p.0000": {
+      "sourceHash": "0ea9d434c5b1db51992211049d5c66ec7636d86ed09d990535c17875934820e3",
+      "source": "≥100× Frequency",
+      "translation": "⟦R0⟧≥100× 频率⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0025": {
+      "sourceHash": "333734dbe26873661c97199861a0f66ef1ad9fe414bab103556a061dd67c69b6",
+      "source": "While 100×, 250× and 500× have been made redundant, lower volatility does not mean more boring gameplay. The changes to the multiplier curve simply replaced volatility with event frequency.",
+      "translation": "⟦R0⟧虽然 100×、250× 和 500× 已被移除，但更低的波动性并不意味着玩法更乏味。倍数曲线的调整只是用事件频率取代了波动性。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0026": {
+      "sourceHash": "cd3d4908741699f265ded5475680bceee4a6cfc6e54ac372dd2ffaf35b283d68",
+      "source": "So, while ≥10× multipliers have decreased very significantly, multipliers between 2× and 6× have increased by a noticeable margin themselves.",
+      "translation": "⟦R0⟧因此，虽然 ≥10× 倍数显著减少，但 2× 至 6× 之间的倍数则有明显增加。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0027": {
+      "sourceHash": "0efc47fcbc902261a9d0c7f0605a60c4fcbe7bd3ec5e9b682d906334201a8e6a",
+      "source": "So statistically speaking, even though the major payouts have become even more rare, players will experience the lower multiplier events more frequently than ever before.",
+      "translation": "⟦R0⟧从统计角度看，尽管大奖变得更加罕见，玩家体验低倍数事件的频率却会高于以往。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0029": {
+      "sourceHash": "fbada9c605e9268d0f10c65c17fa1566e2b4c03e714263aa4ef9b4180b37ecde",
+      "source": "C. PAYTABLE TUNING",
+      "translation": "⟦R0⟧C. 赔付表调优⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0030": {
+      "sourceHash": "f41bac657dd4809738288e6a3809b5f80a153047b359f11103db71992ec90beb",
+      "source": "The default volatility profile has a fairly linear frequency curve for the 9 regular Symbols. However, this game is special in the sense that the regular Symbols are split into 2 distinct groups: 5 Low Symbols, and 4 High Symbols. This grouping matters because of the Bathala Symbol Elimination Skill, where a randomly selected Low Symbol is eliminated after a regular Symbol Win. High Symbols are not able to benefit from this elimination.",
+      "translation": "⟦R0⟧默认波动性特征对 9 个普通符号呈现较为线性的频率曲线。但本游戏的特殊之处在于，普通符号分为 2 个不同组别：5 个低赔符号和 4 个高赔符号。这种分组对 Bathala 符号消除技能非常重要：普通符号中奖后会随机消除一个低赔符号，而高赔符号无法从该消除中受益。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0031": {
+      "sourceHash": "1735230ab2a61012324c76870ca7e5626662df81547f7d56cc9244b1da84efa3",
+      "source": "Due of this exclusion, Low Symbols actually add more to engagement than High Symbols, simply because Eliminations from Low Symbols can trigger recursive wins.",
+      "translation": "⟦R0⟧由于这一限制，低赔符号对参与度的贡献实际上高于高赔符号，因为消除低赔符号能够触发递归中奖。⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0032": {
+      "sourceHash": "43cf02e7d2375792a56ee1fcc33162124d8bdef6d5cbbdaa4691834ca42fb2be",
+      "source": "Therefore, one way to noticeably reduce volatility while maintaining engagement is to shift both symbol frequency weightage and payouts from High Symbols (H1H4) to Low Symbols (L1L5).",
+      "translation": "⟦R0⟧因此，在维持参与度的同时显著降低波动性的一种方式，是将符号频率权重和赔付从高赔符号（H1H4）转移至低赔符号（L1L5）。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0034": {
+      "sourceHash": "5a26794bad954a10d0fb3577e732f654d2aca1a60496222ab40494a75de0cd0a",
+      "source": "NEW PAYTABLE PAYOUTS",
+      "translation": "⟦R0⟧新赔付表赔付⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "b7be4470979f54c66532578261a60f82cd4d66f1aa5e17a7cb9b65e43cc71321",
+      "source": "Base & Free",
+      "translation": "⟦R0⟧基础与免费⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0000.p.0001": {
+      "sourceHash": "ba0e4afa93400b805dfcc4b9e6aef549269946e2d1af5ababfc3a73c67912d89",
+      "source": "Symbol",
+      "translation": "⟦R0⟧符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "a7760e7549cabbd3fe9c479077ea42e464c6ff9dc02400d95cefaf05745155ef",
+      "source": "minCount",
+      "translation": "⟦R0⟧最小数量⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "d0685efba23430ec703fce822145f7ecb3300ab7a4edf1ec2898e3473258f552",
+      "source": "maxCount",
+      "translation": "⟦R0⟧最大数量⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0003.p.0000": {
+      "sourceHash": "951848765ea8542959c4ea6df68e91ea3ef1be3c7ae682e4748b4579291fc568",
+      "source": "Current Payout",
+      "translation": "⟦R0⟧当前赔付⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0004.p.0000": {
+      "sourceHash": "18fdd549b2ed367ac0c74cbec1214644728515b30edbcb78e7d322757a7c8359",
+      "source": "New",
+      "translation": "⟦R0⟧新⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0000.tc.0004.p.0001": {
+      "sourceHash": "08be085af32a9da9661147d3eeafa76a1777d674b28878164b4f897b9dae0015",
+      "source": "Payout",
+      "translation": "⟦R0⟧赔付⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0001.tc.0000.p.0001": {
+      "sourceHash": "1b349ea66fd0a7a73f5b784dcd9d8ae14423aa492ebbd15b8cf70af8bce8e65d",
+      "source": "(Low-1)",
+      "translation": "⟦R0⟧（低赔-1）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0004.tc.0000.p.0001": {
+      "sourceHash": "9eca43beb1991cea0dad0a54b2d6c35e332a8167ee38ed91f27dc4463adae7df",
+      "source": "(Low-2)",
+      "translation": "⟦R0⟧（低赔-2）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0007.tc.0000.p.0001": {
+      "sourceHash": "d5dcf9ae4fafdbec1cfd0e2980a0944c74c14694c7aff739a998d8697bda05f1",
+      "source": "(Low-3)",
+      "translation": "⟦R0⟧（低赔-3）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0010.tc.0000.p.0001": {
+      "sourceHash": "45979d3a6ce6a44caeb2fc8c8982675b1c396ae8caeca73b7f92ff0b71474aba",
+      "source": "(Low-4)",
+      "translation": "⟦R0⟧（低赔-4）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0013.tc.0000.p.0001": {
+      "sourceHash": "08b96f99b715c94ce67b6174ccb71bae3cada7c334a0fb43669d55895a3ab4cc",
+      "source": "(Low-5)",
+      "translation": "⟦R0⟧（低赔-5）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0016.tc.0000.p.0001": {
+      "sourceHash": "9c0af46dea3600668fc352d8b85465e8985ee844e2092f6c153cc88c7eb789ce",
+      "source": "(High-1)",
+      "translation": "⟦R0⟧（高赔-1）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0019.tc.0000.p.0001": {
+      "sourceHash": "cafe467d2d82d090e98a15e6eccd11de4a515f2d37cf1a3f1231f3c7e40d0e02",
+      "source": "(High-2)",
+      "translation": "⟦R0⟧（高赔-2）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0022.tc.0000.p.0001": {
+      "sourceHash": "4a09f0681dd465e01f4a227e152dc1967675e7535fcaa2ae1524ff88189a0033",
+      "source": "(High-3)",
+      "translation": "⟦R0⟧（高赔-3）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0004.tr.0025.tc.0000.p.0001": {
+      "sourceHash": "6c6cd4cbc7bdfb2767b657d1bd29e5126544cec79b1e8c511b4372a1e5381c6a",
+      "source": "(High-4)",
+      "translation": "⟦R0⟧（高赔-4）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0036": {
+      "sourceHash": "a7e7cf47dfb9f54c6c15077ca329196111f8ceb760def81e3fbf0815b189e997",
+      "source": "As a key point of note, the default H3 has a huge payout cliff. At (H3 x 8), the payout is 2.5× which then scales rapidly to 10× at (H3 x 10), and then 25× at (H3 x 12). For a basic mechanic, such exponential payouts are unnecessary. Therefore, my suggested paytable has reduced these to 2.5×, 4.5× and 10× respectively.",
+      "translation": "⟦R0⟧需要特别注意的是，默认 H3 存在巨大的赔付断崖。在 (H3 x 8) 时赔付为 2.5×，随后在 (H3 x 10) 快速升至 10×，并在 (H3 x 12) 升至 25×。对基础机制而言，这种指数级赔付并无必要。因此，建议赔付表将其分别降至 2.5×、4.5× 和 10×。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧⟦R23⟧⟦/R23⟧⟦R24⟧⟦/R24⟧⟦R25⟧⟦/R25⟧⟦R26⟧⟦/R26⟧⟦R27⟧⟦/R27⟧⟦R28⟧⟦/R28⟧⟦R29⟧⟦/R29⟧⟦R30⟧⟦/R30⟧⟦R31⟧⟦/R31⟧⟦R32⟧⟦/R32⟧⟦R33⟧⟦/R33⟧⟦R34⟧⟦/R34⟧⟦R35⟧⟦/R35⟧⟦R36⟧⟦/R36⟧⟦R37⟧⟦/R37⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0037": {
+      "sourceHash": "05914c7a8342dcad3c0caef53a8d20600084d2bd6d4613aa9152360ada5cdb0b",
+      "source": "Similarly, the default L5 went from a payout of only 1.5× at (L5 x 10) to 10× at (L5 x 12). I have suggested reducing (L5 x 12) from 10× to just 4×.",
+      "translation": "⟦R0⟧同样，默认 L5 从 (L5 x 10) 时仅 1.5× 的赔付跃升至 (L5 x 12) 时的 10×。建议将 (L5 x 12) 从 10× 降至仅 4×。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧⟦R23⟧⟦/R23⟧⟦R24⟧⟦/R24⟧⟦R25⟧⟦/R25⟧⟦R26⟧⟦/R26⟧⟦R27⟧⟦/R27⟧⟦R28⟧⟦/R28⟧⟦R29⟧⟦/R29⟧⟦R30⟧⟦/R30⟧⟦R31⟧⟦/R31⟧⟦R32⟧⟦/R32⟧⟦R33⟧⟦/R33⟧⟦R34⟧⟦/R34⟧⟦R35⟧⟦/R35⟧⟦R36⟧⟦/R36⟧⟦R37⟧⟦/R37⟧⟦R38⟧⟦/R38⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0038": {
+      "sourceHash": "7150d07c1f665dc12fa0713182f9809301c3e87cbb16870d1ee63e319d28a459",
+      "source": "In fact, I have compressed most of the payout cliffs from L3, L4, L5, H1, H2, H3, H4 which will help us to free up payout allocations to L1 and L2. So for example, the suggested payout at (L1 x 8) should increase by 60%. Performing these adjustments will materially reduce standard deviation.",
+      "translation": "⟦R0⟧实际上，我已压缩 L3、L4、L5、H1、H2、H3、H4 的大多数赔付断崖，从而为 L1 和 L2 释放赔付分配空间。例如，建议将 (L1 x 8) 的赔付提高 60%。这些调整将实质性降低标准差。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧⟦R23⟧⟦/R23⟧⟦R24⟧⟦/R24⟧⟦R25⟧⟦/R25⟧⟦R26⟧⟦/R26⟧⟦R27⟧⟦/R27⟧⟦R28⟧⟦/R28⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0040": {
+      "sourceHash": "5adc2dd8ba1eb8011cac6f1c7cad9321946aa459665e6f3e66b1f57b357877aa",
+      "source": "D. SYMBOL WEIGHTAGES",
+      "translation": "⟦R0⟧D. 符号权重⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0041": {
+      "sourceHash": "0730d841209b7be5ffe61ace61bdb6d7bfd0cd9769a53e7de391cad5ade9a986",
+      "source": "In conjunction with higher payouts for Low Symbols, we can also improve their weight frequency. This will noticeably improve player experience because players will be able to see more 8-9 Symbol Wins, which could then lead to more Tumbles, more Symbol Eliminations, more Symbol Refills, and recursive wins thereafter.",
+      "translation": "⟦R0⟧在提高低赔符号赔付的同时，也可以增加其频率权重。这将显著改善玩家体验，因为玩家会看到更多 8-9 符号中奖，进而带来更多连消、更多符号消除、更多符号补充，以及随后的递归中奖。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0042": {
+      "sourceHash": "da1e21ceccc1de54377cc0ac2ddc78f5bff5c655d94cfdd70b6cad15b1c8c28a",
+      "source": "In fact, the frequency weights for Base Game Symbols and Free Game Symbols should be modified independently from one another as they impact RTP differently.",
+      "translation": "⟦R0⟧实际上，基础游戏符号与免费游戏符号的频率权重应彼此独立调整，因为两者对 RTP 的影响不同。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "ec2174b9acb18af4e1feae7f4fa31e4112ad3b3f3841e9139ae440b76d243a4a",
+      "source": "NEW BASE GAME SYMBOL WEIGHTS",
+      "translation": "⟦R0⟧新基础游戏符号权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "076566684383644301f26a45eaaabee4a2f2a5857c262e94916185f2ec6a9a93",
+      "source": "NEW FREE GAME SYMBOL WEIGHTS",
+      "translation": "⟦R0⟧新免费游戏符号权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "a50b169bce243ecff0039c98b79677f14ad0c7ce8ca673e4ea37c4f11e0b204b",
+      "source": "Base Game Symbols",
+      "translation": "⟦R0⟧基础游戏符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0001.tc.0001.p.0000": {
+      "sourceHash": "1f198e2a6dfb9f329fb978f151e95e9ae0262bebd2c711d5b7a475711c625067",
+      "source": "Current Config",
+      "translation": "⟦R0⟧当前配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0001.tc.0002.p.0000": {
+      "sourceHash": "fe9ff0105437cc032c7ff298ccdc831a796117751d2414267cb3988ccacfb226",
+      "source": "New Weights",
+      "translation": "⟦R0⟧新权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0001.tc.0004.p.0000": {
+      "sourceHash": "076b138fb03b0e002626944a4e27e278809e822ca76f3132cc4586953ebccbaf",
+      "source": "Free Game Symbols",
+      "translation": "⟦R0⟧免费游戏符号⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0001.tc.0005.p.0000": {
+      "sourceHash": "1f198e2a6dfb9f329fb978f151e95e9ae0262bebd2c711d5b7a475711c625067",
+      "source": "Current Config",
+      "translation": "⟦R0⟧当前配置⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0001.tc.0006.p.0000": {
+      "sourceHash": "fe9ff0105437cc032c7ff298ccdc831a796117751d2414267cb3988ccacfb226",
+      "source": "New Weights",
+      "translation": "⟦R0⟧新权重⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0011.tc.0000.p.0000": {
+      "sourceHash": "332663940113ed76f0839efdd69bd3e07de271c76ed323f2a38e086a3208e634",
+      "source": "SCATTER",
+      "translation": "⟦R0⟧SCATTER⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0011.tc.0004.p.0000": {
+      "sourceHash": "332663940113ed76f0839efdd69bd3e07de271c76ed323f2a38e086a3208e634",
+      "source": "SCATTER",
+      "translation": "⟦R0⟧SCATTER⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0012.tc.0000.p.0000": {
+      "sourceHash": "6addfee62e9deb2da3affee3128f9ec5159ab3588c7f97980541a13e516afff3",
+      "source": "MULTIPLIER",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0005.tr.0012.tc.0004.p.0000": {
+      "sourceHash": "6addfee62e9deb2da3affee3128f9ec5159ab3588c7f97980541a13e516afff3",
+      "source": "MULTIPLIER",
+      "translation": "⟦R0⟧倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0045": {
+      "sourceHash": "7c0a3bcfef36bf0d24eb74769b1059b8c27a0b98f4e066acf5f300ac46110815",
+      "source": "For Base Game Symbols, I have intentionally shifted weightage from L4, L5, H1, H2, H3 and H4 in favor of L1, L2 and L3. Doing so increases the probability of triggering at least one ≥8 regular Symbol cluster from ~32% to ~49% using this distribution method.",
+      "translation": "⟦R0⟧对于基础游戏符号，我有意将权重从 L4、L5、H1、H2、H3 和 H4 转向 L1、L2 和 L3。采用这种分布方式后，触发至少一个 ≥8 普通符号簇的概率从 ~32% 提高至 ~49%。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧⟦R23⟧⟦/R23⟧⟦R24⟧⟦/R24⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0046": {
+      "sourceHash": "02bc38f5d66c45873ffe82e95ef46c41b37e6833a343b802d3d60b550ca21edf",
+      "source": "At the same time, I have reduced the frequency of multipliers by about 40% (from 0.45% to 0.27%).",
+      "translation": "⟦R0⟧同时，我将倍数频率降低了约 40%（从 0.45% 降至 0.27%）。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0047": {
+      "sourceHash": "b7680d9bc773c4032cd5ca1d3c553f754a592033d1d6af85a80eab350594953d",
+      "source": "So as a result, instead of waiting for a multiplier event for engagement, the player will now expect:",
+      "translation": "⟦R0⟧因此，玩家不再需要等待倍数事件来获得参与感，而会期待：⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0048": {
+      "sourceHash": "a1663cd29e8a9c5aeae4b37d5b7776dee0c7d8b2a70056c0729b1d79db81114c",
+      "source": "≥8 REGULAR SYMBOL ➔ BATHALA ELIMINATION ➔ REFILL ➔ ≥8 REGULAR SYMBOL REACTIVATION",
+      "translation": "⟦R0⟧≥8 普通符号 ➔ BATHALA 消除 ➔ 补充 ➔ ≥8 普通符号再次激活⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0050": {
+      "sourceHash": "07609ddb4f21cef65d721b37175e11ecfe74fd5d6b83469d57b67931be32a2af",
+      "source": "On the other hand, I would recommend making Free Game Symbol weightage premium-leaning. So for example, increase H1 from 9.0% to 13.6%, while increasing H2 from 7.5% to 10.9%.",
+      "translation": "⟦R0⟧另一方面，建议让免费游戏符号权重偏向高价值符号。例如，将 H1 从 9.0% 提高至 13.6%，同时将 H2 从 7.5% 提高至 10.9%。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧⟦R17⟧⟦/R17⟧⟦R18⟧⟦/R18⟧⟦R19⟧⟦/R19⟧⟦R20⟧⟦/R20⟧⟦R21⟧⟦/R21⟧⟦R22⟧⟦/R22⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0051": {
+      "sourceHash": "4c0d4a8872bc779c01ab423afc081a601260e662f2900e3ab87a470ca87bc0e2",
+      "source": "This might create an interesting psychological effect where Free Games become perceived as a premium variant due to the frequency of High-Symbols.",
+      "translation": "⟦R0⟧这可能产生有趣的心理效应：由于高赔符号出现更频繁，免费游戏会被感知为更高价值的变体。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0053": {
+      "sourceHash": "ce7415fc4fe19ed4abc73888ca69de488cce8dc7783877ca0c6db78fa91b4b16",
+      "source": "E. FINAL EVALUATION",
+      "translation": "⟦R0⟧E. 最终评估⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "e414b7bf687cdbd90250c28c0bc86decd98ddabc4a95667fb92bb6a406fa59eb",
+      "source": "Targeted Metrics",
+      "translation": "⟦R0⟧目标指标⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "c862407e0809e32e25c86fa9f13c105926ba4296a241f3341b881f68c9402ecb",
+      "source": "Performance Metric",
+      "translation": "⟦R0⟧绩效指标⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0001.tc.0001.p.0000": {
+      "sourceHash": "4ae04a822f7f81c7efe6360673456b94fc64de7c3ff149f4b1979d8675f7c461",
+      "source": "Sim1 (Multiplier-led)",
+      "translation": "⟦R0⟧Sim1（倍数主导型）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0001.tc.0002.p.0000": {
+      "sourceHash": "26acd124b63dd6e56471d5fc452362fb3f8f29fa245ab2b9c48f429c78db4244",
+      "source": "Sim2 (Tumble-led)",
+      "translation": "⟦R0⟧Sim2（连消主导型）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0001.tc.0003.p.0000": {
+      "sourceHash": "18833da39fb9b7f8c917fe0220daf9cf12e6524df8fb16e39f04dbe827e2d200",
+      "source": "Delta",
+      "translation": "⟦R0⟧差值⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "91c9dd31daabc444ce3cbda282aeddaad2ba87da91b4914335a55812d2f943cc",
+      "source": "Win Cadence",
+      "translation": "⟦R0⟧中奖节奏⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0003.tc.0000.p.0000": {
+      "sourceHash": "31d28ad7700f45a5a5573dc86308ccc550fa6b0cc903a5b31d5f915068d02c6e",
+      "source": "Tumbles",
+      "translation": "⟦R0⟧连消⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0004.tc.0000.p.0000": {
+      "sourceHash": "895af05fc60c91e40de43a67573886f72f1b0350c751af519456d45aeb505380",
+      "source": "Multiplier RTP",
+      "translation": "⟦R0⟧倍数 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0005.tc.0000.p.0000": {
+      "sourceHash": "4a0b58eac4f12a890cac8e5ec3eb4f92dffcdccf555ca7c71539cf7fdf828d0c",
+      "source": "Volatility (CoV)",
+      "translation": "⟦R0⟧波动性（CoV）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0006.tr.0006.tc.0000.p.0000": {
+      "sourceHash": "0b200a6709e430658aa9c5e6f1545eef402f2fd3e8d50e12d9163fa2b2b9d04f",
+      "source": "Max Observed Win",
+      "translation": "⟦R0⟧最大观测中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0055": {
+      "sourceHash": "21cf9a737f2e76b3917a6e029162bea221c6ed0dd2b994d633b1400c33399d0d",
+      "source": "Sim2 (Tumble-led) delivers a much more active core loop.",
+      "translation": "⟦R0⟧Sim2（连消主导型）带来了活跃得多的核心循环。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0056": {
+      "sourceHash": "cbcfa7910e0f87c9e97b2e19100c4a810f2bc2d48d25db84783c9d4dcebcf19c",
+      "source": "Win Cadence rose from 31.3% to 45.6% and Tumbles increased from 34.7% to 49.1%, meaning players encountered continuation mechanics far more frequently.",
+      "translation": "⟦R0⟧中奖节奏从 31.3% 升至 45.6%，连消从 34.7% 升至 49.1%，意味着玩家遇到延续机制的频率大幅提高。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0057": {
+      "sourceHash": "5350d251f1d3e1d201c2075df29e37a7da59381521ba471fa35bbd41e9abd904",
+      "source": "Sim2 (Tumble-led) is significantly less multiplier-dependent.",
+      "translation": "⟦R0⟧Sim2（连消主导型）对倍数的依赖显著降低。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0058": {
+      "sourceHash": "ed876454a7952f49ad2e434fd4fd3178baaa8a00ec65ec7fdad2ee7eb0902041",
+      "source": "Multiplier RTP fell from 49.6% to 24.4%, so Sim2 shifts more of its payout value towards regular and tumble-driven outcomes instead of multiplier spikes.",
+      "translation": "⟦R0⟧倍数 RTP 从 49.6% 降至 24.4%，因此 Sim2 将更多赔付价值转向普通中奖及连消驱动的结果，而非倍数尖峰。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0059": {
+      "sourceHash": "341891751e4a6161b47ed495878f7d071df829802137646eca8435a61b4ab6dd",
+      "source": "Sim2 (Tumble-led)’s volatility is dramatically compressed.",
+      "translation": "⟦R0⟧Sim2（连消主导型）的波动性得到大幅压缩。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.p.0060": {
+      "sourceHash": "7aa16aba67651b836c5641b015594d81b39772d1c267107b6246fc5925bfe586",
+      "source": "CoV fell from 9.50 to 3.68, with Maximum Observed Win falling from 3,820× to 616×. This indicates a much narrower payout distribution, with fewer extreme tail outcomes and a more consistent player experience.",
+      "translation": "⟦R0⟧CoV 从 9.50 降至 3.68，最大观测中奖从 3,820× 降至 616×。这表明赔付分布明显收窄，极端尾部结果更少，玩家体验也更加一致。⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧⟦R5⟧⟦/R5⟧⟦R6⟧⟦/R6⟧⟦R7⟧⟦/R7⟧⟦R8⟧⟦/R8⟧⟦R9⟧⟦/R9⟧⟦R10⟧⟦/R10⟧⟦R11⟧⟦/R11⟧⟦R12⟧⟦/R12⟧⟦R13⟧⟦/R13⟧⟦R14⟧⟦/R14⟧⟦R15⟧⟦/R15⟧⟦R16⟧⟦/R16⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0000.tc.0000.p.0000": {
+      "sourceHash": "c862407e0809e32e25c86fa9f13c105926ba4296a241f3341b881f68c9402ecb",
+      "source": "Performance Metric",
+      "translation": "⟦R0⟧绩效指标⟦/R0⟧⟦R1⟧⟦/R1⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0000.tc.0001.p.0000": {
+      "sourceHash": "4ae04a822f7f81c7efe6360673456b94fc64de7c3ff149f4b1979d8675f7c461",
+      "source": "Sim1 (Multiplier-led)",
+      "translation": "⟦R0⟧Sim1（倍数主导型）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0000.tc.0002.p.0000": {
+      "sourceHash": "26acd124b63dd6e56471d5fc452362fb3f8f29fa245ab2b9c48f429c78db4244",
+      "source": "Sim2 (Tumble-led)",
+      "translation": "⟦R0⟧Sim2（连消主导型）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0000.tc.0003.p.0000": {
+      "sourceHash": "18833da39fb9b7f8c917fe0220daf9cf12e6524df8fb16e39f04dbe827e2d200",
+      "source": "Delta",
+      "translation": "⟦R0⟧差值⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0001.tc.0000.p.0000": {
+      "sourceHash": "447f992dbd5511ddb80c495a17fd127265d0a553c0d00ba262f27af5730e147e",
+      "source": "Simulation Overview",
+      "translation": "⟦R0⟧仿真概览⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0002.tc.0000.p.0000": {
+      "sourceHash": "db35e2c6e70fc1a083a3dc2a73135bd2a8f5fa43cb22abac6b051005f9205a2d",
+      "source": "Simulation Spins",
+      "translation": "⟦R0⟧仿真旋转次数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0002.tc.0003.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0003.tc.0000.p.0000": {
+      "sourceHash": "e88ee801a778fafdc86c092285a5cb8a2033c6e1f3beb9fbf26791e727304c3b",
+      "source": "Credited RTP",
+      "translation": "⟦R0⟧计入 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0004.tc.0000.p.0000": {
+      "sourceHash": "12d9edbd0bcb31781ace7ec85e5f0acabd505a52419e491811d5cfa8d5f51793",
+      "source": "95% RTP Confidence",
+      "translation": "⟦R0⟧95% RTP 置信区间⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0004.tc.0001.p.0000": {
+      "sourceHash": "a48b03d4f3e3708b8b16688e4dc4577db7d94bfc65f9aa78dea38306144dd56b",
+      "source": "91.4% to 94.9%",
+      "translation": "⟦R0⟧91.4% 至 94.9%⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0004.tc.0002.p.0000": {
+      "sourceHash": "f35524e165f9c7aa1f14bf3d262f676aa908c6186fe66b2fc9ae240f3f39964d",
+      "source": "93.3% to 94.7%",
+      "translation": "⟦R0⟧93.3% 至 94.7%⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧⟦R3⟧⟦/R3⟧⟦R4⟧⟦/R4⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0004.tc.0003.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0005.tc.0000.p.0000": {
+      "sourceHash": "e04cfef262c78b2ca6cb386c01d78148a23c2a1a5b1c320cc632f8fab80cfb5d",
+      "source": "Winning Spin Frequency",
+      "translation": "⟦R0⟧中奖旋转频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0006.tc.0000.p.0000": {
+      "sourceHash": "d8c85060c2b767b89aeb4db181d6ae5a9c9c937959e2346a107f58b6c8b747e9",
+      "source": "Feature Frequency",
+      "translation": "⟦R0⟧功能频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0006.tc.0001.p.0000": {
+      "sourceHash": "58e4d21b17dfbb5863cbb3d322caadd5f531ac53ed60061714ccaccf09aa9cd4",
+      "source": "1 in 113",
+      "translation": "⟦R0⟧每 113 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0006.tc.0002.p.0000": {
+      "sourceHash": "0eb6bda391735bfdfb817e2f9baf562ebea462825a7856d9779132bf98d64cd2",
+      "source": "1 in 111",
+      "translation": "⟦R0⟧每 111 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0007.tc.0000.p.0000": {
+      "sourceHash": "9c87ccad8ab41173569e940f2465fb244a07de9f7eadd183054a0b61b9555719",
+      "source": "Tumbles & Bathala Elimination Skill",
+      "translation": "⟦R0⟧连消与 Bathala 消除技能⟦/R0⟧⟦R1⟧⟦/R1⟧⟦R2⟧⟦/R2⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0008.tc.0000.p.0000": {
+      "sourceHash": "7451e2c6fdb1931c28ba9e35735a8d1a15f212dfe3a77c2eb0cc76afdc0034b6",
+      "source": "Tumble Frequency",
+      "translation": "⟦R0⟧连消频率⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0009.tc.0000.p.0000": {
+      "sourceHash": "2abdc9d8cd37df3f23de3a39b541079a428280adbf5639ae996987381bab2b09",
+      "source": "Tumble Depth (per spin)",
+      "translation": "⟦R0⟧连消深度（每次旋转）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0010.tc.0000.p.0000": {
+      "sourceHash": "d4bfa78b24b8c09b85278985930d932806b6e78b0bec7e694ce030eda97f87d0",
+      "source": "Tumble Depth (per trigger)",
+      "translation": "⟦R0⟧连消深度（每次触发）⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0011.tc.0000.p.0000": {
+      "sourceHash": "f9e39dbd456edddba4dd8848b5705e3b4022e378daf7c78ec7dd358a76eb2b3c",
+      "source": "Symbol Elimination → Win",
+      "translation": "⟦R0⟧符号消除 → 中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0012.tc.0000.p.0000": {
+      "sourceHash": "9d5af2fcb7bdba19932bc53ee1afccec8b24ac459c7fbeeb785dcd32b1a9701b",
+      "source": "RTP Composition",
+      "translation": "⟦R0⟧RTP 构成⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0013.tc.0000.p.0000": {
+      "sourceHash": "e97131520b6d1f791664c14fd5edddba104bcdc93ad33ebbedb4d2648e57cacf",
+      "source": "Base RTP Contribution",
+      "translation": "⟦R0⟧基础游戏 RTP 贡献⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0014.tc.0000.p.0000": {
+      "sourceHash": "57d28a29036b40d6d7085ba8154edba17a0e6130dfe31959258fbabebf196d05",
+      "source": "Feature RTP Contribution",
+      "translation": "⟦R0⟧功能 RTP 贡献⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0015.tc.0000.p.0000": {
+      "sourceHash": "ada5d7367aee191e0c410666e6700d7326ecaf72b7997659c33d188d5c924d2f",
+      "source": "Base Regular RTP",
+      "translation": "⟦R0⟧基础游戏普通 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0016.tc.0000.p.0000": {
+      "sourceHash": "7c91712aa606b1a5f88517b039e54685a551be97feec43bbfec5c9006186ff93",
+      "source": "Base Multiplier RTP",
+      "translation": "⟦R0⟧基础游戏倍数 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0017.tc.0000.p.0000": {
+      "sourceHash": "822818e4736340e60994aa4e98f644342bc7622b988db441c1b66bda27aa191a",
+      "source": "Free Game Regular RTP",
+      "translation": "⟦R0⟧免费游戏普通 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0018.tc.0000.p.0000": {
+      "sourceHash": "6ee1c3cd88b202e1febe562341e4612ac387fba7ebfcfe7df9d3eebf9f0ee74f",
+      "source": "Free Game Multiplier RTP",
+      "translation": "⟦R0⟧免费游戏倍数 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0019.tc.0000.p.0000": {
+      "sourceHash": "9369a10bcf3fca538eea6f357c3a9a34b00b33a02181fb4a666e2a903901f315",
+      "source": "Total Multiplier RTP",
+      "translation": "⟦R0⟧总倍数 RTP⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0020.tc.0000.p.0000": {
+      "sourceHash": "ba505472f94a7d61bb6ad7e59a472bafe2aa57684a8e52cdacd479db308b1630",
+      "source": "Volatility & Payout Tail",
+      "translation": "⟦R0⟧波动性与赔付尾部⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0021.tc.0000.p.0000": {
+      "sourceHash": "aebfbd2a46774182e862e798ea11173b92d21e0da5108e24c2498d015cbd584c",
+      "source": "Coefficient of Variation",
+      "translation": "⟦R0⟧变异系数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0022.tc.0000.p.0000": {
+      "sourceHash": "9166847fad21a259f0b264b06b44cfa7b9e088ad6c522e3fbdc3528801ad59c4",
+      "source": "Standard Deviation",
+      "translation": "⟦R0⟧标准差⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0023.tc.0000.p.0000": {
+      "sourceHash": "8f5ae60f086df22d1f3609fa089399ef82c1fe9e0847a39be0f5c015c7d18063",
+      "source": "Average Win / Winning Spin",
+      "translation": "⟦R0⟧平均中奖 / 中奖旋转⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0024.tc.0000.p.0000": {
+      "sourceHash": "11e89e5c9f6a1b051814c111584f02957e6a8fc34aac83bf4f0b35f52e3eb218",
+      "source": "Average Multiplier Value",
+      "translation": "⟦R0⟧平均倍数值⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0025.tc.0000.p.0000": {
+      "sourceHash": "b226e8b2c5311eb7424409b940c473012cd5837a109e676715e3a015ae2f3614",
+      "source": "Max Summed Multiplier",
+      "translation": "⟦R0⟧最大合计倍数⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0026.tc.0000.p.0000": {
+      "sourceHash": "eafa3fc20ba98a4461585e194d7f66b3a6cad947cfa3053ce474263d47c3cf96",
+      "source": "Maximum Observed Win",
+      "translation": "⟦R0⟧最大观测中奖⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0027.tc.0000.p.0000": {
+      "sourceHash": "196c4f409320fd4c3143e2f8842d9e84c8198378961ced92ffbb64d1662a4239",
+      "source": "≥100× Occurrence",
+      "translation": "⟦R0⟧≥100× 出现⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0027.tc.0001.p.0000": {
+      "sourceHash": "e1d0c0a366e28e01327534693268e27af7f4fa35373e9d196538d666e4a1a9e8",
+      "source": "1 in 1,080",
+      "translation": "⟦R0⟧每 1,080 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0027.tc.0002.p.0000": {
+      "sourceHash": "69b4abd0af8d5725b54f4b41eba3949f3ba43d083888f8836ffaa248f82375cd",
+      "source": "1 in 3,509",
+      "translation": "⟦R0⟧每 3,509 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0028.tc.0000.p.0000": {
+      "sourceHash": "7dcef6a5dc7a0519c869b69bdec7f25839c9aa035b0fc94ed3e9b2456e44ffbc",
+      "source": "≥250× Occurrence",
+      "translation": "⟦R0⟧≥250× 出现⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0028.tc.0001.p.0000": {
+      "sourceHash": "67b93cbc39812e295662d1cd5b1860a497a7abf5db84c96db6f55ddcb1854593",
+      "source": "1 in 8,333",
+      "translation": "⟦R0⟧每 8,333 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0028.tc.0002.p.0000": {
+      "sourceHash": "4a470214e8f4deb1c2191aced100e443ecfe1b57dcb3f760b866fe307a5f9b57",
+      "source": "1 in 250,000",
+      "translation": "⟦R0⟧每 250,000 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0029.tc.0000.p.0000": {
+      "sourceHash": "30eea4835457d6768cf8d585cc73f633f77903b1d75d5836ee269bf3d279a41d",
+      "source": "≥500× Occurrence",
+      "translation": "⟦R0⟧≥500× 出现⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0029.tc.0001.p.0000": {
+      "sourceHash": "34b2c578991c000f9d8d556e5d53f3f208c0297ff670eb0496256767b5041487",
+      "source": "1 in 41,667",
+      "translation": "⟦R0⟧每 41,667 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0029.tc.0002.p.0000": {
+      "sourceHash": "b06932f4f70c08299b1792c897dc18a3eda9a1dd51048e5048c9c24977432bfe",
+      "source": "1 in 1,000,000",
+      "translation": "⟦R0⟧每 1,000,000 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0030.tc.0000.p.0000": {
+      "sourceHash": "693ecf81e40f45d2fdf13b6de1a6c9fdf9f603ddb56ee7b3ae468394c0e8590b",
+      "source": "≥1,000× Occurrence",
+      "translation": "⟦R0⟧≥1,000× 出现⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0030.tc.0001.p.0000": {
+      "sourceHash": "0e4ed8d34062191db939b0f702198b331d74e7af1e9a622b8a6a212244f376fa",
+      "source": "1 in 125,000",
+      "translation": "⟦R0⟧每 125,000 次 1 次⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0030.tc.0002.p.0000": {
+      "sourceHash": "e118b5c29cb4b975251601a6cc3209a4ea3eb0b429b205b679a8645da47da654",
+      "source": "Nil",
+      "translation": "⟦R0⟧无⟦/R0⟧",
+      "status": "translated"
+    },
+    "document.body.0000.tbl.0001.tr.0000.tc.0000.tbl.0007.tr.0030.tc.0003.p.0000": {
+      "sourceHash": "e2f79e5b60330bba4c289962231b6ba2957d0b14e7deb3110417003c79dea635",
+      "source": "N/A",
+      "translation": "⟦R0⟧不适用⟦/R0⟧",
+      "status": "translated"
+    },
+    "footer1.sdt.0000.sdtContent.0000.sdt.0000.sdtContent.0000.p.0000": {
+      "sourceHash": "25488097aa10a9d16d33e75942d6d0bd1f295e33ead30c9ef1262ba4437999fd",
+      "source": "Page 2 of 2",
+      "translation": "⟦R0⟧第 ⟦/R0⟧⟦R1⟧2⟦/R1⟧⟦R2⟧ 页，共 ⟦/R2⟧⟦R3⟧2⟦/R3⟧",
+      "status": "translated"
+    },
+    "header1.p.0002": {
+      "sourceHash": "458600c56eabb7c761de4a0c921aea9e2eca969af3422fbae0ed8656192c71fd",
+      "source": "LUCKY888 | Bathala Slot AnalysisLEON YANYANG SI | leon@ludoai.xyz",
+      "translation": "⟦R0⟧LUCKY888 | Bathala 角子机分析⟦/R0⟧⟦R1⟧LEON YANYANG SI | leon@ludoai.xyz⟦/R1⟧",
+      "status": "translated"
+    }
+  },
+  "obsolete": {}
+}

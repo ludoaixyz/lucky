@@ -35,9 +35,9 @@ math/reports/raw/
 math/generated/*.json
 math/generated/**/runtime-config.json
 apps/game/public/data/runtime-config.json
-apps/report/public/report/*
+generated/report-docx/
+generated/report-pdf/
 !math/generated/.gitkeep
 !apps/game/public/data/.gitkeep
-!apps/report/public/report/.gitkeep
 ~$*
 *.lock~

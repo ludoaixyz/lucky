@@ -1,8 +1,10 @@
+@import 'pdfjs-dist/web/pdf_viewer.css';
+
 :root {
   color: #182b3e;
   background: #e9eef3;
+  font-family: Arial, Helvetica, 'Liberation Sans', sans-serif;
   font-synthesis: none;
-  --report-scale: 1;
 }
 
 * {
@@ -39,7 +41,6 @@ a:focus-visible {
   color: white;
   background: #173b5d;
   box-shadow: 0 2px 10px #172c3e40;
-  font-family: Arial, Helvetica, 'Liberation Sans', sans-serif;
 }
 .report-brand {
   display: grid;
@@ -89,37 +90,11 @@ a:focus-visible {
   font-size: 0.78rem;
 }
 
-.contents-panel {
-  position: fixed;
-  z-index: 19;
-  top: 72px;
-  right: 1rem;
-  width: min(420px, calc(100vw - 2rem));
-  max-height: calc(100vh - 90px);
-  overflow: auto;
-  border: 1px solid #cbd6e0;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  background: white;
-  box-shadow: 0 12px 40px #172c3e35;
-  font-family: Arial, Helvetica, 'Liberation Sans', sans-serif;
-}
-.contents-panel ol {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-.contents-panel li {
-  margin: 0.45rem 0;
-}
-.contents-panel a {
-  color: #174e7b;
-}
 .report-status {
   width: fit-content;
   margin: 5rem auto;
   padding: 1rem 1.25rem;
   color: #53677a;
-  font-family: Arial, Helvetica, 'Liberation Sans', sans-serif;
 }
 .report-status--error {
   color: #9f2929;
@@ -127,90 +102,40 @@ a:focus-visible {
   border-radius: 6px;
 }
 .report-host {
+  display: flex;
   visibility: hidden;
+  align-items: center;
+  flex-direction: column;
+  gap: clamp(14px, 2.5vw, 34px);
+  width: 100%;
+  padding: clamp(14px, 3vw, 46px) 0;
+  overflow: hidden;
 }
 .report-host.is-ready {
   visibility: visible;
 }
-
-.report-host .docx-wrapper {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  padding: clamp(20px, 4vw, 54px) 0 !important;
-  background: #e9eef3 !important;
-  overflow: hidden;
-}
-.report-page-frame {
+.pdf-page {
   position: relative;
-  flex: 0 0 auto;
-  margin: 0 auto clamp(20px, 3vw, 38px);
-}
-.report-host section.docx {
-  font-family: Arial, Helvetica, 'Liberation Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  flex: none;
+  max-width: calc(100% - 32px);
+  aspect-ratio: var(--pdf-page-ratio);
   overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 22px #1830472e;
 }
-.report-host .report-page-frame > section.docx {
-  position: absolute;
-  inset: 0 auto auto 0;
-  margin: 0 !important;
-  box-shadow: 0 4px 22px #1830472e !important;
-  transform: scale(var(--report-scale));
-  transform-origin: top left;
+.pdf-page canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
-.report-host
-  section.docx
-  :where(p, span, div, table, thead, tbody, tfoot, tr, th, td, ul, ol, li, header, footer, a) {
-  font-family: Arial, Helvetica, 'Liberation Sans', sans-serif !important;
+.pdf-page .textLayer {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
 }
-.report-host section.docx p.report-default-align {
-  text-align: start !important;
-}
-.report-host section.docx p.report-centered-align {
-  text-align: center !important;
-}
-.report-host section.docx p.report-drawing-anchor {
-  position: relative;
-  text-align: start !important;
-}
-.report-host section.docx .report-drawing-caption {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  right: 0;
-  left: 0;
-  display: grid;
-  grid-template-columns: repeat(var(--report-caption-columns), minmax(0, 1fr));
-  color: #17365d;
-  font-size: 7.2pt;
-  font-weight: 700;
-  line-height: 1.1;
-  text-align: center;
-  white-space: normal;
-}
-.report-host section.docx p.report-drawing-spacer {
-  height: var(--report-spacer-height) !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  line-height: 0 !important;
-}
-.report-host section.docx p.report-drawing-spacer--empty {
-  height: 0 !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  line-height: 0 !important;
-}
-.report-host section.docx header p.report-header-line {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-inline-end: 0 !important;
-  white-space: nowrap;
-}
-.report-anchor {
-  scroll-margin-top: 88px;
+.pdf-page .textLayer span {
+  color: transparent;
 }
 .visually-hidden {
   position: absolute !important;
@@ -226,7 +151,6 @@ a:focus-visible {
 
 @media (max-width: 820px) {
   .report-toolbar {
-    align-items: center;
     gap: 0.35rem;
     min-height: 0;
     padding: 0.45rem 0.55rem;
@@ -249,70 +173,12 @@ a:focus-visible {
   .language-selector span {
     display: none;
   }
-  .report-host .docx-wrapper {
-    padding: 10px 0 !important;
+  .report-host {
+    gap: 10px;
+    padding: 10px 0;
   }
-  .report-anchor {
-    scroll-margin-top: 76px;
-  }
-}
-
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 0 0 24px;
-
-    @bottom-center {
-      content: 'Page ' counter(page) ' of 12';
-      color: #687889;
-      font:
-        8.5pt Arial,
-        Helvetica,
-        'Liberation Sans',
-        sans-serif;
-    }
-  }
-  :root,
-  body {
-    background: white !important;
-  }
-  .report-toolbar,
-  .contents-panel,
-  .report-status {
-    display: none !important;
-  }
-  .report-host .docx-wrapper {
-    padding: 0 !important;
-    background: white !important;
-  }
-  .report-page-frame {
-    width: auto !important;
-    height: auto !important;
-    margin: 0 !important;
-  }
-  .report-host .report-page-frame > section.docx {
-    position: static !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    transform: none !important;
-    zoom: 1 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-  .report-host section.docx footer {
-    display: none !important;
-  }
-  .report-host section.docx .report-breakable-layout,
-  .report-host section.docx .report-breakable-layout > tbody,
-  .report-host section.docx .report-breakable-layout > tbody > tr,
-  .report-host section.docx .report-breakable-layout > tr,
-  .report-host section.docx .report-breakable-layout > tbody > tr > td,
-  .report-host section.docx .report-breakable-layout > tr > td {
-    display: block !important;
-    width: 100% !important;
-  }
-  .report-host section.docx .report-print-page-start {
-    break-before: page;
-    page-break-before: always;
+  .pdf-page {
+    max-width: calc(100% - 12px);
+    box-shadow: 0 2px 10px #18304724;
   }
 }

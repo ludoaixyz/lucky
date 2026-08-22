@@ -84,6 +84,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ['apps/report/tests/*.ts', 'apps/report/vitest.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./apps/report/tsconfig.test.json'],
+      },
+    },
+  },
+  {
     files: ['packages/math-engine/tests/*.ts', 'packages/math-engine/vitest.config.ts'],
     languageOptions: {
       parserOptions: {
