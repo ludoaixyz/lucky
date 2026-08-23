@@ -11,6 +11,6 @@ export default defineConfig({
     : process.env.GITHUB_ACTIONS
       ? '/lucky/report/'
       : '/',
-  build: { target: 'es2022' },
+  build: { target: 'es2020' },
   server: { host: '127.0.0.1', port: 5175, strictPort: true },
 });

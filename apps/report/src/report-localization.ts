@@ -10,6 +10,8 @@ export interface ShellTranslation {
   readonly openPdf: string;
   readonly loading: string;
   readonly error: string;
+  readonly interactiveError: string;
+  readonly pageError: string;
   readonly reportLabel: string;
   readonly selected: string;
 }

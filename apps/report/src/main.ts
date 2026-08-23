@@ -7,7 +7,7 @@ import {
   SHELL_TRANSLATIONS,
   type ReportLocale,
 } from './report-localization.js';
-import { PdfReportViewer } from './report-renderer.js';
+import { createDirectPdfLink, PdfReportViewer } from './report-renderer.js';
 
 function required<T extends Element>(selector: string): T {
   const node = document.querySelector<T>(selector);
@@ -22,6 +22,7 @@ const openButton = required<HTMLButtonElement>('#open-pdf-button');
 const announcement = document.querySelector<HTMLElement>('#language-announcement');
 const viewer = new PdfReportViewer(host);
 let locale = initialLocale();
+let loadGeneration = 0;
 
 function applyShellLocale(nextLocale: ReportLocale): void {
   locale = nextLocale;
@@ -44,17 +45,33 @@ function applyShellLocale(nextLocale: ReportLocale): void {
 }
 
 async function loadLocale(nextLocale: ReportLocale): Promise<void> {
+  const generation = ++loadGeneration;
   status.hidden = false;
   status.classList.remove('report-status--error');
   status.textContent = SHELL_TRANSLATIONS[nextLocale].loading;
-  host.classList.remove('is-ready');
   try {
-    await viewer.load(nextLocale);
+    const translation = SHELL_TRANSLATIONS[nextLocale];
+    await viewer.load(nextLocale, {
+      openPdf: translation.openPdf,
+      pageError: translation.pageError,
+    });
+    if (generation !== loadGeneration) return;
     status.hidden = true;
-    host.classList.add('is-ready');
   } catch (error) {
-    console.error(`Unable to render the ${nextLocale} report PDF.`, error);
-    status.textContent = SHELL_TRANSLATIONS[nextLocale].error;
+    if (generation !== loadGeneration) return;
+    const translation = SHELL_TRANSLATIONS[nextLocale];
+    console.error('[report] Unable to initialize the interactive report', {
+      locale: nextLocale,
+      url: viewer.currentUrl,
+      stage: viewer.currentUrl ? 'pdf' : 'manifest',
+      error,
+    });
+    const message = document.createElement('p');
+    message.textContent = viewer.currentUrl ? translation.interactiveError : translation.error;
+    status.replaceChildren(message);
+    if (viewer.currentUrl) {
+      status.append(createDirectPdfLink(viewer.currentUrl, translation.openPdf));
+    }
     status.classList.add('report-status--error');
   }
 }
@@ -65,4 +82,4 @@ openButton.addEventListener('click', () => {
 });
 
 applyShellLocale(locale);
-await loadLocale(locale);
+void loadLocale(locale);

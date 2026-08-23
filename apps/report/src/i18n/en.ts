@@ -6,6 +6,8 @@ export const en: ShellTranslation = {
   openPdf: 'Open PDF',
   loading: 'Loading report…',
   error: 'Unable to load report.',
+  interactiveError: 'Unable to display the interactive report on this browser.',
+  pageError: 'Unable to render this page.',
   reportLabel: 'Bathala Slot Prototype Analysis',
   selected: 'English selected.',
 };
