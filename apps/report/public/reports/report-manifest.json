@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-22T11:28:37Z",
+  "generatedAt": "2026-08-23T09:10:30Z",
   "documents": {
     "en": {
       "label": "English",
-      "file": "report-en.694e4b723143.pdf",
-      "sha256": "694e4b7231437b56e94ada5858632585bc60d2ff9ac140bbc818125e774fa702",
+      "file": "report-en.af1f7788556a.pdf",
+      "sha256": "af1f7788556abf0d0f583fe1a74a565d0b639fd7b5a94e353368060cc0768814",
       "pages": 12
     },
     "zh-CN": {
       "label": "简体中文",
-      "file": "report-zh-CN.1b7d86d63faf.pdf",
-      "sha256": "1b7d86d63faf80cd1111f4576786f8e161ae150b8bbab32e2672dc5aa7277ddc",
+      "file": "report-zh-CN.448c78beec53.pdf",
+      "sha256": "448c78beec5344bc1356555ba9409458042643929f699946c3768cdee688b0ac",
       "pages": 14
     }
   }
