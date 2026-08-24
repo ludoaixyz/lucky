@@ -64,7 +64,7 @@ function value(
   precision = 2,
 ): string {
   if (unit === 'percent') return formatAdaptivePercent(value, locale);
-  if (unit === 'frequency') return formatOneIn(value, locale, l.oneIn);
+  if (unit === 'frequency') return formatOneIn(value, locale, l.oneInFormat);
   if (unit === 'multiplier') return formatMultiplier(value, locale, precision);
   if (unit === 'credits') return formatCredits(value, locale).replace('credits', l.credits);
   if (unit === 'count') return formatInteger(value, locale);
@@ -397,7 +397,7 @@ function mechanicOverview(
   const featureFrequency =
     m.featureFrequency === null
       ? l.na
-      : `${formatAdaptivePercent(m.featureFrequency, locale)} · ${formatOneIn(m.featureFrequency, locale, l.oneIn)}`;
+      : `${formatAdaptivePercent(m.featureFrequency, locale)} · ${formatOneIn(m.featureFrequency, locale, l.oneInFormat)}`;
   const feature = `<article><h3>${esc(l.freeGames)}</h3><dl><div><dt>${esc(l.triggerCount)}</dt><dd>${formatInteger(m.freeGameTriggerCount, locale)}</dd></div><div><dt>${esc(l.featureFrequency)}</dt><dd>${featureFrequency}</dd></div><div><dt>${esc(l.averageFreeGames)}</dt><dd>${formatDecimal(m.averageFreeGamesPlayed, locale)}</dd></div><div><dt>${esc(l.freeContribution)}</dt><dd>${formatAdaptivePercent(m.freeGameWinContribution, locale)}</dd></div></dl></article>`;
   return section(
     l.mechanicHealth,
@@ -479,7 +479,7 @@ function tailChart(report: DashboardAnalysisReport, locale: DashboardLocale, l: 
 		`;
     })
     .join('');
-  return `<figure class="chart-card tail-chart"><figcaption>${esc(l.tailDecayChart)}</figcaption><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(l.tailDecayChart)}"><line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"/><line class="axis" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"/>${yTicks}<polyline class="tail-line" points="${points.map((p) => `${p.x},${p.y}`).join(' ')}"/>${points.map((p) => `<circle class="tail-point" cx="${p.x}" cy="${p.y}" r="4"><title>${formatInteger(p.t, locale)}×+\n${esc(l.frequency)}: ${formatAdaptivePercent(p.f, locale)}\n${esc(l.occurrence)}: ${esc(formatOneIn(p.f, locale, l.oneIn))}</title></circle><text class="axis-label" x="${p.x}" y="${height - 16}">${formatInteger(p.t, locale)}×</text>`).join('')}<text class="chart-note" x="${left}" y="12">${esc(l.occurrence)}</text></svg></figure>`;
+  return `<figure class="chart-card tail-chart"><figcaption>${esc(l.tailDecayChart)}</figcaption><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(l.tailDecayChart)}"><line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"/><line class="axis" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"/>${yTicks}<polyline class="tail-line" points="${points.map((p) => `${p.x},${p.y}`).join(' ')}"/>${points.map((p) => `<circle class="tail-point" cx="${p.x}" cy="${p.y}" r="4"><title>${formatInteger(p.t, locale)}×+\n${esc(l.frequency)}: ${formatAdaptivePercent(p.f, locale)}\n${esc(l.occurrence)}: ${esc(formatOneIn(p.f, locale, l.oneInFormat))}</title></circle><text class="axis-label" x="${p.x}" y="${height - 16}">${formatInteger(p.t, locale)}×</text>`).join('')}<text class="chart-note" x="${left}" y="12">${esc(l.occurrence)}</text></svg></figure>`;
 }
 
 function tailPerformance(
@@ -493,7 +493,7 @@ function tailPerformance(
       `${formatInteger(x.threshold, locale)}×+`,
       formatInteger(x.count, locale),
       formatAdaptivePercent(x.frequency, locale),
-      x.count === 0 ? l.notObserved : formatOneIn(x.frequency, locale, l.oneIn),
+      x.count === 0 ? l.notObserved : formatOneIn(x.frequency, locale, l.oneInFormat),
     ].map(esc),
   );
   return section(
@@ -595,7 +595,7 @@ function scatterPanel(report: DashboardAnalysisReport, locale: DashboardLocale, 
       'featureFrequency',
       m.featureFrequency === null
         ? l.na
-        : `${formatAdaptivePercent(m.featureFrequency, locale)} · ${formatOneIn(m.featureFrequency, locale, l.oneIn)}`,
+        : `${formatAdaptivePercent(m.featureFrequency, locale)} · ${formatOneIn(m.featureFrequency, locale, l.oneInFormat)}`,
     ],
     ['retriggerCount', formatInteger(m.retriggerCount, locale)],
   ]

@@ -142,4 +142,25 @@ describe('localization and export contract', () => {
       );
     }
   });
+
+  it('localizes the audited dashboard, chart, and reconciliation labels', () => {
+    const keys = [
+      'rtpContribution',
+      'tumbleTrigger',
+      'averageTumbleRounds',
+      'maximumTumbleDepth',
+      'multiplierRtp',
+      'rtpContributionChart',
+      'maxDepth',
+      'gameFeature',
+      'componentCredits',
+      'componentRtp',
+      'schemaValidation',
+      'requiredMetrics',
+    ] as const;
+    for (const locale of ['pt-BR', 'zh-CN', 'fil-PH'] as const)
+      for (const key of keys)
+        expect(TRANSLATIONS[locale].labels[key]).not.toBe(TRANSLATIONS.en.labels[key]);
+    expect(TRANSLATIONS['zh-CN'].labels.scatterRtp).toBe('Scatter RTP');
+  });
 });

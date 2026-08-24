@@ -91,10 +91,12 @@ export function formatMultiplier(
 export function formatOneIn(
   value: number | null,
   locale: DashboardLocale,
-  prefix = '1 in',
+  template = '1 in {odds}',
 ): string {
   if (value === null || !Number.isFinite(value)) return 'N/A';
-  return value > 0 ? `${prefix} ${formatInteger(1 / value, locale)}` : '—';
+  if (value <= 0) return '—';
+  const odds = formatInteger(1 / value, locale);
+  return template.includes('{odds}') ? template.replace('{odds}', odds) : `${template} ${odds}`;
 }
 
 export function formatDate(value: string | Date | null, locale: DashboardLocale): string {

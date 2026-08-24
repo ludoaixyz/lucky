@@ -152,7 +152,7 @@ function formatValue(
 ): string {
   if (value === null) return l.na;
   if (unit === 'percent') return formatAdaptivePercent(value, locale);
-  if (unit === 'frequency') return formatOneIn(value, locale, l.oneIn);
+  if (unit === 'frequency') return formatOneIn(value, locale, l.oneInFormat);
   if (unit === 'multiplier') return formatMultiplier(value, locale);
   if (unit === 'count') return formatInteger(value, locale);
   return formatDecimal(value, locale, 3);
@@ -166,7 +166,7 @@ export function formatNullableMetric(
 ): string {
   const value = comparisonMetricValue(set, id);
   if (isTailMetric(id))
-    return value !== null && value > 0 ? formatOneIn(value, locale, l.oneIn) : l.notObserved;
+    return value !== null && value > 0 ? formatOneIn(value, locale, l.oneInFormat) : l.notObserved;
   const definition = metricDefinition(id);
   return formatValue(value, definition.unit, locale, l);
 }
@@ -409,7 +409,7 @@ function comparisonTail(
       return points
         .map(
           (t) =>
-            `<circle class="series-fill-${series}" cx="${x(t.threshold)}" cy="${y(t.frequency)}" r="3.5"><title>${esc(set.label)}\n${formatInteger(t.threshold, locale)}×+\n\n${esc(l.frequency)}: ${formatAdaptivePercent(t.frequency, locale)}\n${esc(l.occurrence)}: ${esc(formatOneIn(t.frequency, locale, l.oneIn))}\n${esc(l.observed)}: ${formatInteger(t.count, locale)} / ${formatInteger(set.report.simulation.spins, locale)} ${esc(l.spins.toLowerCase())}</title></circle>`,
+            `<circle class="series-fill-${series}" cx="${x(t.threshold)}" cy="${y(t.frequency)}" r="3.5"><title>${esc(set.label)}\n${formatInteger(t.threshold, locale)}×+\n\n${esc(l.frequency)}: ${formatAdaptivePercent(t.frequency, locale)}\n${esc(l.occurrence)}: ${esc(formatOneIn(t.frequency, locale, l.oneInFormat))}\n${esc(l.observed)}: ${formatInteger(t.count, locale)} / ${formatInteger(set.report.simulation.spins, locale)} ${esc(l.spins.toLowerCase())}</title></circle>`,
         )
         .join('');
     })
@@ -438,7 +438,9 @@ function comparisonTail(
     set?.report.metrics.tails.find((tail) => tail.threshold === threshold) ?? null;
   const tailCell = (set: (typeof valid)[number] | undefined, threshold: number) => {
     const tail = tailValue(set, threshold);
-    return tail && tail.count > 0 ? formatOneIn(tail.frequency, locale, l.oneIn) : l.notObserved;
+    return tail && tail.count > 0
+      ? formatOneIn(tail.frequency, locale, l.oneInFormat)
+      : l.notObserved;
   };
   const tailDelta = (threshold: number) => {
     const base = tailValue(valid[0], threshold);

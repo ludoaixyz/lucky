@@ -39,6 +39,8 @@ describe('shared dashboard formatting', () => {
     expect(formatAdaptivePercent(0.00001, 'en')).toBe('<0.01%');
     expect(formatOneIn(0.000196, 'en', '1 in')).toBe('1 in 5,102');
     expect(formatOneIn(0, 'en', '1 in')).toBe('—');
+    expect(formatOneIn(0.01, 'zh-CN', '平均每 {odds} 次 1 次')).toBe('平均每 100 次 1 次');
+    expect(formatOneIn(0.01, 'fil-PH', '1 sa bawat {odds}')).toBe('1 sa bawat 100');
     expect(formatCredits(441643.8, 'en')).toBe('441,643.80 credits');
     expect(formatMultiplier(1055.25, 'en')).toBe('1,055.25×');
   });
